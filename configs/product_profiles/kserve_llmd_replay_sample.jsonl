@@ -1,0 +1,4 @@
+{"product":"kserve_llmd","event_type":"request_arrival","request_id":"ks-req-001","arrival_ms":0,"tenant_id":"tenant-d","prompt_tokens":192,"endpoint":"/v1/chat/completions","claim_scope":"sample replay only"}
+{"product":"kserve_llmd","event_type":"route_decision","request_id":"ks-req-001","route_target":"decode-pool-a","reason":"kv_aware_capacity","worker":"decode-2","claim_scope":"sample replay only"}
+{"product":"kserve_llmd","event_type":"admission_reject","request_id":"ks-req-002","tenant_id":"tenant-d","reject_reason":"quota_slo_guard","slo":"ttft_p99","claim_scope":"sample replay only"}
+{"product":"kserve_llmd","event_type":"fallback","operator":"routing","shape_signature":"n/a","fallback_backend":"default_pool","reason":"no_kv_affinity","claim_scope":"sample replay only"}

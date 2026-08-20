@@ -1,0 +1,26 @@
+{
+  "repositories": {
+    "transformers": "/src/transformers",
+    "vllm": "/src/vllm",
+    "tensorrt_llm": "/src/TensorRT-LLM",
+    "llama_cpp": "/src/llama.cpp"
+  },
+  "checks": {
+    "transformers": [
+      {"path": "src/transformers/generation/utils.py", "patterns": ["generate", "past_key_values"]},
+      {"path": "src/transformers/cache_utils.py", "patterns": ["Cache", "update"]}
+    ],
+    "vllm": [
+      {"path": "vllm/engine/llm_engine.py", "patterns": ["add_request", "step"]},
+      {"path": "vllm/core/scheduler.py", "patterns": ["Scheduler", "waiting"]}
+    ],
+    "tensorrt_llm": [
+      {"path": "tensorrt_llm/runtime/session.py", "patterns": ["Session"]},
+      {"path": "tensorrt_llm/builder.py", "patterns": ["Builder"]}
+    ],
+    "llama_cpp": [
+      {"path": "src/llama.cpp", "patterns": ["llama_decode", "llama_model_load"]},
+      {"path": "ggml/src/ggml.c", "patterns": ["ggml_graph"]}
+    ]
+  }
+}

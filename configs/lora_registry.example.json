@@ -1,0 +1,6 @@
+{
+  "registry_fields": ["adapter_id", "tenant", "lineage", "rank", "size_gb", "load_ms"],
+  "cache_policy": "lru_with_prefetch",
+  "prefix_cache_isolation": "adapter_scoped",
+  "dry_run": true
+}

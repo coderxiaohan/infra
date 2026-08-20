@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "fixture_id": "replay_supported",
+  "fixture_type": "replay_supported",
+  "artifact_type": "fixture_replay_supported",
+  "mode": "replay",
+  "executed": false,
+  "replayed": true,
+  "claim_scope": "replay fixture; explains imported product/native events but not live execution",
+  "summary": {
+    "evidence_confidence": "replay_supported",
+    "release_decision": "replay_ready"
+  },
+  "expected_confidence": "replay_supported",
+  "expected_blocker_category": "none",
+  "expected_release_decision": "replay_ready",
+  "expected_repair_environment": "target_product_or_replay_evidence",
+  "expected_repair_action": "attach real replay evidence before product behavior claims",
+  "forbidden_claims": ["live_endpoint_throughput", "cuda_timing"]
+}

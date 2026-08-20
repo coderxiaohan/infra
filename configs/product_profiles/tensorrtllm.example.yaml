@@ -1,0 +1,17 @@
+{
+  "product": "tensorrtllm",
+  "endpoint": "http://127.0.0.1:8000",
+  "metrics_url": "http://127.0.0.1:8000/metrics",
+  "report_sections": ["reports/52_product_runtime_backend_profile.md"],
+  "paths": {
+    "engine_dir": "/models/trtllm_engine",
+    "triton_model_repository": "/models/triton_repo"
+  },
+  "planned_commands": {
+    "build_example": "trtllm-build --checkpoint_dir /models/checkpoint --output_dir /models/trtllm_engine",
+    "triton_example": "tritonserver --model-repository /models/triton_repo",
+    "dry_run": "python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --execute --engine-dir /models/trtllm_engine"
+  },
+  "risks": ["TensorRT-LLM engines are GPU-architecture and version sensitive.", "Build and runtime metrics must include CUDA, driver, TensorRT-LLM, and Triton versions."]
+}

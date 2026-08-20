@@ -1,0 +1,22 @@
+{
+  "product": "kserve_llmd",
+  "namespace": "inferlab",
+  "manifest_template": "deploy/kserve_llm_d.product.example.yaml",
+  "manifest_replacements": {
+    "NAMESPACE": "inferlab",
+    "MODEL_URI": "pvc://models/model",
+    "MODEL_NAME": "inferlab-model",
+    "GPU_COUNT": "1"
+  },
+  "report_sections": ["reports/54_product_cloud_control_plane_profile.md"],
+  "planned_commands": {
+    "dry_run": "python3 -m scripts.product_profiles.profile_kserve_llmd --repo-root . --config configs/product_profiles/kserve_llmd.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_kserve_llmd --repo-root . --config configs/product_profiles/kserve_llmd.example.yaml --execute --namespace inferlab",
+    "apply_example": "kubectl apply -n inferlab -f deploy/kserve_llm_d.product.example.yaml"
+  },
+  "execute_commands": [
+    "kubectl get llminferenceservice -n inferlab",
+    "kubectl get pods -n inferlab"
+  ],
+  "risks": ["Requires Kubernetes, KServe, llm-d, Gateway API, RBAC, GPU nodes, and images.", "Manifest generated is not evidence of deployed traffic until execute artifacts contain readiness and request metrics."]
+}

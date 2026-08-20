@@ -1,0 +1,11 @@
+{
+  "reference_only": true,
+  "consumed_by_current_cli": false,
+  "canonical_domain_owner": "native_core/include/inferlab/advanced_serving_precision.hpp",
+  "canonical_model_owner": "native_core/src/advanced_serving_kv_compression_blend.cpp",
+  "strategies": ["exact_prefix_reuse", "compressed_kv_restore", "non_prefix_blended_reuse", "selective_kv_retention", "attention_sink_recent_window"],
+  "quality_policy": "non_prefix_reuse_is_research_only_until_output_oracle_passes",
+  "metrics": ["compression_ratio", "restore_latency_ms", "hbm_saved_gb", "non_prefix_reuse_rate", "quality_risk_score", "ttft_saved_ms", "net_latency_delta_ms"],
+  "execute": false,
+  "claim_boundary": "reference vocabulary only; the current CLI uses a compiled analytical fixture and does not consume this file or prove KV correctness, quality, measured memory, latency, product support, replay, execute, benchmark, or release readiness"
+}

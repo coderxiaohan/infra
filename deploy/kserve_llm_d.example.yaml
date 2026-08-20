@@ -1,0 +1,21 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: LLMInferenceService
+metadata:
+  name: inferlab-vllm
+  namespace: inferlab
+spec:
+  model:
+    uri: pvc://models/model
+    name: model
+  serving:
+    runtime: vllm
+    replicas: 1
+    resources:
+      limits:
+        nvidia.com/gpu: "1"
+  routing:
+    mode: kv-cache-aware
+    prefillDecodeSeparation: true
+  autoscaling:
+    metric: tokens_per_second
+    target: 100

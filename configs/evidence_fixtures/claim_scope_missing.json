@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "fixture_id": "claim_scope_missing",
+  "fixture_type": "claim_scope_missing",
+  "artifact_type": "fixture_claim_scope_missing",
+  "mode": "dry_run",
+  "executed": false,
+  "replayed": false,
+  "summary": {
+    "evidence_confidence": "stale_or_blocked",
+    "release_decision": "blocked",
+    "blocker_count": 1
+  },
+  "blockers": [
+    {
+      "category": "claim_scope_missing",
+      "message": "claim scope is missing, so report/final-report claims must be blocked"
+    }
+  ],
+  "expected_confidence": "stale_or_blocked",
+  "expected_blocker_category": "claim_scope_missing",
+  "expected_release_decision": "blocked",
+  "expected_repair_environment": "current_repo_fixable",
+  "expected_repair_action": "add claim_scope or claim_scope_detail before report claims",
+  "forbidden_claims": ["claim_allowed", "release_ready"]
+}

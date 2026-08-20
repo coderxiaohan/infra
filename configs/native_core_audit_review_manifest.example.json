@@ -1,0 +1,27 @@
+{
+  "artifact_type": "native_core_audit_review_manifest",
+  "mode": "manual_review_input",
+  "executed": false,
+  "replayed": false,
+  "claim_scope": "Template for explicit per-file static review overrides for inferlab_native_core_audit_register. Copy reviewed rows into configs/native_core_audit_review_manifest.json; this template does not record project review progress or run validation.",
+  "review_overrides": [
+    {
+      "file": "native_core/src/checked_index.hpp",
+      "review_status": "reviewed",
+      "review_notes": "Example only. Replace with a real reviewer note after inspecting the file.",
+      "remaining_risk": "Target-machine build and runtime validation still not run.",
+      "claim_boundary_risk": "claim_boundary_reviewed_by_manifest",
+      "path_redaction_status": "not_path_emitter",
+      "checked_arithmetic_status": "uses_checked_or_bounded_helpers",
+      "artifact_contract_status": "not_artifact_entrypoint",
+      "issues_fixed": []
+    },
+    {
+      "file": "native_core/src/evidence_query_main.cpp",
+      "review_status": "deferred_with_reason",
+      "review_notes": "Example only. Keep deferred until the reviewer inspects CLI, artifact contract, path redaction, and claim-boundary handling.",
+      "remaining_risk": "Large evidence-query target still needs focused human/static audit before full native audit closure.",
+      "issues_fixed": []
+    }
+  ]
+}

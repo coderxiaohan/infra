@@ -1,0 +1,84 @@
+{
+  "description": "Reference-only parameters mirroring the compiled C++ KV offload hierarchy fixture.",
+  "reference_only": true,
+  "consumed_by_current_cli": false,
+  "storage_unit": "binary_gib (legacy *_gb names are compatibility aliases)",
+  "tiers": [
+    {
+      "name": "hbm",
+      "capacity_gb": 24,
+      "bandwidth_gbps": 2400,
+      "access_latency_us": 2,
+      "cost_per_gb_month": 0
+    },
+    {
+      "name": "cpu_dram",
+      "capacity_gb": 256,
+      "bandwidth_gbps": 64,
+      "access_latency_us": 35,
+      "cost_per_gb_month": 0.35
+    },
+    {
+      "name": "nvme",
+      "capacity_gb": 2048,
+      "bandwidth_gbps": 12,
+      "access_latency_us": 120,
+      "cost_per_gb_month": 0.08
+    },
+    {
+      "name": "remote_kv",
+      "capacity_gb": 8192,
+      "bandwidth_gbps": 25,
+      "access_latency_us": 250,
+      "cost_per_gb_month": 0.18
+    }
+  ],
+  "policies": ["lru", "s3fifo", "priority", "session_pin"],
+  "workloads": [
+    {
+      "name": "short_chat_shared_system",
+      "requests": 2048,
+      "prompt_tokens": 768,
+      "output_tokens": 128,
+      "reuse_rate": 0.42,
+      "cross_engine_reuse_rate": 0.12,
+      "session_pin_rate": 0.2,
+      "kv_bytes_per_token": 32768,
+      "prefill_ms_per_token": 0.08
+    },
+    {
+      "name": "rag_long_context",
+      "requests": 1024,
+      "prompt_tokens": 8192,
+      "output_tokens": 256,
+      "reuse_rate": 0.64,
+      "cross_engine_reuse_rate": 0.38,
+      "session_pin_rate": 0.28,
+      "kv_bytes_per_token": 32768,
+      "prefill_ms_per_token": 0.08
+    },
+    {
+      "name": "agentic_multi_turn",
+      "requests": 1536,
+      "prompt_tokens": 4096,
+      "output_tokens": 512,
+      "reuse_rate": 0.71,
+      "cross_engine_reuse_rate": 0.44,
+      "session_pin_rate": 0.62,
+      "kv_bytes_per_token": 32768,
+      "prefill_ms_per_token": 0.08
+    },
+    {
+      "name": "tool_call_schema_heavy",
+      "requests": 4096,
+      "prompt_tokens": 1536,
+      "output_tokens": 96,
+      "reuse_rate": 0.55,
+      "cross_engine_reuse_rate": 0.18,
+      "session_pin_rate": 0.35,
+      "kv_bytes_per_token": 32768,
+      "prefill_ms_per_token": 0.08
+    }
+  ],
+  "command": "./build/inferlab_kv_offload_hierarchy_plan --repo-root . --output results/raw/native_kv_offload_hierarchy_plan.json --hbm-gb 24 --dram-gb 256 --nvme-gb 2048 --remote-gb 8192"
+}

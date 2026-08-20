@@ -1,0 +1,20 @@
+{
+  "gpu_hour_cost": 2.5,
+  "gpu_memory_gb": 80,
+  "output_tokens": [
+    128,
+    512
+  ],
+  "prompt_tokens": [
+    512,
+    2048
+  ],
+  "qps": [
+    1,
+    5,
+    20,
+    100
+  ],
+  "tpot_slo_ms": 50,
+  "ttft_slo_ms": 500
+}

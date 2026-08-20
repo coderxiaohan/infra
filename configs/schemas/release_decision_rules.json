@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "decisions": [
+    {
+      "decision": "blocked",
+      "requires": "One or more required artifacts, schema fields, claim boundaries, freshness records, replay evidence, or execute evidence are missing."
+    },
+    {
+      "decision": "report_ready",
+      "requires": "Required dry-run evidence is present, schema-covered, and wired into reports while execute claims remain blocked."
+    },
+    {
+      "decision": "replay_ready",
+      "requires": "Report-ready evidence plus replay-supported product or native artifacts."
+    },
+    {
+      "decision": "execute_ready",
+      "requires": "Target-machine execute artifacts with no blocking release gates."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "fixture_id": "stale_or_blocked",
+  "fixture_type": "stale_or_blocked",
+  "artifact_type": "fixture_stale_or_blocked",
+  "mode": "dry_run",
+  "executed": false,
+  "replayed": false,
+  "claim_scope": "generic blocked fixture with upstream blockers present",
+  "summary": {
+    "evidence_confidence": "stale_or_blocked",
+    "release_decision": "blocked",
+    "blocker_count": 2
+  },
+  "blockers": [
+    {
+      "category": "artifact_blocked",
+      "message": "upstream blocker is present"
+    },
+    {
+      "category": "report_wiring_missing",
+      "message": "fixture is intentionally incomplete"
+    }
+  ],
+  "expected_confidence": "stale_or_blocked",
+  "expected_blocker_category": "artifact_blocked",
+  "expected_release_decision": "blocked",
+  "expected_repair_environment": "current_repo_fixable",
+  "expected_repair_action": "inspect blockers and regenerate upstream evidence",
+  "forbidden_claims": ["report_ready", "replay_ready", "execute_ready"]
+}

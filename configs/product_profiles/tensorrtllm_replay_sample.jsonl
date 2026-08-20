@@ -1,0 +1,4 @@
+{"product":"tensorrt_llm","event_type":"request_arrival","request_id":"trt-req-001","arrival_ms":0,"tenant_id":"tenant-a","prompt_tokens":256,"endpoint":"trtllm-bench","claim_scope":"sample replay only"}
+{"product":"tensorrt_llm","event_type":"prefill_start","request_id":"trt-req-001","prefill_start_ms":3,"prompt_tokens":256,"engine":"sample_engine","claim_scope":"sample replay only"}
+{"product":"tensorrt_llm","event_type":"decode_step","request_id":"trt-req-001","decode_step_ms":22,"token_index":1,"tpot_ms":12,"claim_scope":"sample replay only"}
+{"product":"tensorrt_llm","event_type":"error","artifact":"product_tensorrtllm_runtime_profile.json","error_type":"sample_missing_engine","message":"sample documents missing engine boundary only","claim_scope":"sample replay only"}

@@ -1,0 +1,15 @@
+{
+  "product": "ktransformers",
+  "endpoint": "http://127.0.0.1:10002",
+  "report_sections": ["reports/53_product_kernel_library_profile.md"],
+  "paths": {
+    "model_path": "/models/model",
+    "placement_config": "/models/ktransformers_placement.yaml"
+  },
+  "planned_commands": {
+    "serve_example": "python3 -m ktransformers.server.main --model_path /models/model --port 10002",
+    "dry_run": "python3 -m scripts.product_profiles.profile_ktransformers --repo-root . --config configs/product_profiles/ktransformers.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_ktransformers --repo-root . --config configs/product_profiles/ktransformers.example.yaml --execute --model-path /models/model"
+  },
+  "risks": ["CPU/GPU placement is sensitive to NUMA, disk, memory bandwidth, and model format.", "Expert placement must be recorded as configuration evidence, not inferred from latency alone."]
+}

@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "artifact_type": "native_edge_cloud_routing",
+  "required_fields": [
+    "schema_version",
+    "artifact_type",
+    "status",
+    "mode",
+    "executed",
+    "replayed",
+    "claim_scope",
+    "generated_at",
+    "config",
+    "dependency_status",
+    "policy_input",
+    "placement_decision",
+    "local_load",
+    "execution",
+    "stream_accounting",
+    "security_controls",
+    "summary",
+    "blockers",
+    "recommended_next_commands",
+    "not_run"
+  ],
+  "summary_metrics": [
+    "local_decision_count",
+    "cloud_decision_count",
+    "local_then_cloud_decision_count",
+    "reject_decision_count",
+    "attempt_count",
+    "local_attempt_count",
+    "cloud_attempt_count",
+    "successful_attempt_count",
+    "failed_attempt_count",
+    "cancelled_attempt_count",
+    "delivered_chunk_count",
+    "pre_output_fallback_count",
+    "privacy_blocker_count",
+    "network_blocker_count",
+    "resource_blocker_count",
+    "dependency_blocker_count",
+    "network_quality_issue_count",
+    "budget_issue_count",
+    "local_budget_ineligible_count",
+    "cloud_budget_ineligible_count",
+    "session_recovery_issue_count",
+    "session_recovery_ready_count",
+    "session_recovery_blocked_count",
+    "fallback_attempted",
+    "fallback_performed",
+    "blocker_count",
+    "evidence_level",
+    "decision"
+  ],
+  "placement_values": [
+    "local",
+    "cloud",
+    "local_then_cloud",
+    "reject"
+  ],
+  "data_classification_values": [
+    "public",
+    "internal",
+    "sensitive",
+    "device_only"
+  ],
+  "target_platform_values": [
+    "linux-aarch64",
+    "linux-x86_64"
+  ],
+  "config_contract": {
+    "required_fields": [
+      "path_label",
+      "path_redacted",
+      "status",
+      "schema_version",
+      "target_platform",
+      "target_platform_match_status",
+      "request_fingerprint",
+      "session_identity_emitted",
+      "session_recovery_requested",
+      "prompt_fingerprint",
+      "prompt_fingerprint_redacted_by_policy",
+      "fingerprint_algorithm",
+      "prompt_bytes",
+      "prompt_text_emitted",
+      "local_model_path_label",
+      "local_model_path_status",
+      "endpoint_emitted",
+      "endpoint_security",
+      "api_key_environment_variable",
+      "api_key_value_emitted",
+      "product_id",
+      "cloud_model_id",
+      "data_classification"
+    ]
+  },
+  "attempt_contract": {
+    "required_fields": [
+      "attempt_id",
+      "placement",
+      "status",
+      "error_category",
+      "finish_reason",
+      "delivered_stream_chunks",
+      "reported_prompt_tokens",
+      "reported_completion_tokens",
+      "duration_ms"
+    ],
+    "maximum_attempts": 2,
+    "fallback_order": [
+      "local",
+      "cloud"
+    ]
+  },
+  "security_contract": {
+    "device_only_remote_forbidden": true,
+    "fallback_requires_zero_delivered_output": true,
+    "cancelled_or_deadline_exhausted_fallback_forbidden": true,
+    "api_key_value_emitted": false,
+    "endpoint_emitted": false,
+    "prompt_text_emitted": false,
+    "stream_text_emitted": false,
+    "budget_estimates_are_caller_supplied_not_measurements_or_bills": true,
+    "partial_output_session_resume_forbidden": true,
+    "session_recovery_prompt_fingerprint_suppressed": true
+  },
+  "network_quality_contract": {
+    "source": "caller_supplied_observation_not_active_probe_or_learned_prediction",
+    "required_input_fields": [
+      "policy_enabled",
+      "observation_available",
+      "round_trip_time_ms",
+      "jitter_ms",
+      "packet_loss_ratio",
+      "downlink_mbps",
+      "observation_age_ms",
+      "maximum_round_trip_time_ms",
+      "maximum_jitter_ms",
+      "maximum_packet_loss_ratio",
+      "minimum_downlink_mbps",
+      "maximum_observation_age_ms",
+      "provenance"
+    ],
+    "assessment_status_values": [
+      "not_required",
+      "observation_missing",
+      "observation_stale",
+      "quality_below_policy",
+      "quality_eligible"
+    ],
+    "assessment_required_fields": [
+      "eligible",
+      "status",
+      "observation_age_ms",
+      "blockers"
+    ],
+    "fallback_reassesses_observation_age": true,
+    "endpoint_or_probe_target_emitted": false
+  },
+  "budget_policy_contract": {
+    "source": "caller_supplied_estimate_snapshot_not_sensor_probe_power_measurement_or_cloud_bill",
+    "required_input_fields": [
+      "battery_gate_enabled",
+      "battery_observation_available",
+      "battery_percent",
+      "minimum_local_battery_percent",
+      "local_energy_gate_enabled",
+      "local_energy_estimate_available",
+      "estimated_local_energy_uj",
+      "maximum_local_energy_uj",
+      "cloud_cost_gate_enabled",
+      "cloud_cost_estimate_available",
+      "estimated_cloud_request_cost_usd",
+      "maximum_cloud_request_cost_usd",
+      "observation_age_ms",
+      "maximum_observation_age_ms",
+      "provenance"
+    ],
+    "assessment_status_values": [
+      "not_required",
+      "both_eligible",
+      "local_ineligible",
+      "cloud_ineligible",
+      "no_eligible_path"
+    ],
+    "assessment_required_fields": [
+      "local_eligible",
+      "cloud_eligible",
+      "status",
+      "observation_age_ms",
+      "local_blockers",
+      "cloud_blockers"
+    ],
+    "fallback_reassesses_observation_age": true,
+    "local_gate_inputs": [
+      "battery_percent",
+      "estimated_local_energy_uj"
+    ],
+    "cloud_gate_inputs": [
+      "estimated_cloud_request_cost_usd"
+    ],
+    "active_sensor_or_billing_collection": false
+  },
+  "session_recovery_contract": {
+    "source": "caller_supplied_durable_transcript_reconstructed_into_current_prompt",
+    "required_input_fields": [
+      "recovery_requested",
+      "durable_transcript_available",
+      "prompt_reconstructed_from_transcript",
+      "previous_response_complete",
+      "prior_delivered_chunks",
+      "transcript_turn_count",
+      "state_age_ms",
+      "maximum_state_age_ms",
+      "session_identity_emitted",
+      "previous_request_identity_emitted",
+      "transcript_revision_emitted",
+      "provenance"
+    ],
+    "assessment_status_values": [
+      "not_required",
+      "recovery_ready",
+      "recovery_blocked"
+    ],
+    "strategy_values": [
+      "not_required",
+      "continue_after_completed_turn",
+      "restart_incomplete_zero_output_turn",
+      "none"
+    ],
+    "blocker_values": [
+      "durable_transcript_missing",
+      "prompt_not_reconstructed_from_transcript",
+      "transcript_turns_missing",
+      "recovery_state_stale",
+      "session_identity_mismatch",
+      "previous_request_identity_reused",
+      "partial_output_resume_unsupported"
+    ],
+    "assessment_required_fields": [
+      "eligible",
+      "status",
+      "strategy",
+      "state_age_ms",
+      "blockers"
+    ],
+    "fallback_reassesses_state_age": true,
+    "session_identity_emitted": false,
+    "previous_request_identity_emitted": false,
+    "transcript_revision_emitted": false,
+    "partial_output_resume_supported": false,
+    "kv_or_hidden_state_transfer_supported": false
+  },
+  "stream_accounting_contract": "OpenAI-compatible SSE delta.content values are text chunks and must not be counted as tokenizer tokens. Token counts are present only when reported by the local runtime or cloud usage metadata.",
+  "claim_boundary": "Plan output proves only configuration and policy readiness. Session recovery proves only admission of a caller-reconstructed durable transcript before generation after a completed turn or an incomplete zero-output request; it does not resume partial output or restore KV/hidden state. Caller-supplied network observations and budget estimates are not active probes, learned predictions, device-exclusive energy measurements or cloud billing records. Execute observations prove one request path only and do not prove production availability, model equivalence, cost accounting, mid-generation migration, KV transfer or release readiness."
+}

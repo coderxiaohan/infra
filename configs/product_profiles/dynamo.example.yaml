@@ -1,0 +1,16 @@
+{
+  "product": "dynamo",
+  "endpoint": "http://127.0.0.1:8000",
+  "metrics_url": "http://127.0.0.1:8000/metrics",
+  "namespace": "dynamo",
+  "report_sections": ["reports/54_product_cloud_control_plane_profile.md"],
+  "planned_commands": {
+    "deploy_example": "kubectl apply -n dynamo -f deploy/dynamo-serving.yaml",
+    "dry_run": "python3 -m scripts.product_profiles.profile_dynamo --repo-root . --config configs/product_profiles/dynamo.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_dynamo --repo-root . --config configs/product_profiles/dynamo.example.yaml --execute --endpoint http://127.0.0.1:8000 --namespace dynamo"
+  },
+  "execute_commands": [
+    "kubectl get pods -n dynamo"
+  ],
+  "risks": ["Dynamo requires its control plane, worker pools, and routing dependencies.", "KV transfer evidence must come from product logs, traces, or metrics."]
+}

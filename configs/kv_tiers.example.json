@@ -1,0 +1,36 @@
+{
+  "sessions": [
+    {
+      "id": "a",
+      "kv_mb": 1024,
+      "reuse": 4
+    },
+    {
+      "id": "b",
+      "kv_mb": 8192,
+      "reuse": 2
+    },
+    {
+      "id": "c",
+      "kv_mb": 2048,
+      "reuse": 1
+    }
+  ],
+  "tiers": [
+    {
+      "capacity_mb": 4096,
+      "latency_ms": 0,
+      "name": "hbm"
+    },
+    {
+      "capacity_mb": 32768,
+      "latency_ms": 4,
+      "name": "cpu"
+    },
+    {
+      "capacity_mb": 131072,
+      "latency_ms": 25,
+      "name": "remote"
+    }
+  ]
+}

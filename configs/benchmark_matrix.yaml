@@ -1,0 +1,519 @@
+# Initial benchmark matrix for M0/M1 smoke runs.
+# Larger model, vLLM, CUDA, TensorRT-LLM, and llama.cpp matrices are added later.
+
+runs:
+  - name: kv_shape_probe_small
+    module: mini_llm.shape_probe
+    backend: python
+    model_family: shape-only
+    precision: fp16
+    batch_size: 1
+    seq_len: 128
+    decode_steps: 16
+    num_layers: 12
+    num_heads: 12
+    head_dim: 64
+
+  - name: mini_workload_profile_128x16
+    module: mini_llm.workload_profile
+    backend: python
+    prompt_tokens: 128
+    output_tokens: 16
+    output: results/raw/mini_transformer_workload_profile.json
+
+  - name: vllm_preflight
+    script: scripts/run_vllm_benchmark.py
+    backend: vllm
+    model: model
+    output: results/raw/vllm_serving_benchmark.json
+
+  - name: trtllm_preflight
+    script: scripts/run_trtllm_benchmark.py
+    backend: trtllm
+    engine_dir: engines/model
+    output: results/raw/trtllm_benchmark.json
+
+  - name: llama_cpp_preflight
+    script: scripts/run_llama_cpp_benchmark.py
+    backend: llama_cpp
+    model: /models/model.gguf
+    output: results/raw/llama_cpp_benchmark.json
+
+  - name: native_probe_refresh
+    backend: native_probes
+    coverage_source: native_probe_runner
+    coverage_manifest: scripts/run_native_probes.py::PROBES
+    build_dir: build
+    results: results/raw
+    output: results/raw/native_probe_run.json
+
+  - name: final_report_refresh
+    backend: final_report
+    report_output: reports/final_report.md
+    output: results/raw/final_report_index.json
+
+  - name: quality_eval_refresh
+    script: scripts/evaluate_backend_quality.py
+    backend: quality
+    output: results/raw/backend_quality_eval.json
+
+  - name: profiling_artifacts_import
+    script: scripts/parse_profiling_artifacts.py
+    backend: profiling
+    output: results/raw/profiling_artifacts.json
+
+  - name: backend_comparison_refresh
+    script: scripts/compare_backends.py
+    backend: comparison
+    output: results/raw/backend_comparison.json
+
+  - name: cuda_profile_matrix_plan
+    script: scripts/run_cuda_profile_matrix.py
+    backend: cuda
+    output: results/raw/cuda_profile_matrix.json
+
+  - name: llama_cpp_matrix_plan
+    script: scripts/run_llama_cpp_matrix.py
+    backend: llama_cpp
+    output: results/raw/llama_cpp_matrix.json
+
+  - name: android_edge_benchmark_plan
+    script: scripts/run_android_edge_benchmark.py
+    backend: android
+    output: results/raw/android_edge_benchmark.json
+
+  - name: source_trace_verification
+    script: scripts/verify_source_traces.py
+    backend: source_trace
+    output: results/raw/source_trace_verification.json
+
+  - name: evidence_checklist_refresh
+    script: scripts/render_evidence_checklist.py
+    backend: evidence
+    output: results/raw/evidence_checklist.json
+  - name: structured_outputs_refresh
+    script: advanced_serving/structured_outputs.py
+    backend: advanced_serving
+    output: results/raw/structured_outputs.json
+
+  - name: pooling_benchmark_refresh
+    script: advanced_serving/pooling_benchmark.py
+    backend: advanced_serving
+    output: results/raw/pooling_benchmark.json
+
+  - name: kserve_llm_d_plan_refresh
+    binary: build/inferlab_kserve_llm_d_plan
+    backend: native_advanced_serving
+    output: results/raw/kserve_llm_d_plan.json
+    report: reports/kserve_llm_d_plan.md
+    command: ./build/inferlab_kserve_llm_d_plan --repo-root . --output results/raw/kserve_llm_d_plan.json --report reports/kserve_llm_d_plan.md
+
+  - name: native_advanced_kv_router_refresh
+    binary: build/inferlab_advanced_kv_router
+    backend: native_advanced_serving
+    output: results/raw/native_advanced_kv_router.json
+    command: ./build/inferlab_advanced_kv_router --repo-root . --output results/raw/native_advanced_kv_router.json
+
+  - name: native_disaggregated_serving_refresh
+    binary: build/inferlab_disaggregated_serving
+    backend: native_advanced_serving
+    output: results/raw/native_disaggregated_serving.json
+    command: ./build/inferlab_disaggregated_serving --repo-root . --output results/raw/native_disaggregated_serving.json
+
+  - name: native_slo_capacity_plan_refresh
+    binary: build/inferlab_slo_capacity_plan
+    backend: native_advanced_serving
+    output: results/raw/native_slo_capacity_plan.json
+    command: ./build/inferlab_slo_capacity_plan --repo-root . --output results/raw/native_slo_capacity_plan.json
+
+  - name: native_long_context_matrix_refresh
+    binary: build/inferlab_long_context_plan
+    backend: native_advanced_serving
+    output: results/raw/native_long_context_matrix.json
+    command: ./build/inferlab_long_context_plan --repo-root . --output results/raw/native_long_context_matrix.json
+
+  - name: native_speculative_decode_plan_refresh
+    binary: build/inferlab_speculative_decode_plan
+    backend: native_advanced_serving
+    output: results/raw/native_speculative_decode_plan.json
+    command: ./build/inferlab_speculative_decode_plan --repo-root . --output results/raw/native_speculative_decode_plan.json
+
+  - name: native_observability_evidence_refresh
+    binary: build/inferlab_observability_evidence
+    backend: native_advanced_serving
+    output: results/raw/native_observability_evidence.json
+    command: ./build/inferlab_observability_evidence --repo-root . --output results/raw/native_observability_evidence.json
+
+  - name: native_streaming_sse_plan_refresh
+    binary: build/inferlab_streaming_sse_plan
+    backend: native_advanced_serving
+    output: results/raw/native_streaming_sse_plan.json
+    command: ./build/inferlab_streaming_sse_plan --repo-root . --output results/raw/native_streaming_sse_plan.json
+
+  - name: native_radix_prefix_cache_plan_refresh
+    binary: build/inferlab_radix_prefix_cache_plan
+    backend: native_advanced_serving
+    output: results/raw/native_radix_prefix_cache_plan.json
+    command: ./build/inferlab_radix_prefix_cache_plan --repo-root . --output results/raw/native_radix_prefix_cache_plan.json
+
+  - name: native_tensor_parallel_comm_plan_refresh
+    binary: build/inferlab_tensor_parallel_comm_plan
+    backend: native_advanced_serving
+    output: results/raw/native_tensor_parallel_comm_plan.json
+    command: ./build/inferlab_tensor_parallel_comm_plan --repo-root . --output results/raw/native_tensor_parallel_comm_plan.json
+
+  - name: native_lora_adapter_cache_plan_refresh
+    binary: build/inferlab_lora_adapter_cache_plan
+    backend: native_advanced_serving
+    output: results/raw/native_lora_adapter_cache_plan.json
+    command: ./build/inferlab_lora_adapter_cache_plan --repo-root . --output results/raw/native_lora_adapter_cache_plan.json
+
+  - name: native_chunked_prefill_scheduler_plan_refresh
+    binary: build/inferlab_chunked_prefill_scheduler_plan
+    backend: native_advanced_serving
+    output: results/raw/native_chunked_prefill_scheduler_plan.json
+    command: ./build/inferlab_chunked_prefill_scheduler_plan --repo-root . --output results/raw/native_chunked_prefill_scheduler_plan.json
+
+  - name: native_cost_accounting_plan_refresh
+    binary: build/inferlab_cost_accounting_plan
+    backend: native_advanced_serving
+    output: results/raw/native_cost_accounting_plan.json
+    command: ./build/inferlab_cost_accounting_plan --repo-root . --output results/raw/native_cost_accounting_plan.json
+
+  - name: native_kv_offload_hierarchy_plan_refresh
+    binary: build/inferlab_kv_offload_hierarchy_plan
+    backend: native_advanced_serving
+    output: results/raw/native_kv_offload_hierarchy_plan.json
+    command: ./build/inferlab_kv_offload_hierarchy_plan --repo-root . --output results/raw/native_kv_offload_hierarchy_plan.json
+
+  - name: native_engine_memory_planner_refresh
+    binary: build/inferlab_engine_memory_planner
+    backend: native_advanced_serving
+    output: results/raw/native_engine_memory_planner.json
+    command: ./build/inferlab_engine_memory_planner --repo-root . --output results/raw/native_engine_memory_planner.json
+
+  - name: native_gateway_policy_matrix_plan_refresh
+    binary: build/inferlab_gateway_policy_matrix_plan
+    backend: native_advanced_serving
+    output: results/raw/native_gateway_policy_matrix_plan.json
+    command: ./build/inferlab_gateway_policy_matrix_plan --repo-root . --output results/raw/native_gateway_policy_matrix_plan.json
+
+  - name: native_replica_placement_plan_refresh
+    binary: build/inferlab_replica_placement_plan
+    backend: native_advanced_serving
+    output: results/raw/native_replica_placement_plan.json
+    command: ./build/inferlab_replica_placement_plan --repo-root . --output results/raw/native_replica_placement_plan.json
+
+  - name: native_product_profile_contract_check_refresh
+    binary: build/inferlab_product_profile_contract_check
+    backend: native_product_profile
+    output: results/raw/native_product_profile_contract_check.json
+    command: ./build/inferlab_product_profile_contract_check --repo-root . --results results/raw --output results/raw/native_product_profile_contract_check.json --format json
+
+  - name: native_product_integration_inventory_refresh
+    binary: build/inferlab_product_integration_inventory
+    backend: native_product_profile
+    output: results/raw/native_product_integration_inventory.json
+    command: ./build/inferlab_product_integration_inventory --repo-root . --output results/raw/native_product_integration_inventory.json
+
+  - name: native_claim_scope_contract_refresh
+    binary: build/inferlab_claim_scope_contract
+    backend: native_evidence_contract
+    output: results/raw/native_claim_scope_contract.json
+    command: ./build/inferlab_claim_scope_contract --repo-root . --matrix configs/benchmark_matrix.yaml --results results/raw --output results/raw/native_claim_scope_contract.json --format json
+
+  - name: native_runtime_evidence_freshness_gate_refresh
+    binary: build/inferlab_runtime_evidence_freshness_gate
+    backend: native_evidence_contract
+    output: results/raw/native_runtime_evidence_freshness_gate.json
+    command: ./build/inferlab_runtime_evidence_freshness_gate --repo-root . --results results/raw --output results/raw/native_runtime_evidence_freshness_gate.json --format json
+
+  - name: native_kv_paged_attention_deep_dive_refresh
+    binary: build/inferlab_kv_paged_attention_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_kv_paged_attention_deep_dive.json
+    command: ./build/inferlab_kv_paged_attention_deep_dive --repo-root . --output results/raw/native_kv_paged_attention_deep_dive.json
+
+  - name: native_kv_lifecycle_deep_dive_refresh
+    binary: build/inferlab_kv_lifecycle_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_kv_lifecycle_deep_dive.json
+    command: ./build/inferlab_kv_lifecycle_deep_dive --repo-root . --output results/raw/native_kv_lifecycle_deep_dive.json
+
+  - name: native_scheduler_batching_deep_dive_refresh
+    binary: build/inferlab_scheduler_batching_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_scheduler_batching_deep_dive.json
+    command: ./build/inferlab_scheduler_batching_deep_dive --repo-root . --output results/raw/native_scheduler_batching_deep_dive.json
+
+  - name: native_cuda_quant_microkernel_deep_dive_refresh
+    binary: build/inferlab_cuda_quant_microkernel_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_cuda_quant_microkernel_deep_dive.json
+    command: ./build/inferlab_cuda_quant_microkernel_deep_dive --repo-root . --output results/raw/native_cuda_quant_microkernel_deep_dive.json
+
+  - name: native_kv_tier_decision_deep_dive_refresh
+    binary: build/inferlab_kv_tier_decision_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_kv_tier_decision_deep_dive.json
+    command: ./build/inferlab_kv_tier_decision_deep_dive --repo-root . --output results/raw/native_kv_tier_decision_deep_dive.json
+
+  - name: native_pd_split_crossover_deep_dive_refresh
+    binary: build/inferlab_pd_split_crossover_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_pd_split_crossover_deep_dive.json
+    command: ./build/inferlab_pd_split_crossover_deep_dive --repo-root . --output results/raw/native_pd_split_crossover_deep_dive.json
+
+  - name: native_scheduler_root_cause_deep_dive_refresh
+    binary: build/inferlab_scheduler_root_cause_deep_dive
+    backend: native_deep_dive
+    output: results/raw/native_scheduler_root_cause_deep_dive.json
+    command: ./build/inferlab_scheduler_root_cause_deep_dive --repo-root . --output results/raw/native_scheduler_root_cause_deep_dive.json
+
+  - name: native_kernel_compatibility_matrix_refresh
+    binary: build/inferlab_kernel_compatibility_matrix
+    backend: native_kernel_contract
+    output: results/raw/native_kernel_compatibility_matrix.json
+    command: ./build/inferlab_kernel_compatibility_matrix --repo-root . --output results/raw/native_kernel_compatibility_matrix.json
+
+  - name: product_replay_semantic_events_refresh
+    binary: build/inferlab_product_replay_semantic_events
+    backend: product_replay_semantics
+    output: results/raw/product_replay_semantic_events.json
+    command: ./build/inferlab_product_replay_semantic_events --repo-root . --results results/raw --output results/raw/product_replay_semantic_events.json --format json
+
+  - name: native_streaming_backpressure_deep_dive_refresh
+    binary: build/inferlab_mature_product_p2_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_streaming_backpressure_deep_dive.json
+    command: ./build/inferlab_mature_product_p2_artifacts --repo-root . --artifact native_streaming_backpressure_deep_dive --output results/raw/native_streaming_backpressure_deep_dive.json
+
+  - name: native_structured_output_parser_contract_refresh
+    binary: build/inferlab_mature_product_p2_artifacts
+    backend: native_parser_contract
+    output: results/raw/native_structured_output_parser_contract.json
+    command: ./build/inferlab_mature_product_p2_artifacts --repo-root . --artifact native_structured_output_parser_contract --output results/raw/native_structured_output_parser_contract.json
+
+  - name: native_autoscaler_cost_slo_deep_dive_refresh
+    binary: build/inferlab_mature_product_p2_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_autoscaler_cost_slo_deep_dive.json
+    command: ./build/inferlab_mature_product_p2_artifacts --repo-root . --artifact native_autoscaler_cost_slo_deep_dive --output results/raw/native_autoscaler_cost_slo_deep_dive.json
+
+  - name: native_lora_adapter_cache_deep_dive_refresh
+    binary: build/inferlab_mature_product_p2_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_lora_adapter_cache_deep_dive.json
+    command: ./build/inferlab_mature_product_p2_artifacts --repo-root . --artifact native_lora_adapter_cache_deep_dive --output results/raw/native_lora_adapter_cache_deep_dive.json
+
+  - name: native_grammar_backend_matrix_refresh
+    binary: build/inferlab_mature_product_p2_artifacts
+    backend: native_parser_contract
+    output: results/raw/native_grammar_backend_matrix.json
+    command: ./build/inferlab_mature_product_p2_artifacts --repo-root . --artifact native_grammar_backend_matrix --output results/raw/native_grammar_backend_matrix.json
+
+  - name: native_edge_compiler_artifact_matrix_refresh
+    binary: build/inferlab_mature_product_p2_artifacts
+    backend: native_edge_contract
+    output: results/raw/native_edge_compiler_artifact_matrix.json
+    command: ./build/inferlab_mature_product_p2_artifacts --repo-root . --artifact native_edge_compiler_artifact_matrix --output results/raw/native_edge_compiler_artifact_matrix.json
+
+  - name: native_kv_transport_timeline_deep_dive_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_kv_transport_timeline_deep_dive.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_kv_transport_timeline_deep_dive --output results/raw/native_kv_transport_timeline_deep_dive.json
+
+  - name: native_radix_prefix_cache_deep_dive_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_radix_prefix_cache_deep_dive.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_radix_prefix_cache_deep_dive --output results/raw/native_radix_prefix_cache_deep_dive.json
+
+  - name: native_kv_compression_blend_risk_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_kv_compression_blend_risk.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_kv_compression_blend_risk --output results/raw/native_kv_compression_blend_risk.json
+
+  - name: native_chunked_prefill_stall_free_deep_dive_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_chunked_prefill_stall_free_deep_dive.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_chunked_prefill_stall_free_deep_dive --output results/raw/native_chunked_prefill_stall_free_deep_dive.json
+
+  - name: native_tenant_quota_admission_deep_dive_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_tenant_quota_admission_deep_dive.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_tenant_quota_admission_deep_dive --output results/raw/native_tenant_quota_admission_deep_dive.json
+
+  - name: native_live_request_migration_deep_dive_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_deep_dive
+    output: results/raw/native_live_request_migration_deep_dive.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_live_request_migration_deep_dive --output results/raw/native_live_request_migration_deep_dive.json
+
+  - name: native_quant_correctness_contract_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_kernel_contract
+    output: results/raw/native_quant_correctness_contract.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_quant_correctness_contract --output results/raw/native_quant_correctness_contract.json
+
+  - name: native_paged_kv_gather_kernel_contract_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_kernel_contract
+    output: results/raw/native_paged_kv_gather_kernel_contract.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_paged_kv_gather_kernel_contract --output results/raw/native_paged_kv_gather_kernel_contract.json
+
+  - name: native_flashinfer_replay_alignment_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_kernel_contract
+    output: results/raw/native_flashinfer_replay_alignment.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_flashinfer_replay_alignment --output results/raw/native_flashinfer_replay_alignment.json
+
+  - name: native_trtllm_engine_quant_alignment_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_kernel_contract
+    output: results/raw/native_trtllm_engine_quant_alignment.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_trtllm_engine_quant_alignment --output results/raw/native_trtllm_engine_quant_alignment.json
+
+  - name: native_gateway_policy_matrix_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_evidence_contract
+    output: results/raw/native_gateway_policy_matrix.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_gateway_policy_matrix --output results/raw/native_gateway_policy_matrix.json
+
+  - name: native_deployment_readiness_matrix_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_evidence_contract
+    output: results/raw/native_deployment_readiness_matrix.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_deployment_readiness_matrix --output results/raw/native_deployment_readiness_matrix.json
+
+  - name: native_openai_api_conformance_matrix_refresh
+    binary: build/inferlab_mature_product_borrowed_gap_artifacts
+    backend: native_parser_contract
+    output: results/raw/native_openai_api_conformance_matrix.json
+    command: ./build/inferlab_mature_product_borrowed_gap_artifacts --repo-root . --artifact native_openai_api_conformance_matrix --output results/raw/native_openai_api_conformance_matrix.json
+
+  - name: native_product_replay_alignment_refresh
+    binary: build/inferlab_product_replay_alignment
+    backend: native_deep_dive
+    output: results/raw/native_product_replay_alignment.json
+    command: ./build/inferlab_product_replay_alignment --repo-root . --results results/raw --output results/raw/native_product_replay_alignment.json --format json
+
+  - name: native_deep_dive_contract_check_refresh
+    binary: build/inferlab_deep_dive_contract_check
+    backend: native_deep_dive
+    output: results/raw/native_deep_dive_contract_check.json
+    command: ./build/inferlab_deep_dive_contract_check --repo-root . --results results/raw --output results/raw/native_deep_dive_contract_check.json --format json
+
+  - name: native_evidence_warehouse_index_refresh
+    binary: build/inferlab_evidence_warehouse_index
+    backend: native_evidence_governance
+    output: results/raw/native_evidence_warehouse_index.json
+    command: ./build/inferlab_evidence_warehouse_index --repo-root . --results results/raw --output results/raw/native_evidence_warehouse_index.json --format json
+
+  - name: native_kernel_microbench_harness_refresh
+    binary: build/inferlab_kernel_microbench_harness
+    backend: native_kernel_microbench
+    output: results/raw/native_kernel_microbench_harness.json
+    command: ./build/inferlab_kernel_microbench_harness --repo-root . --output results/raw/native_kernel_microbench_harness.json --format json
+
+  - name: native_third_party_dependency_gate_refresh
+    binary: build/inferlab_third_party_dependency_gate
+    backend: native_dependency_governance
+    output: results/raw/native_third_party_dependency_gate.json
+    command: ./build/inferlab_third_party_dependency_gate --repo-root . --output results/raw/native_third_party_dependency_gate.json --format json
+
+  - name: native_release_evidence_pipeline_refresh
+    binary: build/inferlab_release_evidence_pipeline
+    backend: native_release_governance
+    output: results/raw/native_release_evidence_pipeline.json
+    command: ./build/inferlab_release_evidence_pipeline --repo-root . --results results/raw --output results/raw/native_release_evidence_pipeline.json --format json
+
+  - name: native_evidence_query_result_refresh
+    binary: build/inferlab_evidence_query
+    backend: native_evidence_governance
+    output: results/raw/native_evidence_query_result.json
+    command: ./build/inferlab_evidence_query --repo-root . --warehouse results/raw/native_evidence_warehouse_index.json --query confidence_summary --output results/raw/native_evidence_query_result.json --format json
+
+  - name: native_evidence_query_selector_repair_card_export_refresh
+    binary: build/inferlab_evidence_query
+    backend: native_evidence_governance
+    output: results/raw/native_evidence_query_selector_repair_card_export.json
+    command: ./build/inferlab_evidence_query --repo-root . --warehouse results/raw/native_evidence_warehouse_index.json --operation explain_blocker --selector report_wiring_missing --selector-repair-card-output results/raw/native_evidence_query_selector_repair_card_export.json --format json
+
+  - name: native_dependency_sbom_gate_refresh
+    binary: build/inferlab_dependency_sbom_gate
+    backend: native_dependency_governance
+    output: results/raw/native_dependency_sbom_gate.json
+    command: ./build/inferlab_dependency_sbom_gate --repo-root . --output results/raw/native_dependency_sbom_gate.json --format json
+
+  - name: native_artifact_schema_registry_refresh
+    binary: build/inferlab_artifact_schema_registry
+    backend: native_evidence_governance
+    output: results/raw/native_artifact_schema_registry.json
+    command: ./build/inferlab_artifact_schema_registry --repo-root . --output results/raw/native_artifact_schema_registry.json --format json
+
+  - name: native_artifact_catalog_single_source_refresh
+    binary: build/inferlab_artifact_catalog_single_source
+    backend: native_evidence_governance
+    output: results/raw/native_artifact_catalog_single_source.json
+    command: ./build/inferlab_artifact_catalog_single_source --repo-root . --output results/raw/native_artifact_catalog_single_source.json --format json
+
+  - name: native_core_audit_register_refresh
+    binary: build/inferlab_native_core_audit_register
+    backend: native_evidence_governance
+    output: results/raw/native_core_audit_register.json
+    command: ./build/inferlab_native_core_audit_register --repo-root . --review-manifest configs/native_core_audit_review_manifest.json --output results/raw/native_core_audit_register.json --format json
+    baseline_without_review_manifest_command: ./build/inferlab_native_core_audit_register --repo-root . --output results/raw/native_core_audit_register.json --format json
+    review_manifest_template: configs/native_core_audit_review_manifest.example.json
+
+  - name: native_edge_runtime_matrix_refresh
+    binary: build/inferlab_edge_runtime_matrix
+    backend: native_edge_runtime
+    config: configs/edge_runtime_matrix.example.json
+    output: results/raw/native_edge_runtime_matrix.json
+    report: reports/112_edge_runtime_matrix.md
+    command: ./build/inferlab_edge_runtime_matrix --repo-root . --config configs/edge_runtime_matrix.example.json --mode plan --output results/raw/native_edge_runtime_matrix.json --format json
+    target_machine_execute_command: ./build-edge-linux-aarch64/inferlab_edge_runtime_matrix --repo-root . --config configs/edge_runtime_matrix.example.json --mode execute --output results/raw/native_edge_runtime_matrix.json --format json
+
+  - name: native_edge_cloud_routing_refresh
+    binary: build/inferlab_edge_cloud_routing
+    backend: native_edge_cloud_routing
+    config: configs/edge_cloud_routing.example.json
+    output: results/raw/native_edge_cloud_routing.json
+    report: reports/113_edge_cloud_routing.md
+    command: ./build/inferlab_edge_cloud_routing --repo-root . --config configs/edge_cloud_routing.example.json --mode plan --output results/raw/native_edge_cloud_routing.json --format json
+    target_machine_execute_command: ./build-edge-cloud/inferlab_edge_cloud_routing --repo-root . --config configs/edge_cloud_routing.example.json --mode execute --output results/raw/native_edge_cloud_routing.json --format json
+
+  - name: product_vllm_capability_profile
+    script: scripts/product_profiles/profile_vllm.py
+    entry_module: scripts.product_profiles.profile_vllm
+    backend: product_profile
+    config: configs/product_profiles/vllm.example.yaml
+    output: results/raw/product_vllm_capability_profile.json
+    report: reports/49_product_vllm_profile.md
+    command: python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --output results/raw/product_vllm_capability_profile.json --report reports/49_product_vllm_profile.md --dry-run
+    replay_command: python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --output results/raw/product_vllm_capability_profile.json --report reports/49_product_vllm_profile.md --replay --evidence-dir profiling/vllm
+
+  - name: product_sglang_capability_profile
+    script: scripts/product_profiles/profile_sglang.py
+    entry_module: scripts.product_profiles.profile_sglang
+    backend: product_profile
+    config: configs/product_profiles/sglang.example.yaml
+    output: results/raw/product_sglang_capability_profile.json
+    report: reports/50_product_sglang_profile.md
+    command: python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --output results/raw/product_sglang_capability_profile.json --report reports/50_product_sglang_profile.md --dry-run
+    replay_command: python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --output results/raw/product_sglang_capability_profile.json --report reports/50_product_sglang_profile.md --replay --evidence-dir profiling/sglang
+
+  - name: product_tensorrtllm_runtime_profile
+    script: scripts/product_profiles/profile_tensorrtllm.py
+    entry_module: scripts.product_profiles.profile_tensorrtllm
+    backend: product_profile
+    config: configs/product_profiles/tensorrtllm.example.yaml
+    output: results/raw/product_tensorrtllm_runtime_profile.json
+    report: reports/52_product_runtime_backend_profile.md
+    command: python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --output results/raw/product_tensorrtllm_runtime_profile.json --report reports/52_product_runtime_backend_profile.md --dry-run
+    replay_command: python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --output results/raw/product_tensorrtllm_runtime_profile.json --report reports/52_product_runtime_backend_profile.md --replay --evidence-dir profiling/tensorrtllm

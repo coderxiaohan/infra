@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "fixture_id": "dry_run_ready",
+  "fixture_type": "dry_run_ready",
+  "artifact_type": "fixture_dry_run_ready",
+  "mode": "dry_run",
+  "executed": false,
+  "replayed": false,
+  "claim_scope": "dry-run evidence fixture; validates schema/report wiring only",
+  "summary": {
+    "evidence_confidence": "dry_run_ready",
+    "release_decision": "report_ready"
+  },
+  "expected_confidence": "dry_run_ready",
+  "expected_blocker_category": "none",
+  "expected_release_decision": "report_ready",
+  "expected_repair_environment": "none",
+  "expected_repair_action": "no repair required for dry-run report demonstration",
+  "forbidden_claims": ["throughput", "cuda_timing", "product_execute"]
+}

@@ -1,0 +1,4 @@
+{"product":"flashinfer","event_type":"fallback","operator":"decode_attention","shape_signature":"batch=8,heads=32,head_dim=128,kv=4096","fallback_backend":"reference_attention","dtype":"fp16","claim_scope":"sample replay only"}
+{"product":"flashinfer","event_type":"decode_step","request_id":"fi-req-001","decode_step_ms":17,"token_index":1,"kernel":"paged_decode_attention","claim_scope":"sample replay only"}
+{"product":"flashinfer","event_type":"prefill_start","request_id":"fi-req-001","prefill_start_ms":2,"prompt_tokens":1024,"operator":"prefill_attention","claim_scope":"sample replay only"}
+{"product":"flashinfer","event_type":"prefill_end","request_id":"fi-req-001","prefill_end_ms":39,"kv_bytes":16777216,"claim_scope":"sample replay only"}

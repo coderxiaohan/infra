@@ -1,0 +1,30 @@
+{
+  "product": "mooncake",
+  "endpoint": "http://127.0.0.1:8000",
+  "metrics_url": "http://127.0.0.1:8000/metrics",
+  "report_sections": ["reports/51_product_kv_offload_profile.md"],
+  "paths": {
+    "config_dir": "/etc/mooncake",
+    "cache_dir": "/var/lib/mooncake/kv-cache",
+    "trace_dir": "/var/log/mooncake"
+  },
+  "planned_commands": {
+    "deployment_config_snapshot": "kubectl get configmap -A | grep -i mooncake",
+    "metrics_snapshot": "curl -fsS http://127.0.0.1:8000/metrics",
+    "dry_run": "python3 -m scripts.product_profiles.profile_mooncake --repo-root . --config configs/product_profiles/mooncake.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_mooncake --repo-root . --config configs/product_profiles/mooncake.example.yaml --execute --endpoint http://127.0.0.1:8000"
+  },
+  "expected_mooncake_metrics": [
+    "remote_cache_hit_rate",
+    "kv_transfer_bytes",
+    "transfer_latency_ms",
+    "restore_latency_ms",
+    "hbm_saved_gb",
+    "ttft_delta_ms"
+  ],
+  "risks": [
+    "Remote KV reuse must be tied to exact model, tokenizer, rope scaling, dtype, and cache layout compatibility.",
+    "Non-prefix or cross-session KV reuse must be labeled as correctness risk before reporting latency gains.",
+    "Network and storage transfer metrics must be separated from model compute time."
+  ]
+}

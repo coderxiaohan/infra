@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["id", "item", "quantity", "status"],
+  "properties": {
+    "id": {"type": "string"},
+    "item": {"type": "string"},
+    "quantity": {"type": "integer"},
+    "status": {"type": "string", "enum": ["created", "confirmed", "cancelled"]}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "fixture_id": "schema_only",
+  "fixture_type": "schema_only",
+  "artifact_type": "fixture_schema_only",
+  "mode": "dry_run",
+  "executed": false,
+  "replayed": false,
+  "claim_scope": "schema fixture only; no summary, replay, execute, or product claims",
+  "expected_confidence": "schema_only",
+  "expected_blocker_category": "summary_missing",
+  "expected_release_decision": "blocked",
+  "expected_repair_environment": "current_repo_fixable",
+  "expected_repair_action": "add summary and claim fields before report-ready claims",
+  "forbidden_claims": ["throughput", "p99_latency", "product_execute"]
+}

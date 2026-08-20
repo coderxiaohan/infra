@@ -1,0 +1,88 @@
+{
+  "description": "Reference-only gateway policy matrix migration inventory. The current native target uses a strict compiled fixture and does not parse this file.",
+  "reference_only": true,
+  "consumed_by_current_cli": false,
+  "fixture_source": "inferlab::default_gateway_policy_scenarios",
+  "claim_scope": "compiled six-policy gateway routing analytical fixture only; not live gateway enforcement, request-trace simulation, imported product replay, observed TTFT/backend support, measured routing quality/performance, benchmark, or release readiness",
+  "backends": [
+    "vllm",
+    "sglang",
+    "tgi",
+    "ray_serve_llm",
+    "kserve_llm_d",
+    "dynamo",
+    "aibrix"
+  ],
+  "policies": [
+    "round_robin",
+    "least_loaded",
+    "prefix_lora_aware",
+    "slo_rescue_quota",
+    "overload_shed",
+    "canary_shadow"
+  ],
+  "routing_key_fields": [
+    "base_model_id",
+    "adapter_id",
+    "tokenizer_template_hash",
+    "prefix_hash",
+    "tenant_tier"
+  ],
+  "metrics": {
+    "required": [
+      "gateway_route_duration_ms",
+      "router_prefix_overlap_tokens",
+      "router_worker_queue_depth",
+      "router_worker_kv_pressure",
+      "tenant_quota_utilization",
+      "lora_adapter_cache_hit_rate",
+      "request_ttft_ms",
+      "request_tpot_ms",
+      "slo_violation_budget_burn_rate",
+      "admission_shed_qps"
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "prefix_lora_aware",
+      "request_qps": 220,
+      "tenant_count": 48,
+      "worker_count": 16,
+      "prompt_tokens": 2048,
+      "output_tokens": 384,
+      "prefix_hit_rate": 0.66,
+      "lora_cache_hit_rate": 0.72,
+      "hot_adapter_count": 48,
+      "queue_depth": 36,
+      "kv_pressure": 0.74,
+      "tenant_quota_utilization": 0.7,
+      "compiled_ttft_ms": 840,
+      "p99_ttft_slo_ms": 900
+    },
+    {
+      "name": "slo_rescue_quota",
+      "request_qps": 420,
+      "tenant_count": 64,
+      "worker_count": 24,
+      "prompt_tokens": 3072,
+      "output_tokens": 512,
+      "prefix_hit_rate": 0.54,
+      "lora_cache_hit_rate": 0.61,
+      "hot_adapter_count": 96,
+      "queue_depth": 84,
+      "kv_pressure": 0.92,
+      "tenant_quota_utilization": 0.96,
+      "compiled_ttft_ms": 1420,
+      "p99_ttft_slo_ms": 900
+    }
+  ],
+  "artifact_contract": {
+    "artifact_type": "native_gateway_policy_matrix_plan",
+    "mode": "dry_run_plan",
+    "executed": false,
+    "replayed": false,
+    "timing_evidence": "modeled_not_measured"
+  },
+  "artifact": "results/raw/native_gateway_policy_matrix_plan.json",
+  "migration_command": "./build/inferlab_gateway_policy_matrix_plan --repo-root . --output results/raw/native_gateway_policy_matrix_plan.json"
+}

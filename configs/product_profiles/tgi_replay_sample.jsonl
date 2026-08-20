@@ -1,0 +1,4 @@
+{"product":"tgi","event_type":"request_arrival","request_id":"tgi-req-001","arrival_ms":0,"tenant_id":"tenant-f","prompt_tokens":288,"endpoint":"/generate_stream","claim_scope":"sample replay only"}
+{"product":"tgi","event_type":"prefill_start","request_id":"tgi-req-001","prefill_start_ms":5,"prompt_tokens":288,"claim_scope":"sample replay only"}
+{"product":"tgi","event_type":"decode_step","request_id":"tgi-req-001","decode_step_ms":25,"token_index":1,"inter_token_ms":14,"claim_scope":"sample replay only"}
+{"product":"tgi","event_type":"batch_split","batch_id":"tgi-batch-2","request_ids":["tgi-req-001"],"reason":"streaming_flush","chunked":true,"claim_scope":"sample replay only"}

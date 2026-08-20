@@ -1,0 +1,4 @@
+{"product":"lmcache","event_type":"request_arrival","request_id":"lmc-req-001","arrival_ms":0,"tenant_id":"tenant-b","prompt_tokens":512,"endpoint":"openai-compatible","claim_scope":"sample replay only"}
+{"product":"lmcache","event_type":"kv_hit","request_id":"lmc-req-001","cache_key":"sample-prefix-a","tier":"cpu_dram","cache_hit":true,"prefix_tokens":448,"claim_scope":"sample replay only"}
+{"product":"lmcache","event_type":"kv_miss","request_id":"lmc-req-002","cache_key":"sample-prefix-b","fallback":"prefill_recompute","cache_miss":true,"claim_scope":"sample replay only"}
+{"product":"lmcache","event_type":"decode_step","request_id":"lmc-req-001","decode_step_ms":44,"token_index":1,"inter_token_ms":21,"claim_scope":"sample replay only"}

@@ -1,0 +1,47 @@
+backends:
+  vllm:
+    base_url: http://127.0.0.1:8000/v1
+    model: model
+  sglang:
+    base_url: http://127.0.0.1:30000/v1
+    model: model
+  llama_cpp:
+    base_url: http://127.0.0.1:8080/v1
+    model: model
+  tgi:
+    base_url: http://127.0.0.1:8081
+    model: model
+structured_outputs:
+  schemas:
+    - name: order_json
+      kind: json_schema
+      path: configs/schemas/order.json
+lora:
+  base_model: /models/base
+  adapters:
+    - name: sql
+      path: /adapters/sql
+    - name: summary
+      path: /adapters/summary
+routing:
+  workers: 4
+  policies: [round_robin, least_loaded, prefix_hit_aware, hybrid]
+disaggregated:
+  prefill_workers: [1, 2, 4]
+  decode_workers: [1, 2, 4]
+  kv_transfer_bandwidth_gbps: [25, 100, 200]
+long_context:
+  prompt_tokens: [2048, 8192, 32768, 131072]
+  chunk_sizes: [512, 1024, 2048, 4096]
+pooling:
+  dataset: configs/rag_pairs.example.jsonl
+  top_k: [1, 5, 10]
+slo:
+  qps: [1, 5, 20, 100]
+  ttft_slo_ms: 500
+  tpot_slo_ms: 50
+  gpu_hour_cost: 2.5
+deployment:
+  kubernetes_namespace: inferlab
+  serving_runtime: vllm
+  routing_mode: kv_cache_aware

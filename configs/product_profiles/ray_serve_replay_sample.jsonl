@@ -1,0 +1,4 @@
+{"product":"ray_serve","event_type":"request_arrival","request_id":"ray-req-001","arrival_ms":0,"tenant_id":"tenant-e","prompt_tokens":320,"endpoint":"deployment:llm","claim_scope":"sample replay only"}
+{"product":"ray_serve","event_type":"route_decision","request_id":"ray-req-001","route_target":"replica-3","reason":"queue_depth","worker":"replica-3","claim_scope":"sample replay only"}
+{"product":"ray_serve","event_type":"batch_merge","batch_id":"ray-batch-4","request_ids":["ray-req-001","ray-req-002"],"scheduler_step":9,"queue_depth":5,"claim_scope":"sample replay only"}
+{"product":"ray_serve","event_type":"decode_step","request_id":"ray-req-001","decode_step_ms":28,"token_index":1,"inter_token_ms":16,"claim_scope":"sample replay only"}

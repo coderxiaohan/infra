@@ -1,0 +1,13 @@
+{
+  "product": "sglang",
+  "endpoint": "http://127.0.0.1:30000",
+  "metrics_url": "http://127.0.0.1:30000/metrics",
+  "api_key_env": "OPENAI_API_KEY",
+  "report_sections": ["reports/50_product_sglang_profile.md"],
+  "planned_commands": {
+    "start_example": "python3 -m sglang.launch_server --model-path /models/model --host 0.0.0.0 --port 30000",
+    "dry_run": "python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --execute --endpoint http://127.0.0.1:30000"
+  },
+  "risks": ["HiCache, PD/EPD, and gateway metrics depend on the selected SGLang deployment mode.", "Parser success rates require real structured/tool-call workloads."]
+}

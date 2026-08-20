@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "fixture_id": "freshness_stale",
+  "fixture_type": "freshness_stale",
+  "artifact_type": "fixture_freshness_stale",
+  "mode": "dry_run",
+  "executed": false,
+  "replayed": false,
+  "claim_scope": "stale evidence fixture used to demonstrate freshness blocker handling",
+  "summary": {
+    "evidence_confidence": "stale_or_blocked",
+    "release_decision": "blocked",
+    "blocker_count": 1
+  },
+  "blockers": [
+    {
+      "category": "freshness_stale",
+      "message": "artifact age exceeds freshness policy or freshness gate is missing"
+    }
+  ],
+  "expected_confidence": "stale_or_blocked",
+  "expected_blocker_category": "freshness_stale",
+  "expected_release_decision": "blocked",
+  "expected_repair_environment": "current_server_when_validation_enabled",
+  "expected_repair_action": "refresh the producer artifact and runtime freshness gate",
+  "forbidden_claims": ["fresh", "execute_verified"]
+}

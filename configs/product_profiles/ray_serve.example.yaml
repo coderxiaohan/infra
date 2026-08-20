@@ -1,0 +1,12 @@
+{
+  "product": "ray_serve",
+  "endpoint": "http://127.0.0.1:8000",
+  "metrics_url": "http://127.0.0.1:8000/metrics",
+  "report_sections": ["reports/54_product_cloud_control_plane_profile.md"],
+  "planned_commands": {
+    "serve_example": "serve run ray_app:deployment",
+    "dry_run": "python3 -m scripts.product_profiles.profile_ray_serve --repo-root . --config configs/product_profiles/ray_serve.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_ray_serve --repo-root . --config configs/product_profiles/ray_serve.example.yaml --execute --endpoint http://127.0.0.1:8000"
+  },
+  "risks": ["Ray Serve autoscaling and KV offload depend on deployment graph and cluster resources.", "Record Ray version, deployment graph, and autoscaling policy with every execution artifact."]
+}

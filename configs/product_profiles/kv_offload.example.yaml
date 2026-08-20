@@ -1,0 +1,16 @@
+{
+  "product": "kv_offload",
+  "endpoint": "http://127.0.0.1:8000",
+  "metrics_url": "http://127.0.0.1:8000/metrics",
+  "report_sections": ["reports/51_product_kv_offload_profile.md"],
+  "paths": {
+    "cache_dir": "/var/lib/inferlab/kv-cache"
+  },
+  "planned_commands": {
+    "lmcache_vllm_example": "vllm serve /models/model --kv-transfer-config '{\"kv_connector\":\"LMCacheConnectorV1\"}'",
+    "ray_serve_example": "serve run deployment:app",
+    "dry_run": "python3 -m scripts.product_profiles.profile_kv_offload --repo-root . --config configs/product_profiles/kv_offload.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_kv_offload --repo-root . --config configs/product_profiles/kv_offload.example.yaml --execute --endpoint http://127.0.0.1:8000"
+  },
+  "risks": ["Non-prefix or semantic KV reuse must be labeled as correctness risk.", "Cache tier metrics need product-specific logs or Prometheus metrics."]
+}

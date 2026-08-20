@@ -1,0 +1,47 @@
+{
+  "policies": [
+    "round_robin",
+    "least_loaded",
+    "prefix_hit_aware",
+    "hybrid"
+  ],
+  "requests": [
+    {
+      "id": "sys_a_1",
+      "output_tokens": 128,
+      "prefix": "system_a",
+      "prompt_tokens": 2048
+    },
+    {
+      "id": "sys_a_2",
+      "output_tokens": 128,
+      "prefix": "system_a",
+      "prompt_tokens": 1024
+    },
+    {
+      "id": "sys_b_1",
+      "output_tokens": 256,
+      "prefix": "system_b",
+      "prompt_tokens": 2048
+    },
+    {
+      "id": "rag_a_1",
+      "output_tokens": 64,
+      "prefix": "rag_doc_a",
+      "prompt_tokens": 4096
+    },
+    {
+      "id": "rag_a_2",
+      "output_tokens": 64,
+      "prefix": "rag_doc_a",
+      "prompt_tokens": 1024
+    },
+    {
+      "id": "random_1",
+      "output_tokens": 64,
+      "prefix": "random_1",
+      "prompt_tokens": 512
+    }
+  ],
+  "workers": 4
+}

@@ -1,0 +1,2 @@
+{"id":"kv_cache","query":"What does KV cache store?","positive":"KV cache stores previous attention keys and values for faster decode.","negatives":["A compiler turns source code into binaries.","A web server handles HTTP routing."]}
+{"id":"paged_attention","query":"Why does PagedAttention improve serving?","positive":"PagedAttention allocates KV cache in blocks to reduce memory waste and improve concurrency.","negatives":["Dropout regularizes training.","Batch norm normalizes activations."]}

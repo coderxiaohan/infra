@@ -1,0 +1,4 @@
+# CPU-only development environment for the Mini Transformer reference.
+# GPU machines should install the CUDA-specific torch wheel selected for that host.
+numpy>=2.4
+torch>=2.12

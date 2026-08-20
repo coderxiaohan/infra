@@ -1,0 +1,41 @@
+services:
+  inferlab-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: ${INFERLAB_DEV_IMAGE:-inferlab-dev:local}
+    working_dir: /workspace/InferLab
+    volumes:
+      - ..:/workspace/InferLab
+    command: bash
+
+  vllm-server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.vllm
+      args:
+        CUDA_BASE_IMAGE: ${CUDA_BASE_IMAGE:-nvidia/cuda:12.4.1-devel-ubuntu22.04}
+        VLLM_PACKAGE: ${VLLM_PACKAGE:-vllm}
+        EXTRA_PIP_INDEX_URL: ${EXTRA_PIP_INDEX_URL:-}
+    image: ${INFERLAB_VLLM_IMAGE:-inferlab-vllm:local}
+    ports:
+      - "${INFERLAB_PORT:-8000}:8000"
+    environment:
+      INFERLAB_MODEL: ${INFERLAB_MODEL:-/models/model}
+      INFERLAB_HOST: 0.0.0.0
+      INFERLAB_PORT: 8000
+      INFERLAB_DTYPE: ${INFERLAB_DTYPE:-auto}
+      INFERLAB_MAX_MODEL_LEN: ${INFERLAB_MAX_MODEL_LEN:-4096}
+    volumes:
+      - ${INFERLAB_MODEL_ROOT:-./models}:/models:ro
+      - ..:/workspace/InferLab:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: ${INFERLAB_GPU_COUNT:-all}
+              capabilities:
+                - gpu
+    profiles:
+      - gpu

@@ -1,0 +1,20 @@
+{
+  "models": [
+    {
+      "name": "q4_k_m",
+      "path": "/models/model-q4_k_m.gguf",
+      "quant": "Q4_K_M"
+    },
+    {
+      "name": "q8_0",
+      "path": "/models/model-q8_0.gguf",
+      "quant": "Q8_0"
+    }
+  ],
+  "threads": [1, 2, 4, 8],
+  "ctx_size": [2048, 4096],
+  "batch_size": [128, 512],
+  "ngl": [0, 999],
+  "n_predict": [128],
+  "prompt_file": "configs/eval_prompts.jsonl"
+}

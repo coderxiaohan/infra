@@ -1,0 +1,3 @@
+{"id":"short_math","prompt":"What is 17 + 25?","category":"sanity"}
+{"id":"short_explain","prompt":"Explain KV cache in one sentence.","category":"inference"}
+{"id":"long_context_seed","prompt":"You are analyzing an LLM inference server. List the main latency components.","category":"serving"}

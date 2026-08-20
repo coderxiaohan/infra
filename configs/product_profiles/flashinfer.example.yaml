@@ -1,0 +1,14 @@
+{
+  "product": "flashinfer",
+  "report_sections": ["reports/53_product_kernel_library_profile.md"],
+  "shape_matrix": [
+    {"batch": 1, "heads": 32, "head_dim": 128, "kv_pages": 128, "dtype": "fp16"},
+    {"batch": 8, "heads": 32, "head_dim": 128, "kv_pages": 512, "dtype": "bf16"}
+  ],
+  "planned_commands": {
+    "capability_probe_example": "python3 - <<'PY'\nimport flashinfer\nprint(flashinfer.__version__)\nPY",
+    "dry_run": "python3 -m scripts.product_profiles.profile_flashinfer --repo-root . --config configs/product_profiles/flashinfer.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_flashinfer --repo-root . --config configs/product_profiles/flashinfer.example.yaml --execute"
+  },
+  "risks": ["Kernel availability depends on CUDA, PyTorch, FlashInfer version, dtype, and shape.", "InferLab records capability and fallback evidence; it does not copy kernels."]
+}

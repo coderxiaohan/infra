@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {
+      "name": "slow_client_cancel",
+      "request_qps": 20,
+      "output_tokens": 2048,
+      "tokens_per_chunk": 2,
+      "client_disconnect_rate": 0.02,
+      "network_rtt_ms": 30
+    }
+  ],
+  "emit_timeline": true,
+  "dry_run": true
+}

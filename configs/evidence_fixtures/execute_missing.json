@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "fixture_id": "execute_missing",
+  "fixture_type": "execute_missing",
+  "artifact_type": "fixture_execute_missing",
+  "mode": "dry_run",
+  "executed": false,
+  "replayed": false,
+  "claim_scope": "kernel or product execution fixture with execute evidence intentionally missing",
+  "summary": {
+    "evidence_confidence": "dry_run_ready",
+    "release_decision": "blocked",
+    "blocker_count": 1
+  },
+  "blockers": [
+    {
+      "category": "execute_missing",
+      "message": "target-machine execute evidence is required before execute claims"
+    }
+  ],
+  "expected_confidence": "dry_run_ready",
+  "expected_blocker_category": "execute_missing",
+  "expected_release_decision": "blocked",
+  "expected_repair_environment": "target_gpu_or_execute_machine",
+  "expected_repair_action": "run target-machine correctness/timing/execute workflow",
+  "forbidden_claims": ["execute_verified", "gpu_speedup", "measured_latency"]
+}

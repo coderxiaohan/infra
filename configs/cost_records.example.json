@@ -1,0 +1,13 @@
+{
+  "records": [
+    {
+      "provider": "TBD",
+      "instance": "TBD",
+      "gpu": "TBD",
+      "hours": 0,
+      "unit_cost": 0,
+      "total_cost": 0,
+      "purpose": "vLLM or TensorRT-LLM runtime validation"
+    }
+  ]
+}

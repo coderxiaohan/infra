@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "prompts": {
+    "short_math": {
+      "numeric_answer": 42,
+      "numeric_tolerance": 0,
+      "expected_contains": ["42"]
+    },
+    "short_explain": {
+      "expected_contains": ["cache"],
+      "expected_regex": ["(?i)key|value|kv"]
+    },
+    "long_context_seed": {
+      "expected_contains": ["prefill", "decode"],
+      "reference_answer": "Main latency components include queue wait, prefill, decode, scheduling, tokenization, network transfer, and streaming overhead."
+    }
+  }
+}

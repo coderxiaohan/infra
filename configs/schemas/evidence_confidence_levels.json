@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "levels": [
+    {
+      "level": "schema_only",
+      "meaning": "Artifact exposes schema metadata but is not strong enough for dry-run readiness."
+    },
+    {
+      "level": "dry_run_ready",
+      "meaning": "Artifact has schema, summary, and claim boundary, but no replay or execute evidence."
+    },
+    {
+      "level": "replay_supported",
+      "meaning": "Artifact is backed by imported replay evidence; it still is not execute timing."
+    },
+    {
+      "level": "execute_verified",
+      "meaning": "Artifact is backed by target-machine execution evidence."
+    },
+    {
+      "level": "stale_or_blocked",
+      "meaning": "Artifact is missing, stale, blocked, unparsable, or lacks required evidence fields."
+    }
+  ]
+}

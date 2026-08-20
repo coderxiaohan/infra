@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "rules": [
+    {
+      "rule": "external_product_boundary",
+      "decision": "vLLM, SGLang, TensorRT-LLM, FlashInfer, LMCache, Mooncake, Ray Serve, KServe/llm-d, TGI, KTransformers, and similar products retain ownership of their core runtime behavior."
+    },
+    {
+      "rule": "dry_run_not_execute",
+      "decision": "Dry-run artifacts can describe implementation and migration readiness but cannot prove throughput, latency, GPU timing, or production SLO."
+    },
+    {
+      "rule": "replay_not_execute",
+      "decision": "Replay artifacts can explain imported logs or traces but cannot prove live endpoint behavior."
+    },
+    {
+      "rule": "performance_numbers_from_raw_only",
+      "decision": "Performance numbers must originate from results/raw/*.json and preserve their mode."
+    }
+  ]
+}

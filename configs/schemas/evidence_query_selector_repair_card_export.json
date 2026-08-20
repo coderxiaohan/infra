@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "artifact_type": "native_evidence_query_selector_repair_card_export",
+  "required_fields": [
+    "schema_version",
+    "artifact_type",
+    "mode",
+    "executed",
+    "replayed",
+    "claim_scope",
+    "query",
+    "selector_resolution_summary",
+    "export_contract",
+    "export_review_focus",
+    "repair_cards",
+    "summary",
+    "claim_boundary"
+  ],
+  "summary_metrics": [
+    "selector_repair_card_full_export_count",
+    "selector_repair_card_current_repo_count",
+    "selector_repair_card_current_server_count",
+    "selector_repair_card_target_machine_count",
+    "selector_repair_card_target_product_count",
+    "selector_repair_card_source_location_gap_count",
+    "selector_repair_card_export_review_status",
+    "selector_repair_card_export_blocker_reason",
+    "selector_repair_card_external_file_required"
+  ]
+}

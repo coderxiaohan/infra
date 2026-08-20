@@ -1,0 +1,13 @@
+{
+  "product": "vllm",
+  "endpoint": "http://127.0.0.1:8000",
+  "metrics_url": "http://127.0.0.1:8000/metrics",
+  "api_key_env": "OPENAI_API_KEY",
+  "report_sections": ["reports/49_product_vllm_profile.md"],
+  "planned_commands": {
+    "start_example": "vllm serve /models/model --host 0.0.0.0 --port 8000 --enable-lora --enable-prefix-caching",
+    "dry_run": "python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --execute --endpoint http://127.0.0.1:8000"
+  },
+  "risks": ["vLLM server flags vary by version; record exact version and server args.", "DBO, EP, DPA, and KV connector evidence must come from real vLLM artifacts."]
+}

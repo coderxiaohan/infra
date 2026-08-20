@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "target_platform": "linux-aarch64",
+  "local": {
+    "runtime": "llama_cpp",
+    "resource_fit": true,
+    "model": {
+      "logical_model_id": "example-logical-model",
+      "model_format": "gguf",
+      "quantization": "q4_k_m",
+      "tokenizer_id": "embedded-gguf-tokenizer",
+      "checkpoint_revision": "replace-with-model-checkpoint-revision",
+      "conversion_provenance": "replace-with-gguf-conversion-command-or-manifest",
+      "model_path": "models/example-model.gguf",
+      "context_limit": 4096,
+      "prefer_mmap": true
+    }
+  },
+  "cloud": {
+    "product": "vllm",
+    "endpoint_url": "https://127.0.0.1:8000/v1/chat/completions",
+    "api_key_env": "INFERLAB_EDGE_CLOUD_API_KEY",
+    "allow_loopback_http": false,
+    "network_available": false,
+    "connect_timeout_ms": 5000,
+    "maximum_event_bytes": 1048576,
+    "maximum_response_bytes": 67108864,
+    "network_quality": {
+      "policy_enabled": true,
+      "observation_available": false,
+      "round_trip_time_ms": 0.0,
+      "jitter_ms": 0.0,
+      "packet_loss_ratio": 0.0,
+      "downlink_mbps": 0.0,
+      "observation_age_ms": 0,
+      "maximum_round_trip_time_ms": 250.0,
+      "maximum_jitter_ms": 100.0,
+      "maximum_packet_loss_ratio": 0.05,
+      "minimum_downlink_mbps": 0.5,
+      "maximum_observation_age_ms": 30000,
+      "provenance": "not_observed_replace_on_target_machine"
+    }
+  },
+  "policy": {
+    "data_classification": "internal",
+    "remote_processing_allowed": true,
+    "prefer_local": true,
+    "minimum_cloud_deadline_ms": 5000,
+    "budget": {
+      "battery_gate_enabled": false,
+      "battery_observation_available": false,
+      "battery_percent": 0.0,
+      "minimum_local_battery_percent": 15.0,
+      "local_energy_gate_enabled": false,
+      "local_energy_estimate_available": false,
+      "estimated_local_energy_uj": 0,
+      "maximum_local_energy_uj": 10000000,
+      "cloud_cost_gate_enabled": false,
+      "cloud_cost_estimate_available": false,
+      "estimated_cloud_request_cost_usd": 0.0,
+      "maximum_cloud_request_cost_usd": 0.10,
+      "observation_age_ms": 0,
+      "maximum_observation_age_ms": 30000,
+      "provenance": "not_required"
+    },
+    "session_recovery": {
+      "recovery_requested": false,
+      "durable_transcript_available": false,
+      "prompt_reconstructed_from_transcript": false,
+      "previous_response_complete": false,
+      "prior_delivered_chunks": 0,
+      "transcript_turn_count": 0,
+      "state_age_ms": 0,
+      "maximum_state_age_ms": 300000,
+      "recovered_session_id": "not_required",
+      "previous_request_id": "not_required",
+      "transcript_revision": "not_required",
+      "provenance": "not_required"
+    }
+  },
+  "generation": {
+    "request_id": "example-edge-cloud-request",
+    "session_id": "example-edge-cloud-session",
+    "cloud_model_id": "replace-with-served-model-name",
+    "prompt": "Explain why request-before-execution placement avoids duplicate output.",
+    "maximum_output_tokens": 128,
+    "context_tokens": 4096,
+    "batch_size": 1,
+    "thread_count": 4,
+    "maximum_generation_duration_ms": 120000,
+    "seed": 7,
+    "temperature": 0.0,
+    "top_p": 1.0
+  }
+}

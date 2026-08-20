@@ -1,0 +1,38 @@
+{
+  "product": "lmdeploy",
+  "endpoint": "http://127.0.0.1:23333",
+  "metrics_url": "http://127.0.0.1:23333/metrics",
+  "report_sections": ["reports/52_product_runtime_backend_profile.md"],
+  "paths": {
+    "model_path": "/models/model",
+    "workspace": "/var/lib/inferlab/lmdeploy",
+    "engine_dir": "/var/lib/inferlab/lmdeploy/engine"
+  },
+  "planned_commands": {
+    "serve_example": "lmdeploy serve api_server /models/model --server-port 23333",
+    "profile_snapshot": "lmdeploy check_env",
+    "dry_run": "python3 -m scripts.product_profiles.profile_lmdeploy --repo-root . --config configs/product_profiles/lmdeploy.example.yaml --dry-run",
+    "execute": "python3 -m scripts.product_profiles.profile_lmdeploy --repo-root . --config configs/product_profiles/lmdeploy.example.yaml --execute --endpoint http://127.0.0.1:23333"
+  },
+  "runtime_options": {
+    "engine": "turbomind",
+    "persistent_batching": true,
+    "blocked_kv_cache": true,
+    "kv_cache_quantization": "optional",
+    "quantization": ["fp16", "awq", "int4_weight_only"]
+  },
+  "expected_lmdeploy_metrics": [
+    "ttft_ms",
+    "tpot_ms",
+    "tokens_per_s",
+    "p99_latency_ms",
+    "gpu_memory_bytes",
+    "kv_cache_quant_enabled",
+    "persistent_batching_enabled"
+  ],
+  "risks": [
+    "TurboMind engine, persistent batching, and blocked KV cache are LMDeploy-owned runtime features.",
+    "InferLab must not report KV cache quantization or multi-model serving gains without LMDeploy version, config, model, hardware, and raw latency artifacts.",
+    "OpenAI-compatible endpoint checks must be separated from engine build or conversion time."
+  ]
+}

@@ -1,0 +1,36 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: LLMInferenceService
+metadata:
+  name: inferlab-product-profile
+  namespace: "{{NAMESPACE}}"
+  labels:
+    app.kubernetes.io/name: inferlab
+    app.kubernetes.io/component: product-profile
+spec:
+  model:
+    name: "{{MODEL_NAME}}"
+    uri: "{{MODEL_URI}}"
+    runtime: vllm
+    resources:
+      requests:
+        cpu: "4"
+        memory: 32Gi
+        nvidia.com/gpu: "{{GPU_COUNT}}"
+      limits:
+        cpu: "8"
+        memory: 64Gi
+        nvidia.com/gpu: "{{GPU_COUNT}}"
+  router:
+    gateway:
+      enabled: true
+    routingPolicy:
+      type: kv-cache-aware
+      prefillDecodeSeparation: true
+  autoscaler:
+    minReplicas: 1
+    maxReplicas: 4
+    metrics:
+      - type: concurrency
+        target: 16
+      - type: ttft
+        target: 1000ms

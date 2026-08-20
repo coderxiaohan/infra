@@ -1,0 +1,22 @@
+{
+  "backends": {
+    "llama_cpp": {
+      "base_url": "http://127.0.0.1:8080/v1",
+      "model": "embedding-model"
+    },
+    "vllm": {
+      "base_url": "http://127.0.0.1:8000/v1",
+      "model": "embedding-model"
+    }
+  },
+  "dataset": "configs/rag_pairs.example.jsonl",
+  "tasks": [
+    "embedding",
+    "rerank"
+  ],
+  "top_k": [
+    1,
+    5,
+    10
+  ]
+}

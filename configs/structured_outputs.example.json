@@ -1,0 +1,34 @@
+{
+  "backends": {
+    "llama_cpp": {
+      "base_url": "http://127.0.0.1:8080/v1",
+      "model": "model"
+    },
+    "sglang": {
+      "base_url": "http://127.0.0.1:30000/v1",
+      "model": "model"
+    },
+    "vllm": {
+      "base_url": "http://127.0.0.1:8000/v1",
+      "model": "model"
+    }
+  },
+  "prompts": [
+    {
+      "id": "order",
+      "prompt": "Return a JSON order with id, item, quantity, and status."
+    }
+  ],
+  "schemas": [
+    {
+      "kind": "json_schema",
+      "name": "order_json",
+      "path": "configs/schemas/order.json"
+    },
+    {
+      "kind": "regex",
+      "name": "tool_call_regex",
+      "pattern": "\\{\"tool\":\"[a-z_]+\",\"arguments\":.*\\}"
+    }
+  ]
+}

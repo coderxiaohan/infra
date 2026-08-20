@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "registry_type": "inferlab_artifact_schema_registry",
+  "claim_boundary": "This registry describes artifact shape and claim boundaries only; it is not benchmark or execute evidence.",
+  "default_required_fields": [
+    "schema_version",
+    "artifact_type",
+    "mode",
+    "executed",
+    "replayed",
+    "claim_scope",
+    "summary"
+  ],
+  "default_optional_fields": [
+    "environment",
+    "official_sources",
+    "refresh_commands",
+    "migration_commands",
+    "not_run",
+    "recommended_next_commands"
+  ],
+  "registry_files": [
+    "configs/schemas/artifact_schema_registry.json",
+    "configs/schemas/evidence_confidence_levels.json",
+    "configs/schemas/claim_boundary_rules.json",
+    "configs/schemas/release_decision_rules.json",
+    "configs/schemas/artifact_catalog_single_source.json",
+    "configs/schemas/evidence_query_result.json",
+    "configs/schemas/evidence_query_selector_repair_card_export.json",
+    "configs/schemas/native_core_audit_register.json"
+  ],
+  "artifact_family_rules": [
+    {
+      "family": "evidence_governance",
+      "required_fields": [
+        "blockers",
+        "recommended_next_commands"
+      ],
+      "report_required": true,
+      "freshness_required": true
+    },
+    {
+      "family": "product_replay",
+      "required_fields": [
+        "sample_sources",
+        "normalized_events",
+        "records"
+      ],
+      "mode_policy": "replay evidence must never be promoted to execute without target product artifacts"
+    },
+    {
+      "family": "kernel_microbenchmark",
+      "required_fields": [
+        "operators",
+        "correctness_contracts",
+        "tolerance_policies",
+        "target_machine_execution_matrix"
+      ],
+      "mode_policy": "timing claims require target-machine correctness and benchmark artifacts"
+    }
+  ]
+}

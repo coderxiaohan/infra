@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "artifact_type": "native_edge_runtime_matrix",
+  "required_fields": [
+    "schema_version",
+    "artifact_type",
+    "status",
+    "mode",
+    "executed",
+    "replayed",
+    "claim_scope",
+    "generated_at",
+    "target_platform",
+    "build_environment",
+    "config",
+    "isa_capabilities",
+    "kernel_capabilities",
+    "dependency_status",
+    "runtime_rows",
+    "comparison_identity",
+    "deployment_recommendation",
+    "delivery_contract",
+    "summary",
+    "blockers",
+    "recommended_next_commands"
+  ],
+  "summary_metrics": [
+    "runtime_row_count",
+    "dependency_linked_count",
+    "adapter_implemented_count",
+    "model_present_count",
+    "executed_row_count",
+    "blocker_count",
+    "evidence_level",
+    "decision"
+  ],
+  "isa_capability_fields": [
+    "aarch64_build",
+    "neon_compiled",
+    "neon_runtime_available",
+    "sve_requested",
+    "sve_compiled",
+    "sve_runtime_available",
+    "runtime_probe_status"
+  ],
+  "runtime_row_contract": {
+    "artifact_preflight_fields": [
+      "model_path_label",
+      "model_path_redacted",
+      "model_path_status",
+      "tokenizer_path_label",
+      "tokenizer_path_redacted",
+      "tokenizer_path_status",
+      "input_artifact_stability",
+      "thread_control_status",
+      "target_physical_core_count",
+      "recommended_thread_count",
+      "thread_recommendation_status"
+    ],
+    "request_identity_fields": [
+      "prompt_fingerprint",
+      "prompt_bytes",
+      "seed",
+      "temperature",
+      "top_p",
+      "prompt_text_emitted"
+    ],
+    "input_artifact_stability_fields": [
+      "model_snapshot_source",
+      "model_status",
+      "tokenizer_snapshot_source",
+      "tokenizer_status",
+      "metadata_identity_emitted",
+      "content_hash_verified",
+      "claim_boundary"
+    ],
+    "lifecycle_fields": [
+      "load",
+      "generate",
+      "cancel",
+      "reset",
+      "unload"
+    ],
+    "execution_observation_fields": [
+      "prompt_tokens",
+      "generated_tokens",
+      "token_callback_count",
+      "finish_reason",
+      "error_category"
+    ],
+    "execution_protocol_fields": [
+      "warmup_iterations",
+      "minimum_measurement_iterations",
+      "minimum_sustained_duration_ms",
+      "maximum_measurement_iterations",
+      "maximum_generation_duration_ms",
+      "deadline_semantics",
+      "completed_warmup_iterations",
+      "completed_measurement_iterations",
+      "observed_measurement_duration_ms",
+      "status",
+      "aggregation",
+      "claim_boundary"
+    ],
+    "concurrent_execution_fields": [
+      "requested_sessions",
+      "loaded_sessions",
+      "warmed_sessions",
+      "started_sessions",
+      "completed_sessions",
+      "total_prompt_tokens",
+      "total_generated_tokens",
+      "total_callback_count",
+      "wall_time_ms",
+      "median_warm_ttft_ms",
+      "median_tpot_ms",
+      "aggregate_generated_tokens_per_second",
+      "peak_rss_bytes",
+      "peak_pss_bytes",
+      "mapped_model_bytes",
+      "finish_alignment_status",
+      "status",
+      "provenance",
+      "claim_boundary"
+    ],
+    "metric_fields": [
+      "load_time_ms",
+      "cold_ttft_ms",
+      "warm_ttft_ms",
+      "tpot_ms",
+      "prompt_tokens_per_second",
+      "decode_tokens_per_second",
+      "peak_rss_bytes",
+      "peak_pss_bytes",
+      "mapped_model_bytes",
+      "kv_cache_bytes",
+      "runtime_workspace_bytes",
+      "provenance"
+    ],
+    "thermal_observation_fields": [
+      "maximum_temperature_before_c",
+      "maximum_temperature_after_c",
+      "readable_sensor_count_before",
+      "readable_sensor_count_after",
+      "before_status",
+      "after_status",
+      "provenance",
+      "claim_boundary"
+    ],
+    "resource_plan_fields": [
+      "mmap_requested",
+      "mmap_strategy",
+      "runtime_workspace_budget_bytes",
+      "estimated_runtime_workspace_total_bytes",
+      "system_memory_budget_bytes",
+      "system_reserve_bytes",
+      "model_file_bytes",
+      "estimated_model_residency_total_bytes",
+      "estimated_kv_cache_bytes",
+      "estimated_required_bytes",
+      "estimated_resource_fit",
+      "estimated_headroom_bytes",
+      "estimated_shortfall_bytes",
+      "observed_working_set_bytes",
+      "observed_working_set_source",
+      "observed_resource_fit",
+      "observed_headroom_bytes",
+      "observed_shortfall_bytes",
+      "observed_status",
+      "status",
+      "claim_boundary"
+    ]
+  },
+  "config_contract": {
+    "required_fields": [
+      "path_label",
+      "path_redacted",
+      "schema_version",
+      "status"
+    ]
+  },
+  "deployment_recommendation_contract": {
+    "required_fields": [
+      "status",
+      "candidate_row_ids",
+      "observation_alignment_status",
+      "observation_alignment_gaps",
+      "selected_row_id",
+      "runtime",
+      "backend",
+      "model_format",
+      "thread_count",
+      "thread_count_status",
+      "mmap_strategy",
+      "criterion",
+      "claim_boundary"
+    ],
+    "selection_boundary": "A runtime can only become a target execute performance candidate after comparable configuration identity, successful lifecycle, aligned observed prompt/generated token counts and finish reason, observed memory fit, configured-workload TPOT and configured-workload generated-token throughput are present for every row. Multi-session rows use the synchronized concurrent window; single-session rows use serial measurement. Plan mode cannot select a runtime."
+  },
+  "comparison_identity_quality_observation_contract": {
+    "required_fields": [
+      "status",
+      "reference_row_id",
+      "observations",
+      "matching_row_ids",
+      "mismatching_row_ids",
+      "unavailable_row_ids",
+      "criterion",
+      "fingerprint_algorithm",
+      "capture_limit_bytes",
+      "matrix_capture_limit_bytes",
+      "claim_boundary"
+    ],
+    "observation_fields": [
+      "row_id",
+      "generated_text_bytes",
+      "generated_text_fingerprint",
+      "capture_status",
+      "exact_match_with_reference",
+      "first_mismatch_byte_offset",
+      "generated_text_emitted"
+    ],
+    "comparison_boundary": "Only rows with aligned logical identity, complete execute observations and nonempty generated callback text may compare the exact bounded bytes retained in memory for one deterministic request. Any capture or empty-output gap makes every row unavailable for that comparison. Capture is bounded to 1 MiB per row, 8 MiB per matrix and 64 rows; exceeding a text budget makes the comparison unavailable without changing performance evidence. Generated text is not emitted. FNV-1a is a non-cryptographic diagnostic fingerprint and is not the equality authority. A mismatch offset identifies the first differing byte position without exposing text. A match is not a model-quality, logit, token-id or quantization-equivalence claim; a mismatch is not a performance blocker."
+  },
+  "claim_boundary": "Plan and capability rows remain non-execute evidence and cannot select a runtime. A performance candidate requires every comparable row to complete the serial cold/warm/cancel protocol and provide observed memory fit, median measurement TPOT and median measurement decode throughput. Warmup and cancel-probe timing are excluded from those medians. The candidate is not concurrent-session, quality, power, thermal, production or release evidence. Null metrics must never be interpreted as zero measurements."
+}

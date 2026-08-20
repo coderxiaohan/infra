@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "corpus": "inferlab_standard_evidence_fixtures",
+  "purpose": "Offline evidence-state fixtures for query, release-gate, and final-report confidence demonstrations.",
+  "claim_boundary": "Fixtures are synthetic examples only. They do not contain real benchmark, CUDA timing, product replay, or live execute evidence.",
+  "fixtures": [
+    "schema_only.json",
+    "dry_run_ready.json",
+    "replay_supported.json",
+    "execute_missing.json",
+    "report_wiring_missing.json",
+    "freshness_stale.json",
+    "claim_scope_missing.json",
+    "stale_or_blocked.json"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "backends": {
+    "vllm": {
+      "base_url": "http://127.0.0.1:8000/v1",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "tool_call_parser": "hermes"
+    },
+    "sglang": {
+      "base_url": "http://127.0.0.1:30000/v1",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "tool_call_parser": "qwen"
+    },
+    "tgi": {
+      "base_url": "http://127.0.0.1:8081/v1",
+      "model": "model",
+      "tool_call_parser": "raw_auto"
+    }
+  },
+  "tools": [
+    {
+      "name": "search_docs",
+      "required": ["query", "top_k"],
+      "properties": {
+        "query": "string",
+        "top_k": "integer"
+      }
+    },
+    {
+      "name": "create_ticket",
+      "required": ["title", "priority"],
+      "properties": {
+        "title": "string",
+        "priority": "string",
+        "owner": "string"
+      }
+    },
+    {
+      "name": "route_request",
+      "required": ["tenant", "model", "slo_ms"],
+      "properties": {
+        "tenant": "string",
+        "model": "string",
+        "slo_ms": "integer"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "hermes_valid_search",
+      "parser": "hermes",
+      "expected_tool": "search_docs",
+      "expect_reasoning": false,
+      "raw_output": "<tool_call>{\"name\":\"search_docs\",\"arguments\":{\"query\":\"paged kv cache\",\"top_k\":3}}</tool_call>"
+    },
+    {
+      "id": "qwen_reasoning_ticket",
+      "parser": "qwen",
+      "expected_tool": "create_ticket",
+      "expect_reasoning": true,
+      "raw_output": "<think>Need an owner-visible incident record before changing routing.</think>\n<tool_call>{\"name\":\"create_ticket\",\"arguments\":{\"title\":\"KV cache offload regression\",\"priority\":\"high\",\"owner\":\"serving\"}}</tool_call>"
+    },
+    {
+      "id": "openai_recipient_search",
+      "parser": "openai",
+      "expected_tool": "search_docs",
+      "expect_reasoning": false,
+      "raw_output": "{\"recipient_name\":\"functions.search_docs\",\"parameters\":{\"query\":\"structured outputs latency\",\"top_k\":5}}"
+    },
+    {
+      "id": "deepseek_reasoning_route",
+      "parser": "deepseek_v31",
+      "expected_tool": "route_request",
+      "expect_reasoning": true,
+      "raw_output": "<reasoning>Use the fast tier because the SLO is tight.</reasoning>{\"name\":\"route_request\",\"arguments\":{\"tenant\":\"gold\",\"model\":\"qwen-32b\",\"slo_ms\":180}}"
+    },
+    {
+      "id": "missing_required_argument",
+      "parser": "hermes",
+      "expected_tool": "search_docs",
+      "expect_reasoning": false,
+      "raw_output": "<tool_call>{\"name\":\"search_docs\",\"arguments\":{\"query\":\"missing top k\"}}</tool_call>"
+    },
+    {
+      "id": "wrong_tool_name",
+      "parser": "raw_auto",
+      "expected_tool": "create_ticket",
+      "expect_reasoning": false,
+      "raw_output": "{\"name\":\"search_docs\",\"arguments\":{\"query\":\"should have created ticket\",\"top_k\":1}}"
+    },
+    {
+      "id": "broken_partial_json",
+      "parser": "raw_auto",
+      "expected_tool": "create_ticket",
+      "expect_reasoning": false,
+      "raw_output": "{\"name\":\"create_ticket\",\"arguments\":{\"title\":\"bad json\", \"priority\":\"low\""
+    }
+  ]
+}
