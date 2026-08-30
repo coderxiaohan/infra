@@ -13,13 +13,21 @@ import sys
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
 try:
+    from scripts.artifact_json import write_json_file as shared_write_json_file
     from scripts.bounded_http import BoundedHttpBody, read_bounded_http_body
     from scripts.bounded_process import run_bounded_process
+    from scripts.cli_validation import (
+        normalize_env_var_name,
+        require_float_range,
+        require_int_range,
+    )
+    from scripts.path_status import safe_exists as safe_path_exists
+    from scripts.repo_paths import default_repo_root
+    from scripts.time_utils import utc_now
     from scripts.command_redaction import (
         artifact_path_or_value,
         artifact_path_payload,
@@ -37,8 +45,17 @@ except ModuleNotFoundError:
     scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
+    from artifact_json import write_json_file as shared_write_json_file  # type: ignore
     from bounded_http import BoundedHttpBody, read_bounded_http_body  # type: ignore
     from bounded_process import run_bounded_process  # type: ignore
+    from cli_validation import (  # type: ignore
+        normalize_env_var_name,
+        require_float_range,
+        require_int_range,
+    )
+    from path_status import safe_exists as safe_path_exists  # type: ignore
+    from repo_paths import default_repo_root  # type: ignore
+    from time_utils import utc_now  # type: ignore
     from command_redaction import (  # type: ignore
         artifact_path_or_value,
         artifact_path_payload,
@@ -61,7 +78,6 @@ DEFAULT_BACKENDS = {
     "tgi": {"base_url": "http://127.0.0.1:8081", "model": "model"},
 }
 
-ENV_VAR_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 COMMAND_OUTPUT_LIMIT_BYTES = 16 * 1024 * 1024
 HTTP_RESPONSE_LIMIT_BYTES = 16 * 1024 * 1024
 CONTENT_FIELD_NAMES = {
@@ -138,10 +154,6 @@ class ConfigDict(dict):
         self.read_status = read_status_value
 
 
-def default_repo_root() -> Path:
-    return Path(__file__).resolve().parents[1]
-
-
 _REPO_ROOT = default_repo_root()
 
 
@@ -175,10 +187,6 @@ def path_payload(
     return artifact_path_payload(raw_path, field_name, redacted_field_name)
 
 
-def utc_now() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
 def read_status(status: str, path: Path, error: str = "", fallback_used: bool = False) -> Dict[str, Any]:
     raw_path = path.as_posix()
     safe_path = redacted_path_label(raw_path)
@@ -191,13 +199,6 @@ def read_status(status: str, path: Path, error: str = "", fallback_used: bool = 
     if error:
         payload["error"] = redact_path_error(error, path)
     return payload
-
-
-def safe_path_exists(path: Path) -> tuple[bool, str]:
-    try:
-        return path.exists(), ""
-    except OSError as exc:
-        return False, redact_path_error(exc, path)
 
 
 def read_json_with_status(path: str | Path, default: Dict[str, Any]) -> tuple[Dict[str, Any], Dict[str, Any]]:
@@ -423,17 +424,6 @@ def post_json_ok(result: Dict[str, Any]) -> bool:
     )
 
 
-def normalize_env_var_name(label: str, env_name: Any) -> str:
-    if env_name is None:
-        return ""
-    name = str(env_name).strip()
-    if not name:
-        return ""
-    if not ENV_VAR_NAME_RE.fullmatch(name):
-        raise SystemExit(f"{label} must be an environment variable name, not a secret value")
-    return name
-
-
 def api_key_from_env(env_name: str) -> str:
     name = normalize_env_var_name("--api-key-env", env_name)
     return os.environ.get(name, "") if name else ""
@@ -453,47 +443,15 @@ def write_json(path: str | Path, payload: Dict[str, Any]) -> None:
         output_payload.setdefault("config_read_status", config.read_status)
     elif isinstance(config, dict):
         output_payload["config"] = artifact_safe_value(config)
-    try:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(output_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    except OSError as exc:
-        raise SystemExit(f"failed to write {path_label(p)}: {redact_path_error(exc, p)}") from exc
-
-
-def write_text_file(path: str | Path, text: str) -> None:
-    p = resolve_path(path)
-    try:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(text, encoding="utf-8")
-    except OSError as exc:
-        raise SystemExit(f"failed to write {path_label(p)}: {redact_path_error(exc, p)}") from exc
-
-
-def markdown_table(headers: Sequence[str], rows: Iterable[Sequence[Any]]) -> List[str]:
-    lines = [
-        "| " + " | ".join(markdown_cell(header) for header in headers) + " |",
-        "|" + "|".join("---" for _ in headers) + "|",
-    ]
-    for row in rows:
-        lines.append("| " + " | ".join(markdown_cell(item) for item in row) + " |")
-    return lines
-
-
-def markdown_cell(value: Any) -> str:
-    text = str(value)
-    return text.replace("\\", "\\\\").replace("|", "\\|").replace("\r", " ").replace("\n", "<br>")
+    shared_write_json_file(p, output_payload)
 
 
 def content_field_name(key: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_")
 
 
-def path_field_name(key: str) -> str:
-    return content_field_name(key)
-
-
 def is_path_field_name(key: str) -> bool:
-    normalized = path_field_name(key)
+    normalized = content_field_name(key)
     return (
         normalized in PATH_FIELD_NAMES
         or normalized.endswith("_path")
@@ -533,37 +491,6 @@ def artifact_safe_value(value: Any, key: str = "") -> Any:
     return redact_value(value, key)
 
 
-def write_report(path: str | Path, title: str, payload: Dict[str, Any], rows: Iterable[Sequence[Any]], headers: Sequence[str], notes: Sequence[str] = ()) -> None:
-    lines = [f"# {title}", "", f"- Generated: `{payload.get('timestamp_utc')}`", f"- Status: `{payload.get('status')}`", f"- Executed: `{payload.get('executed')}`", "", "## Summary", ""]
-    for key, value in payload.get("summary", {}).items():
-        lines.append(f"- `{key}`: `{value}`")
-    lines.extend(["", "## Records", ""])
-    lines.extend(markdown_table(headers, rows))
-    if notes:
-        lines.extend(["", "## Notes", ""])
-        lines.extend(f"- {note}" for note in notes)
-    p = resolve_path(path)
-    try:
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    except OSError as exc:
-        raise SystemExit(f"failed to write {path_label(p)}: {redact_path_error(exc, p)}") from exc
-
-
-def require_int_range(name: str, value: int, minimum: int, maximum: int) -> None:
-    if isinstance(value, bool) or not isinstance(value, int) or value < minimum or value > maximum:
-        raise SystemExit(f"{name} must be an integer in [{minimum}, {maximum}], got {value!r}")
-
-
-def require_float_range(name: str, value: float, minimum: float, maximum: float) -> None:
-    try:
-        numeric = float(value)
-    except (TypeError, ValueError) as exc:
-        raise SystemExit(f"{name} must be a finite number in [{minimum}, {maximum}], got {value!r}") from exc
-    if isinstance(value, bool) or not math.isfinite(numeric) or numeric < minimum or numeric > maximum:
-        raise SystemExit(f"{name} must be a finite number in [{minimum}, {maximum}], got {value!r}")
-
-
 def validate_common_args(namespace: argparse.Namespace) -> None:
     if hasattr(namespace, "timeout_seconds"):
         require_float_range("--timeout-seconds", namespace.timeout_seconds, 0.001, 86_400.0)
@@ -599,13 +526,46 @@ def config_int_list(config: Dict[str, Any], key: str, minimum: int, maximum: int
     ]
 
 
-def config_string_value(name: str, value: Any, allow_empty: bool = False) -> str:
+def config_raw_string_value(name: str, value: Any, allow_empty: bool = False) -> str:
     if isinstance(value, bool) or not isinstance(value, str):
         raise SystemExit(f"{name} must be a string, got {value!r}")
-    parsed = value.strip()
-    if not allow_empty and not parsed:
+    if not allow_empty and not value.strip():
         raise SystemExit(f"{name} must be a non-empty string")
-    return parsed
+    return value
+
+
+def config_string_value(name: str, value: Any, allow_empty: bool = False) -> str:
+    return config_raw_string_value(name, value, allow_empty=allow_empty).strip()
+
+
+def config_backend_map(
+    config: Mapping[str, Any],
+    default_backends: Mapping[str, Any],
+    extra_string_defaults: Mapping[str, str] | None = None,
+) -> Dict[str, Dict[str, str]]:
+    raw = config.get("backends", default_backends)
+    if not isinstance(raw, dict) or not raw:
+        raise SystemExit("config.backends must be a non-empty object")
+    extras = extra_string_defaults or {}
+    backends: Dict[str, Dict[str, str]] = {}
+    for name, backend in raw.items():
+        backend_name = config_string_value("config.backends.<name>", name)
+        if not isinstance(backend, dict):
+            raise SystemExit(f"config.backends.{backend_name} must be an object")
+        normalized = {
+            "base_url": config_string_value(
+                f"config.backends.{backend_name}.base_url", backend.get("base_url", "")
+            ),
+            "model": config_string_value(
+                f"config.backends.{backend_name}.model", backend.get("model", "model")
+            ),
+        }
+        for field, default in extras.items():
+            normalized[field] = config_string_value(
+                f"config.backends.{backend_name}.{field}", backend.get(field, default)
+            )
+        backends[backend_name] = normalized
+    return backends
 
 
 def config_string_list(config: Dict[str, Any], key: str, allowed: Iterable[str] | None = None) -> List[str]:
@@ -667,13 +627,6 @@ def status_from_execution(execute: bool, failures: int = 0, record_count: int | 
             return "empty_execution_plan"
         return "ok" if failures == 0 else "failed"
     return "planned"
-
-
-def percentile(sorted_values: List[float], q: float) -> float:
-    if not sorted_values:
-        return 0.0
-    idx = max(0, min(len(sorted_values) - 1, int(round((len(sorted_values) - 1) * q))))
-    return sorted_values[idx]
 
 
 def safe_div(a: float, b: float) -> float:

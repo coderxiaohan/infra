@@ -8,7 +8,7 @@
 namespace {
 
 const inferlab_plan::CliOptionSpec kCliOptions{
-    {"--repo-root", "--output", "--report"},
+    {"--repo-root", "--output"},
     {},
 };
 
@@ -30,26 +30,14 @@ int main(int argc, char** argv) {
     const std::string output_arg =
         inferlab_plan::arg_value_with_spec(
             argc, argv, "--output", "", kCliOptions);
-    const std::string report_arg =
-        inferlab_plan::arg_value_with_spec(
-            argc, argv, "--report", "", kCliOptions);
     const std::string output_path =
         inferlab_plan::resolve_optional_repo_relative_path(
             repo_root, output_arg)
             .generic_string();
-    const std::string report_path =
-        inferlab_plan::resolve_optional_repo_relative_path(
-            repo_root, report_arg)
-            .generic_string();
-
     const auto plan = inferlab::kserve_llmd_plan::build_default_plan();
     inferlab_plan::write_or_print(
         output_path,
         inferlab_kserve_view::artifact_json(plan));
-    if (!report_path.empty()) {
-      inferlab_plan::write_or_print(
-          report_path, inferlab_kserve_view::deployment_report(plan));
-    }
   } catch (const std::exception& error) {
     inferlab_plan::report_cli_error(error);
     inferlab_plan::print_cli_usage(program, kCliOptions);

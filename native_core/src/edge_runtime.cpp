@@ -127,7 +127,7 @@ const EdgeRuntimeTargetPlatform* current_edge_runtime_target_platform() {
 const std::vector<EdgeRuntimeRegistration>& edge_runtime_registrations() {
   static const std::vector<EdgeRuntimeRegistration> registrations = {
       {{"llama_cpp",
-         "b10173-e9fa078",
+         "11cd988",
          {"gguf"},
          {"cpu", "cpu-neon"},
          {"scalar", "arm_neon"},
@@ -140,7 +140,7 @@ const std::vector<EdgeRuntimeRegistration>& edge_runtime_registrations() {
        INFERLAB_ENABLE_EDGE_LLAMA_CPP_BUILD != 0,
        INFERLAB_EDGE_LLAMA_CPP_LINKED != 0,
        INFERLAB_EDGE_LLAMA_CPP_LINKED != 0
-           ? "linked_llama_cpp_b10173_adapter"
+           ? "linked_llama_cpp_11cd988_adapter"
            : (INFERLAB_ENABLE_EDGE_LLAMA_CPP_BUILD != 0
                   ? "adapter_requested_dependency_gate_failed"
                   : "adapter_disabled_by_build_option")},

@@ -1,0 +1,92 @@
+{
+    "engine": {
+        "model": "distilgpt2",
+        "model_path": "None",
+        "engine_dir": "/home/codex/infra/InferLab/results/raw/trtllm_distilgpt2_dynamic_engine",
+        "revision": null,
+        "version": "1.2.1",
+        "backend": "TRT",
+        "dtype": "float16",
+        "kv_cache_dtype": null,
+        "quantization": null,
+        "max_input_length": 64,
+        "max_sequence_length": 96
+    },
+    "machine": {
+        "name": "NVIDIA GeForce RTX 4070 SUPER",
+        "memory.total": 11.99365234375,
+        "clocks.mem": 10.501
+    },
+    "world_info": {
+        "tp_size": 1,
+        "pp_size": 1,
+        "ep_size": 1,
+        "world_size": 1,
+        "max_batch_size": 1,
+        "max_num_tokens": 64,
+        "scheduling_policy": "GUARANTEED_NO_EVICT",
+        "kv_cache_percentage": 0.9,
+        "issue_rate": 0.0
+    },
+    "request_info": {
+        "num_requests": 1,
+        "avg_num_concurrent_requests": 1.0,
+        "avg_input_length": 9.0,
+        "avg_output_length": 8.0
+    },
+    "performance": {
+        "total_latency_ms": 1891.954849,
+        "avg_request_latency_ms": 1891.954849,
+        "request_throughput_req_s": 0.5285538397116368,
+        "system_output_throughput_tok_s": 4.228430717693095,
+        "system_total_throughput_tok_s": 8.985415275097827,
+        "output_throughput_per_user_tok_s": 4.228430717693095,
+        "output_throughput_per_gpu_tok_s": 4.228430717693095,
+        "request_latency_percentiles_ms": {
+            "p50": 1891.954849,
+            "p90": 1891.954849,
+            "p95": 1891.954849,
+            "p99": 1891.954849,
+            "minimum": 1891.954849,
+            "maximum": 1891.954849,
+            "average": 1891.954849
+        }
+    },
+    "dataset": {
+        "isl_stats": {
+            "p50": 9.0,
+            "p90": 9.0,
+            "p95": 9.0,
+            "p99": 9.0,
+            "minimum": 9.0,
+            "maximum": 9.0,
+            "average": 9.0
+        },
+        "osl_stats": {
+            "p50": 8.0,
+            "p90": 8.0,
+            "p95": 8.0,
+            "p99": 8.0,
+            "minimum": 8.0,
+            "maximum": 8.0,
+            "average": 8.0
+        },
+        "seq_len_stats": {
+            "p50": 17.0,
+            "p90": 17.0,
+            "p95": 17.0,
+            "p99": 17.0,
+            "minimum": 17.0,
+            "maximum": 17.0,
+            "average": 17.0
+        },
+        "num_requests": 1,
+        "dataset_path": "/home/codex/infra/InferLab/results/showcase/distilgpt2_edge_cloud/20260828T085017Z/raw/trtllm_dataset.json",
+        "max_isl": 9,
+        "max_osl": 8,
+        "max_sequence_length": 17,
+        "avg_isl": 9,
+        "avg_osl": 8,
+        "avg_sequence_length": 17
+    }
+}

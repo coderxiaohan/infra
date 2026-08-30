@@ -411,7 +411,7 @@ std::vector<inferlab_artifact::TextSource> load_lineage_sources(
           "prometheus_consumer",
           repo_root / "scripts" / "export_prometheus_metrics.py"),
       read_text_source("final_report_consumer",
-                       repo_root / "scripts" / "render_final_report.py"),
+                       repo_root / "scripts" / "summarize_benchmarks.py"),
       read_text_source(
           "catalog_surface_views",
           repo_root / "native_core" / "src" /
@@ -610,8 +610,8 @@ ManagedLineageProjection project_managed_artifact_lineage(
              record.warehouse_record.report_present,
              "report_wiring_missing",
              "restore the catalog-owned report as a safe regular file");
-    add_edge(record, "final_report", "scripts/render_final_report.py",
-             "catalog final_report_source_views",
+    add_edge(record, "structured_summary", "scripts/summarize_benchmarks.py",
+             "catalog structured-summary source views",
              record.warehouse_record.final_report_present,
              "final_report_wiring_missing",
              "restore catalog-derived Final Report consumption and source readability");

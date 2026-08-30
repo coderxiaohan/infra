@@ -16,13 +16,20 @@
 
 namespace inferlab_release_alignment {
 
+inline std::size_t checked_add_size_with_context(const std::size_t lhs,
+                                                 const std::size_t rhs,
+                                                 const std::string& name) {
+  return inferlab::internal::checked_add_size(lhs, rhs, name.c_str());
+}
+
 template <typename ArtifactProjection>
 void add_check(ArtifactProjection& projection, const bool satisfied,
                const std::string& issue, const std::string& context) {
-  projection.required_check_count = inferlab::internal::checked_add_size(
-      projection.required_check_count, 1U, context + " required check count");
+  projection.required_check_count = checked_add_size_with_context(
+      projection.required_check_count, 1U,
+      context + " required check count");
   if (satisfied) {
-    projection.satisfied_check_count = inferlab::internal::checked_add_size(
+    projection.satisfied_check_count = checked_add_size_with_context(
         projection.satisfied_check_count, 1U,
         context + " satisfied check count");
   } else {
@@ -68,10 +75,10 @@ AlignmentProjection evaluate_alignment(
     const auto& snapshot = repository.get(repo_root / spec.artifact);
     source_missing = source_missing || !snapshot.read_result.readable;
     auto artifact = inspector(spec, snapshot);
-    projection.required_check_count = inferlab::internal::checked_add_size(
+    projection.required_check_count = checked_add_size_with_context(
         projection.required_check_count, artifact.required_check_count,
         context + " required check count");
-    projection.satisfied_check_count = inferlab::internal::checked_add_size(
+    projection.satisfied_check_count = checked_add_size_with_context(
         projection.satisfied_check_count, artifact.satisfied_check_count,
         context + " satisfied check count");
     for (const auto& issue : artifact.issues) {
@@ -80,7 +87,7 @@ AlignmentProjection evaluate_alignment(
     projection.artifacts.push_back(std::move(artifact));
   }
 
-  projection.required_check_count = inferlab::internal::checked_add_size(
+  projection.required_check_count = checked_add_size_with_context(
       projection.required_check_count, 1U,
       context + " cross-artifact check count");
   projection.cross_artifact_reconciled =
@@ -94,7 +101,7 @@ AlignmentProjection evaluate_alignment(
                                     projection.artifacts[index]));
   }
   if (projection.cross_artifact_reconciled) {
-    projection.satisfied_check_count = inferlab::internal::checked_add_size(
+    projection.satisfied_check_count = checked_add_size_with_context(
         projection.satisfied_check_count, 1U,
         context + " cross-artifact satisfied check count");
   } else {

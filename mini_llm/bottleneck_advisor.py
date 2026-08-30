@@ -14,7 +14,7 @@ from .cli_io import (
     write_text_file,
 )
 from .transformer import MiniTransformerConfig
-from .workload_profile import build_workload_report
+from .workload_profile import build_workload_report, safe_ratio
 
 
 DEFAULT_PEAK_TFLOPS = 10.0
@@ -24,7 +24,7 @@ DEFAULT_BANDWIDTH_GBPS = 300.0
 GROUP_COMPONENTS = {
     "qkv_projection": {
         "flops": ("qkv_projection",),
-        "bytes": ("qkv_activation_bytes", "hidden_read_write_bytes"),
+        "bytes": ("qkv_activation_bytes",),
         "advice": (
             "Use fused QKV projection, tensor-core-friendly layouts, and weight-only quantization "
             "to reduce projection bandwidth and improve matmul occupancy."
@@ -32,7 +32,7 @@ GROUP_COMPONENTS = {
     },
     "rope": {
         "flops": ("rope_qk",),
-        "bytes": ("qkv_activation_bytes",),
+        "bytes": (),
         "advice": (
             "Fuse RoPE with Q/K staging or attention input preparation so rotary work does not "
             "become a separate memory round trip."
@@ -40,7 +40,7 @@ GROUP_COMPONENTS = {
     },
     "attention_scores": {
         "flops": ("attention_scores",),
-        "bytes": ("attention_score_bytes", "kv_read_bytes"),
+        "bytes": ("attention_score_bytes",),
         "advice": (
             "Prefer tiled/FlashAttention-style score computation to avoid materializing large "
             "score matrices and to improve K-cache locality."
@@ -48,7 +48,7 @@ GROUP_COMPONENTS = {
     },
     "attention_values": {
         "flops": ("attention_values",),
-        "bytes": ("attention_probability_bytes", "kv_read_bytes"),
+        "bytes": ("attention_probability_bytes",),
         "advice": (
             "Fuse probability application with value accumulation and keep V reads coalesced "
             "through block-table-aware KV layouts."
@@ -56,7 +56,7 @@ GROUP_COMPONENTS = {
     },
     "attention_output_projection": {
         "flops": ("attention_output_projection",),
-        "bytes": ("hidden_read_write_bytes",),
+        "bytes": (),
         "advice": (
             "Keep attention output projection in the same fused scheduling region where possible "
             "and preserve tensor-core-aligned hidden dimensions."
@@ -64,7 +64,7 @@ GROUP_COMPONENTS = {
     },
     "ffn": {
         "flops": ("ffn_gate_up_projection", "ffn_swiglu", "ffn_down_projection"),
-        "bytes": ("hidden_read_write_bytes",),
+        "bytes": (),
         "advice": (
             "Use fused SwiGLU kernels, tensor-core matmuls, and weight-only quantization because "
             "FFN projections usually dominate decoder-layer FLOPs."
@@ -72,7 +72,7 @@ GROUP_COMPONENTS = {
     },
     "rmsnorm": {
         "flops": ("rmsnorm_attention", "rmsnorm_ffn", "final_rmsnorm"),
-        "bytes": ("hidden_read_write_bytes",),
+        "bytes": (),
         "advice": (
             "Fuse RMSNorm with adjacent projection input preparation to reduce hidden-state "
             "read/write traffic."
@@ -84,6 +84,14 @@ GROUP_COMPONENTS = {
         "advice": (
             "For large vocabularies, use tensor-parallel or sampled/top-k-aware output paths; "
             "for this tiny model it is mainly a schema placeholder."
+        ),
+    },
+    "hidden_state_io": {
+        "flops": (),
+        "bytes": ("hidden_read_write_bytes",),
+        "advice": (
+            "Treat hidden-state traffic as a shared pipeline cost and fuse adjacent normalization, "
+            "projection, and residual operations to remove full-tensor round trips."
         ),
     },
     "persistent_kv_cache": {
@@ -108,12 +116,6 @@ def _sum_named(items: Iterable[dict[str, Any]], field: str, names: Sequence[str]
     return total
 
 
-def _ratio(numerator: int | float, denominator: int | float) -> float | None:
-    if denominator == 0:
-        return None
-    return float(numerator) / float(denominator)
-
-
 def _classify(
     *,
     flops: int,
@@ -121,7 +123,7 @@ def _classify(
     peak_flops_per_second: float,
     bandwidth_bytes_per_second: float,
 ) -> dict[str, Any]:
-    arithmetic_intensity = _ratio(flops, bytes_moved)
+    arithmetic_intensity = safe_ratio(flops, bytes_moved)
     ridge_point = peak_flops_per_second / bandwidth_bytes_per_second
     if flops <= 0 and bytes_moved > 0:
         limiter = "memory"
@@ -175,8 +177,8 @@ def _group_records(
                 "group": group_name,
                 "flops": flops,
                 "bytes": bytes_moved,
-                "flops_share": _ratio(flops, total_flops),
-                "bytes_share": _ratio(bytes_moved, total_bytes),
+                "flops_share": safe_ratio(flops, total_flops),
+                "bytes_share": safe_ratio(bytes_moved, total_bytes),
                 "optimization_advice": group["advice"],
                 **classification,
             }
@@ -190,6 +192,25 @@ def _group_records(
         reverse=True,
     )
     return records
+
+
+def _attribution_summary(
+    records: Sequence[dict[str, Any]],
+    *,
+    total_flops: int,
+    total_bytes: int,
+) -> dict[str, Any]:
+    attributed_flops = sum(int(item.get("flops", 0)) for item in records)
+    attributed_bytes = sum(int(item.get("bytes", 0)) for item in records)
+    return {
+        "mode": "exclusive_component_buckets",
+        "attributed_flops": attributed_flops,
+        "attributed_bytes": attributed_bytes,
+        "unattributed_flops": total_flops - attributed_flops,
+        "unattributed_bytes": total_bytes - attributed_bytes,
+        "flops_share_sum": safe_ratio(attributed_flops, total_flops),
+        "bytes_share_sum": safe_ratio(attributed_bytes, total_bytes),
+    }
 
 
 def build_bottleneck_report(
@@ -229,6 +250,16 @@ def build_bottleneck_report(
     )
     top_cached = cached_groups[0] if cached_groups else {}
     top_recompute = recompute_groups[0] if recompute_groups else {}
+    cached_attribution = _attribution_summary(
+        cached_groups,
+        total_flops=int(workload["cached_decode"]["total_flops"]),
+        total_bytes=int(workload["cached_decode"]["total_bytes"]),
+    )
+    recompute_attribution = _attribution_summary(
+        recompute_groups,
+        total_flops=int(workload["full_recompute"]["total_flops"]),
+        total_bytes=int(workload["full_recompute"]["total_bytes"]),
+    )
     return {
         "schema_version": 1,
         "kind": "mini_transformer_bottleneck_advisor",
@@ -240,11 +271,13 @@ def build_bottleneck_report(
         "cached_decode": {
             "strategy": workload["cached_decode"]["strategy"],
             "top_bottleneck_group": top_cached.get("group"),
+            "attribution": cached_attribution,
             "group_rankings": cached_groups,
         },
         "full_recompute": {
             "strategy": workload["full_recompute"]["strategy"],
             "top_bottleneck_group": top_recompute.get("group"),
+            "attribution": recompute_attribution,
             "group_rankings": recompute_groups,
         },
         "recommendations": [

@@ -1,0 +1,58 @@
+{
+  "artifact_type": "native_kv_allocation_compare",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU static-versus-paged KV allocation accounting over a synthetic workload only; not product serving, GPU memory, latency, throughput, fragmentation, or benchmark evidence.",
+  "config": {
+    "block_size_tokens": 8,
+    "bytes_per_token": 128,
+    "max_requests": 4,
+    "max_seq_len": 64,
+    "paged_total_blocks": 32
+  },
+  "fixture_limits": {
+    "max_paged_kv_probe_blocks": 1048576
+  },
+  "paged": {
+    "active_requests": 4,
+    "free_blocks": 23,
+    "reserved_bytes": 9216,
+    "total_blocks": 32,
+    "total_tokens": 66,
+    "used_blocks": 9,
+    "used_bytes": 8448,
+    "utilization": 0.916667
+  },
+  "reference_simulation_only": true,
+  "savings": {
+    "reserved_bytes_delta": 23552,
+    "reserved_bytes_ratio": 0.281250
+  },
+  "static": {
+    "active_requests": 4,
+    "max_requests": 4,
+    "reserved_bytes": 32768,
+    "total_tokens": 66,
+    "used_bytes": 8448,
+    "utilization": 0.257812
+  },
+  "workload": [
+    {
+      "request_id": 1,
+      "tokens": 7
+    },
+    {
+      "request_id": 2,
+      "tokens": 23
+    },
+    {
+      "request_id": 3,
+      "tokens": 5
+    },
+    {
+      "request_id": 4,
+      "tokens": 31
+    }
+  ]
+}

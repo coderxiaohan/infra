@@ -429,35 +429,6 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
     }
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# llama.cpp Matrix",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Status: `{payload['status']}`",
-        f"- Scenarios: `{payload['summary']['scenario_count']}`",
-        "",
-        "| Scenario | Quant | Threads | Ctx | Batch | ngl | Command |",
-        "|---|---|---:|---:|---:|---:|---|",
-    ]
-    matrix_error = payload.get("matrix_config_error")
-    if isinstance(matrix_error, dict):
-        error_text = str(matrix_error.get("error", "")).replace("|", "\\|")
-        lines.extend(
-            [
-                "",
-                "## Matrix Config Issue",
-                "",
-                "| Status | Error |",
-                "|---|---|",
-                f"| `{matrix_error.get('status')}` | {error_text} |",
-                "",
-            ]
-        )
-    for item in payload["records"]:
-        row = item["scenario"]
-        lines.append(f"| {row['name']} | {row['quant']} | {row['threads']} | {row['ctx_size']} | {row['batch_size']} | {row['ngl']} | `{item['shell']}` |")
-    return "\n".join(lines) + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -471,7 +442,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-dir", default="results/raw/llama_cpp_matrix")
     parser.add_argument("--timeout-seconds", type=int, default=900)
     parser.add_argument("--output", default="results/raw/llama_cpp_matrix.json")
-    parser.add_argument("--report", default="reports/llama_cpp_matrix.md")
     return parser.parse_args()
 
 
@@ -482,17 +452,11 @@ def main() -> int:
     payload = build_payload(args, repo_root)
     output = resolve_repo_path(repo_root, args.output)
     output_status = write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    report_status = write_text_file(report, markdown(payload))
     if output_status["status"] == "ok":
         print(f"wrote {path_label(output)}")
     else:
         print(f"failed to write {path_label(output)}: {output_status.get('error')}")
-    if report_status["status"] == "ok":
-        print(f"wrote {path_label(report)}")
-    else:
-        print(f"failed to write {path_label(report)}: {report_status.get('error')}")
-    return 0 if output_status["status"] == "ok" and report_status["status"] == "ok" else 1
+    return 0 if output_status["status"] == "ok" else 1
 
 
 if __name__ == "__main__":

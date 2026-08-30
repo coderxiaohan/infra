@@ -11,9 +11,14 @@ from __future__ import annotations
 import shlex
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence
+from typing import Any, Dict, List, Sequence
 
-from command_redaction import artifact_path_fields, redact_path_error, redacted_path_label as path_label
+from command_redaction import (
+    artifact_path_fields,
+    command_line as shell_join,
+    redact_path_error,
+    redacted_path_label as path_label,
+)
 
 
 def path_status_payload(path: Path, status: str, entry_count: int = 0, error: Any = "") -> Dict[str, Any]:
@@ -46,10 +51,7 @@ REPO_ROOT_AWARE_SCRIPTS = {
     "scripts/plan_android_deploy.py",
     "scripts/plan_profiling_runs.py",
     "scripts/plan_runtime_deploy.py",
-    "scripts/plot_results.py",
     "scripts/render_evidence_checklist.py",
-    "scripts/render_final_report.py",
-    "scripts/render_mini_transformer_report.py",
     "scripts/run_android_edge_benchmark.py",
     "scripts/run_cuda_profile_matrix.py",
     "scripts/run_llama_cpp_benchmark.py",
@@ -169,10 +171,6 @@ def load_matrix_entries_with_status(path: Path) -> tuple[List[Dict[str, Any]], D
     return entries, path_status_payload(path, "ok" if entries else "empty_matrix", entry_count=len(entries))
 
 
-def shell_join(parts: Iterable[Any]) -> str:
-    return " ".join(shlex.quote(str(part)) for part in parts)
-
-
 def matrix_output_path(entry: Dict[str, Any]) -> str:
     name = str(entry.get("name", "unnamed"))
     return str(entry.get("output") or f"results/raw/{name}.json")
@@ -278,18 +276,6 @@ def derived_command_parts(entry: Dict[str, Any]) -> List[Any]:
             "--results",
             entry.get("results", "results/raw"),
             "--output",
-            output,
-        ]
-
-    if backend == "final_report":
-        return [
-            "python3",
-            "scripts/render_final_report.py",
-            "--repo-root",
-            ".",
-            "--output",
-            entry.get("report_output", "reports/final_report.md"),
-            "--json-output",
             output,
         ]
 

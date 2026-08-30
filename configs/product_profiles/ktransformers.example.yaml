@@ -1,7 +1,7 @@
 {
+  "report_sections": ["results/raw/product_ktransformers_hybrid_profile.json"],
   "product": "ktransformers",
   "endpoint": "http://127.0.0.1:10002",
-  "report_sections": ["reports/53_product_kernel_library_profile.md"],
   "paths": {
     "model_path": "/models/model",
     "placement_config": "/models/ktransformers_placement.yaml"

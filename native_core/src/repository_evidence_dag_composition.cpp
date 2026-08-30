@@ -346,14 +346,6 @@ void add_catalog_report_consumers(internal::GraphDraft& draft) {
         DependencyPhase::PostGeneration, ExemptionKind::None,
         "catalog_derived_report_surfaces", "prometheus/" + source.name);
   }
-  for (const auto& source : inferlab_catalog::final_report_source_views()) {
-    draft.add_dependency(
-        results_artifact(source.artifact),
-        "scripts/render_final_report.py",
-        EdgeKind::PostGenerationOrder,
-        DependencyPhase::PostGeneration, ExemptionKind::None,
-        "catalog_derived_report_surfaces", "final_report/" + source.name);
-  }
 }
 
 }  // namespace

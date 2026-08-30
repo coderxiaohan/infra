@@ -1,9 +1,9 @@
 {
+  "report_sections": ["results/raw/product_dynamo_serving_profile.json"],
   "product": "dynamo",
   "endpoint": "http://127.0.0.1:8000",
   "metrics_url": "http://127.0.0.1:8000/metrics",
   "namespace": "dynamo",
-  "report_sections": ["reports/54_product_cloud_control_plane_profile.md"],
   "planned_commands": {
     "deploy_example": "kubectl apply -n dynamo -f deploy/dynamo-serving.yaml",
     "dry_run": "python3 -m scripts.product_profiles.profile_dynamo --repo-root . --config configs/product_profiles/dynamo.example.yaml --dry-run",

@@ -39,16 +39,14 @@ def project_catalog_flow_fallback_removal_queue(
     evidence_query: Mapping[str, Any],
 ) -> Dict[str, Any]:
     """Project canonical fallback-removal queue counts from Evidence Query."""
-    canonical_source = "native_evidence_query_result.json"
     projection: Dict[str, Any] = {
-        "canonical_source": canonical_source,
+        "canonical_source": "native_evidence_query_result.json",
         "canonical_gap_count": 0,
         "source_drift_count": 0,
         "source_drift_fields": [],
         "source_drift_sources": [],
+        "source_consistent": True,
     }
-    drift_fields = set()
-    drift_sources = set()
 
     for field_name in CATALOG_FLOW_FALLBACK_REMOVAL_QUEUE_COUNT_FIELDS:
         raw_value = evidence_query.get(field_name)
@@ -62,10 +60,7 @@ def project_catalog_flow_fallback_removal_queue(
         if not canonical_valid:
             projection["canonical_gap_count"] += 1
 
-    projection["source_drift_fields"] = sorted(drift_fields)
-    projection["source_drift_sources"] = sorted(drift_sources)
     projection["canonical_ready"] = projection["canonical_gap_count"] == 0
-    projection["source_consistent"] = projection["source_drift_count"] == 0
     return projection
 
 
@@ -2962,10 +2957,6 @@ def project_evidence_query_catalog_flow_filter(
         "source_artifact": primary.get(
             "source_artifact", "native_artifact_catalog_single_source.json"
         ),
-        "catalog_artifact": primary.get(
-            "catalog_artifact",
-            "native_artifact_catalog_single_source.json",
-        ),
         "catalog_artifact_readable": _first_non_none(
             primary.get("catalog_artifact_readable"),
             fallback.get("catalog_flow_catalog_artifact_readable"),
@@ -3249,19 +3240,9 @@ def project_evidence_query_native_core_audit_filter(
             for source_name, source_field in field.additional_sources
         )
         projection[field.name] = _first_non_none(*candidates)
-    projection.update(
-        {
-            "current_repo_actions": list_value(
-                primary.get("current_repo_actions")
-            ),
-            "target_machine_actions": list_value(
-                primary.get("target_machine_actions")
-            ),
-            "claim_boundary": _first_non_none(
-                primary.get("claim_boundary"),
-                "Evidence-query native-core audit filter summarizes static audit-register evidence only; it does not compile native code or prove runtime correctness.",
-            ),
-        }
+    projection["claim_boundary"] = _first_non_none(
+        primary.get("claim_boundary"),
+        "Evidence-query native-core audit filter summarizes static audit-register evidence only; it does not compile native code or prove runtime correctness.",
     )
     return projection
 

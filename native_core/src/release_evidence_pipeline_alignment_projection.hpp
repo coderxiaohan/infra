@@ -1,6 +1,7 @@
 #pragma once
 
 #include "artifact_evidence_contract.hpp"
+#include "evidence_release_policy.hpp"
 
 #include <cstddef>
 #include <filesystem>

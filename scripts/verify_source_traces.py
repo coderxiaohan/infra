@@ -6,9 +6,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from email.parser import Parser
 from time_utils import utc_now
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from bounded_process import run_bounded_process
 from command_redaction import artifact_path_payload as path_payload, redact_path_error, redacted_path_label as path_label
@@ -127,7 +128,96 @@ def load_config_with_status(path: Path) -> Tuple[Dict[str, Any], Dict[str, Any]]
     return payload, {"status": "ok", "path": path_label(path), "fallback_used": False}
 
 
-def verify_repo(name: str, root: Path, checks: List[Dict[str, Any]], configured: bool = True) -> Dict[str, Any]:
+def normalized_distribution_name(value: str) -> str:
+    return re.sub(r"[-_.]+", "-", value).lower()
+
+
+def source_identity_status(
+    root: Path,
+    root_exists: bool,
+    identity: Dict[str, Any],
+    git_status: Dict[str, Any],
+) -> Dict[str, Any]:
+    identity_type = str(identity.get("type", ""))
+    if not identity_type:
+        return {
+            "type": "unconfigured",
+            "status": "identity_unconfigured",
+            "complete": False,
+        }
+    if not root_exists:
+        return {
+            "type": identity_type,
+            "status": "root_missing",
+            "complete": False,
+        }
+    if identity_type == "git":
+        expected = str(identity.get("revision", "")).lower()
+        observed = str(git_status.get("revision", "")).lower()
+        expected_valid = bool(re.fullmatch(r"[0-9a-f]{40}", expected))
+        complete = (
+            expected_valid
+            and git_status.get("status") == "ok"
+            and observed == expected
+        )
+        if complete:
+            status = "complete"
+        elif not expected_valid:
+            status = "invalid_expected_revision"
+        elif git_status.get("status") != "ok":
+            status = str(git_status.get("status", "git_revision_unavailable"))
+        else:
+            status = "revision_mismatch"
+        return {
+            "type": identity_type,
+            "status": status,
+            "complete": complete,
+            "expected_revision": expected,
+            "observed_revision": observed,
+        }
+    if identity_type == "python_distribution":
+        expected_name = str(identity.get("distribution", ""))
+        expected_version = str(identity.get("version", ""))
+        metadata_relative = str(identity.get("metadata_path", ""))
+        metadata_path = root / metadata_relative
+        text, read_error = safe_read_text(metadata_path) if metadata_relative else ("", "missing metadata_path")
+        metadata = Parser().parsestr(text, headersonly=True) if text and not read_error else {}
+        observed_name = str(metadata.get("Name", ""))
+        observed_version = str(metadata.get("Version", ""))
+        complete = (
+            bool(expected_name)
+            and bool(expected_version)
+            and not read_error
+            and normalized_distribution_name(observed_name)
+            == normalized_distribution_name(expected_name)
+            and observed_version == expected_version
+        )
+        return {
+            "type": identity_type,
+            "status": "complete" if complete else "distribution_identity_mismatch",
+            "complete": complete,
+            "expected_distribution": expected_name,
+            "expected_version": expected_version,
+            "observed_distribution": observed_name,
+            "observed_version": observed_version,
+            **path_payload(metadata_path, "metadata_path", "metadata_path_redacted"),
+            "metadata_read_error": read_error,
+        }
+    return {
+        "type": identity_type,
+        "status": "unsupported_identity_type",
+        "complete": False,
+    }
+
+
+def verify_repo(
+    name: str,
+    root: Path,
+    checks: List[Dict[str, Any]],
+    configured: bool = True,
+    identity: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    identity = identity or {}
     root_exists, root_probe_error = safe_path_exists(root) if configured else (False, "")
     root_exists = configured and root_exists
     records = []
@@ -148,7 +238,18 @@ def verify_repo(name: str, root: Path, checks: List[Dict[str, Any]], configured:
             "patterns": pattern_records,
             "ok": root_exists and path_exists and not read_error and all(item["found"] for item in pattern_records),
         })
-    git_status = git_revision_status(root) if root_exists else {"available": False, "status": "root_missing_or_unconfigured", "revision": "", "error": root_probe_error}
+    identity_type = str(identity.get("type", ""))
+    git_status = (
+        git_revision_status(root)
+        if root_exists and identity_type == "git"
+        else {
+            "available": False,
+            "status": "not_applicable" if root_exists else "root_missing_or_unconfigured",
+            "revision": "",
+            "error": root_probe_error,
+        }
+    )
+    source_identity = source_identity_status(root, root_exists, identity, git_status)
     return {
         "name": name,
         **(path_payload(root, "root", "root_path_redacted") if configured else {"root": "", "root_path_redacted": False}),
@@ -157,8 +258,9 @@ def verify_repo(name: str, root: Path, checks: List[Dict[str, Any]], configured:
         "root_probe_error": root_probe_error,
         "git_commit": str(git_status.get("revision", "")),
         "git_revision": git_status,
+        "source_identity": source_identity,
         "checks": records,
-        "ok": root_exists and all(item["ok"] for item in records),
+        "ok": root_exists and source_identity["complete"] and all(item["ok"] for item in records),
     }
 
 
@@ -173,18 +275,37 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
     for item in args.repo:
         if "=" in item:
             name, path = item.split("=", 1)
-            repositories[name] = path
+            configured = repositories.get(name)
+            if isinstance(configured, dict):
+                repositories[name] = {**configured, "root": path}
+            else:
+                repositories[name] = path
     checks = config.get("checks", DEFAULT_CHECKS)
     repos = []
     for name, repo_checks in checks.items():
-        configured_path = str(repositories.get(name, ""))
+        repository = repositories.get(name, "")
+        if isinstance(repository, dict):
+            configured_path = str(repository.get("root", ""))
+            identity = repository.get("identity", {})
+            identity = identity if isinstance(identity, dict) else {}
+        else:
+            configured_path = str(repository)
+            identity = {}
         root = resolve_external_or_repo_path(repo_root, configured_path)
-        repos.append(verify_repo(name, root, repo_checks, bool(configured_path)))
+        repos.append(
+            verify_repo(
+                name,
+                root,
+                repo_checks,
+                bool(configured_path),
+                identity,
+            )
+        )
     return {
         "schema_version": 1,
         "timestamp_utc": utc_now(),
         **path_payload(repo_root, "repo_root", "repo_root_path_redacted"),
-        "status": "ok" if repos and all(item["ok"] for item in repos) else "planned",
+        "status": "complete" if repos and all(item["ok"] for item in repos) else "planned",
         "config": {
             **path_payload(args.config, "config_path", "config_path_redacted"),
             **path_payload(config_path, "resolved_config_path"),
@@ -196,27 +317,17 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
             "ready_repositories": sum(1 for item in repos if item["ok"]),
             "check_count": sum(len(item["checks"]) for item in repos),
             "failed_checks": sum(1 for repo in repos for check in repo["checks"] if not check["ok"]),
-            "git_probe_issue_count": sum(1 for repo in repos if repo.get("git_revision", {}).get("status") != "ok"),
+            "identity_issue_count": sum(1 for repo in repos if not repo.get("source_identity", {}).get("complete")),
+            "git_probe_issue_count": sum(
+                1
+                for repo in repos
+                if repo.get("source_identity", {}).get("type") == "git"
+                and repo.get("git_revision", {}).get("status") != "ok"
+            ),
         },
     }
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# Source Trace Verification",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Status: `{payload['status']}`",
-        "",
-        "| Repository | Root | Commit | Git status | Ready | Failed checks |",
-        "|---|---|---|---|---:|---:|",
-    ]
-    for repo in payload["repositories"]:
-        failed = sum(1 for check in repo["checks"] if not check["ok"])
-        git_status = repo.get("git_revision", {}).get("status", "unknown")
-        lines.append(f"| {repo['name']} | `{repo['root']}` | `{repo['git_commit'][:12]}` | `{git_status}` | {repo['ok']} | {failed} |")
-    lines.extend(["", "## Notes", "", "- Point `--repo name=/path/to/checkout` at pinned upstream checkouts before finalizing source notes.", "- Checks are intentionally shallow anchors; inspect matching files while writing final explanations."])
-    return "\n".join(lines) + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -225,7 +336,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", default="configs/source_trace_targets.example.json")
     parser.add_argument("--repo", action="append", default=[], help="Override repository path, e.g. vllm=/src/vllm")
     parser.add_argument("--output", default="results/raw/source_trace_verification.json")
-    parser.add_argument("--report", default="reports/source_trace_verification.md")
     return parser.parse_args()
 
 
@@ -235,10 +345,7 @@ def main() -> int:
     payload = build_payload(args, repo_root)
     output = resolve_repo_path(repo_root, args.output)
     write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    write_text_file(report, markdown(payload))
     print(f"wrote {path_label(output)}")
-    print(f"wrote {path_label(report)}")
     return 0
 
 

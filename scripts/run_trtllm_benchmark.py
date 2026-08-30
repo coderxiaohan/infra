@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from bounded_process import run_bounded_process
-from artifact_json import try_write_json_file
+from artifact_json import artifact_status_exit_code, try_write_json_file
 from cli_validation import require_int_range
 from command_redaction import (
     artifact_command_parts as shared_artifact_command_parts,
@@ -93,7 +93,7 @@ def tool_probe(name: str, override: str = "", repo_root: Optional[Path] = None) 
             path = str(override_path)
     return {
         "name": name,
-        "requested": artifact_path_or_value(candidate),
+        "requested": artifact_model_value(candidate),
         **path_payload(path or "missing"),
         "available": bool(path),
         "path_probe_error": redact_path_error(path_probe_error, override_path) if path_probe_error and override else path_probe_error,
@@ -443,6 +443,11 @@ def parse_args() -> argparse.Namespace:
         help="Extra argument appended to the best-effort trtllm-bench command. Repeat as needed.",
     )
     parser.add_argument("--output", default="results/raw/trtllm_benchmark.json")
+    parser.add_argument(
+        "--allow-non-ok-status",
+        action="store_true",
+        help="Return zero after writing a non-ok diagnostic artifact.",
+    )
     return parser.parse_args()
 
 
@@ -467,7 +472,7 @@ def main() -> int:
         f"wrote {path_label(output)} status={payload['status']} mode={payload['mode']}",
         quiet=args.quiet,
     )
-    return 1 if payload["status"] == "error" else 0
+    return artifact_status_exit_code(payload, allow_non_ok=args.allow_non_ok_status)
 
 
 if __name__ == "__main__":

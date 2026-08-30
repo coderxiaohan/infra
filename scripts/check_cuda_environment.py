@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -17,7 +16,8 @@ except ModuleNotFoundError:
 from command_redaction import redact_artifact_output, redact_path_error, redacted_path_label
 from cli_validation import require_float_range
 from repo_paths import default_repo_root as default_project_root
-from text_output import write_text_file
+from text_output import first_text_line as first_line, write_text_file
+from time_utils import utc_now_precise
 
 DEFAULT_COMMAND_TIMEOUT_SECONDS = 15.0
 DEFAULT_CMAKE_TIMEOUT_SECONDS = 120.0
@@ -63,11 +63,6 @@ def run(
     elif capture.error:
         result["error"] = capture.error
     return result
-
-
-def first_line(output: str) -> str:
-    lines = output.splitlines()
-    return lines[0] if lines else ""
 
 
 def collect(
@@ -116,7 +111,7 @@ def collect(
             cmake_configure["error"] = result["error"]
 
     return {
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "timestamp_utc": utc_now_precise(),
         "tools": {
             "cmake": redacted_path_label(cmake_path or "missing") or "missing",
             "nvcc": redacted_path_label(nvcc_path or "missing") or "missing",

@@ -1,0 +1,170 @@
+{
+  "backends": [
+    {
+      "backend": "vllm",
+      "cost": {
+        "records": 0,
+        "total_cost": null
+      },
+      "evidence": [
+        "vllm_serving_benchmark.json"
+      ],
+      "latency": {
+        "avg_latency_ms": 507.4595309997676,
+        "max_latency_ms": 507.4595309997676,
+        "median_latency_ms": 507.4595309997676,
+        "min_latency_ms": 507.4595309997676,
+        "p90_latency_ms": 507.4595309997676
+      },
+      "model": "inferlab-distilgpt2",
+      "profiling": {
+        "bytes": 0,
+        "files": 0,
+        "metrics": 0
+      },
+      "quality": {},
+      "readiness": {
+        "can_benchmark_external_endpoint": true,
+        "gpu_available": true,
+        "runtime_available": true
+      },
+      "readiness_score": 1.0,
+      "runtime_role": "cloud_openai_compatible_serving",
+      "status": "ok",
+      "throughput": {
+        "completed_requests": 1,
+        "completion_token_throughput_per_s": 15.753579702200282,
+        "failed_requests": 0,
+        "request_throughput_per_s": 1.9691974627750353
+      }
+    },
+    {
+      "backend": "trtllm",
+      "cost": {
+        "records": 0,
+        "total_cost": null
+      },
+      "evidence": [
+        "trtllm_benchmark.json"
+      ],
+      "latency": {
+        "avg_latency_ms": null,
+        "latency_ms": 1891.9548,
+        "p50_latency_ms": null,
+        "p90_latency_ms": null,
+        "p99_latency_ms": null
+      },
+      "model": "distilgpt2",
+      "profiling": {
+        "bytes": 0,
+        "files": 0,
+        "metrics": 0
+      },
+      "quality": {},
+      "readiness": {
+        "gpu_available": true,
+        "tensorrt_available": true,
+        "tensorrt_llm_available": true
+      },
+      "readiness_score": 1.0,
+      "runtime_role": "compiled_gpu_engine",
+      "status": "ok",
+      "throughput": {
+        "request_throughput_per_s": 0.5286,
+        "throughput_per_s": 4.2284,
+        "token_throughput_per_s": 8.9854
+      }
+    },
+    {
+      "backend": "llama.cpp",
+      "cost": {
+        "records": 0,
+        "total_cost": null
+      },
+      "evidence": [
+        "llama_cpp_benchmark.json"
+      ],
+      "latency": {
+        "eval_ms": null,
+        "load_ms": null,
+        "prompt_eval_ms": null,
+        "total_ms": null
+      },
+      "model": "path_5c7ec70141abb079.gguf",
+      "profiling": {
+        "bytes": 0,
+        "files": 0,
+        "metrics": 0
+      },
+      "quality": {},
+      "readiness": {
+        "can_run_bench": true,
+        "can_run_cli": true,
+        "ngl": 0,
+        "threads": 4
+      },
+      "readiness_score": 1.0,
+      "runtime_role": "edge_gguf_runtime",
+      "status": "ok",
+      "throughput": {
+        "eval_tokens": null,
+        "eval_tokens_per_s": 166.6,
+        "prompt_eval_tokens": null,
+        "prompt_eval_tokens_per_s": 2282.1
+      }
+    },
+    {
+      "backend": "native",
+      "cost": {
+        "records": 0,
+        "total_cost": null
+      },
+      "evidence": [
+        "native_probe_run.json",
+        "matrix_ops_profile.json",
+        "attention_probe.json"
+      ],
+      "latency": {
+        "slowest_probe_elapsed_ms": 11.083,
+        "total_probe_elapsed_ms": 216.891
+      },
+      "model": "synthetic_native_probes",
+      "profiling": {
+        "bytes": 0,
+        "files": 0,
+        "metrics": 0
+      },
+      "quality": {},
+      "readiness": {
+        "failed_probes": 0,
+        "passed_probes": 20,
+        "skipped_probes": 0
+      },
+      "readiness_score": 1.0,
+      "runtime_role": "cpu_reference_and_cuda_kernel_oracles",
+      "status": "ok",
+      "throughput": {
+        "attention_score_intermediate_bytes": null,
+        "matmul_tiled_global_bytes": null
+      }
+    }
+  ],
+  "cost_records": "path_6b7bf459a436a382.json",
+  "cost_records_path_redacted": true,
+  "recommendations": [
+    "vLLM and TensorRT-LLM readiness are tied or both missing runtime evidence.",
+    "llama.cpp has edge runtime evidence and can anchor CPU/ARM comparison.",
+    "Native probes provide local correctness/profile baselines even without full model runtimes.",
+    "Use quality and profiling imports to turn raw runtime logs into reportable backend trade-offs."
+  ],
+  "repo_root": "path_e4b9a6eb8d7718ba",
+  "repo_root_redacted": true,
+  "resolved_cost_records": "path_d8eadc2ce53f665c.json",
+  "resolved_cost_records_redacted": true,
+  "resolved_results_root": "path_9d86b447f66f90f6",
+  "resolved_results_root_redacted": true,
+  "results_root": "path_9d86b447f66f90f6",
+  "results_root_path_redacted": true,
+  "schema_version": 1,
+  "timestamp_utc": "2026-08-28T08:51:47Z"
+}

@@ -1,0 +1,56 @@
+{
+  "experiment": {
+    "claim_scope": "Representative single-request smoke evidence for an end-to-end InferLab workflow; not a product SLA or cross-format model quality ranking.",
+    "id": "distilgpt2_edge_cloud",
+    "model_family": "distilgpt2",
+    "output_tokens": 8,
+    "prompt": "Explain KV cache in one sentence.",
+    "prompt_id": "kv_cache_short_explain",
+    "title": "DistilGPT2 edge-cloud inference mechanism showcase"
+  },
+  "llama_cpp": {
+    "batch_size": 128,
+    "ctx_size": 512,
+    "ngl": 0,
+    "threads": 4,
+    "timeout_seconds": 120,
+    "ubatch_size": 128
+  },
+  "native": {
+    "timeout_seconds": 300
+  },
+  "paths": {
+    "build_dir": "build-final-cuda",
+    "llama_bench": "../llama.cpp/build/bin/llama-bench",
+    "llama_cli": "../llama.cpp/build/bin/llama-cli",
+    "llama_model": "../models/distilgpt2-f16.gguf",
+    "trtllm_bench": "${HOME}/.venvs/inferlab-trtllm/bin/trtllm-bench",
+    "trtllm_engine_dir": "results/raw/trtllm_distilgpt2_dynamic_engine",
+    "trtllm_python": "${HOME}/.venvs/inferlab-trtllm/bin/python",
+    "vllm_model": "../models/distilgpt2_clean_hf",
+    "vllm_python": "${HOME}/.venvs/inferlab-vllm/bin/python"
+  },
+  "report_output": "reports/showcase_edge_cloud_distilgpt2.md",
+  "schema_version": 1,
+  "trtllm": {
+    "batch_size": 1,
+    "max_num_tokens": 64,
+    "model": "distilgpt2",
+    "mpi_interface": "eth0",
+    "timeout_seconds": 240,
+    "warmup": 0
+  },
+  "vllm": {
+    "dtype": "half",
+    "enforce_eager": true,
+    "gpu_memory_utilization": 0.35,
+    "host": "127.0.0.1",
+    "max_model_len": 512,
+    "port": 18000,
+    "request_timeout_seconds": 60,
+    "served_model_name": "inferlab-distilgpt2",
+    "shutdown_timeout_seconds": 30,
+    "startup_timeout_seconds": 180,
+    "use_v2_model_runner": false
+  }
+}

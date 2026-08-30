@@ -192,7 +192,7 @@ class LlamaCppEdgeRuntime final : public IEdgeRuntime {
     EdgeGenerationResult result;
     result.metrics.load_time_ms = load_time_ms_;
     result.metrics.provenance =
-        "llama_cpp_b10173_in_process_steady_clock;cooperative_generation_deadline_process_scheduler;peak_rss_is_process_lifetime_getrusage;peak_pss_is_max_of_adapter_checkpoints;mapped_model_bytes_is_latest_proc_maps_checkpoint_exact_main_path";
+        "llama_cpp_11cd988_in_process_steady_clock;cooperative_generation_deadline_process_scheduler;peak_rss_is_process_lifetime_getrusage;peak_pss_is_max_of_adapter_checkpoints;mapped_model_bytes_is_latest_proc_maps_checkpoint_exact_main_path";
     project_edge_process_metrics(process_metrics_, &result.metrics);
     if (model_ == nullptr) {
       result.status = EdgeRuntimeStatus::kNotLoaded;

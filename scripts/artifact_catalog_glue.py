@@ -58,7 +58,6 @@ COMMON_EVIDENCE_SOURCE_EXTENSIONS = (
     "source_trace_verification.json",
     "evidence_checklist.json",
     "structured_outputs.json",
-    "disaggregated_serving.json",
     "pooling_benchmark.json",
     "kserve_llm_d_plan.json",
     "native_disaggregated_serving.json",

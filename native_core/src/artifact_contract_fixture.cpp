@@ -146,22 +146,21 @@ Contract deep_dive_wiring_contract(
 
 Contract derived_report_contract() {
   Contract contract;
-  contract.name = "final_report";
-  contract.artifact = "reports/final_report.md";
-  contract.producer = "report renderer";
-  contract.producer_target = "scripts/render_final_report.py";
-  contract.evidence_level = "derived_report";
+  contract.name = "benchmark_summary";
+  contract.artifact = "results/raw/benchmark_summary.json";
+  contract.producer = "benchmark summarizer";
+  contract.producer_target = "scripts/summarize_benchmarks.py";
+  contract.evidence_level = "derived_summary";
   contract.source = ContractSource::DerivedReport;
   contract.required_fields =
-      {"module_coverage", "missing_evidence", "reproducible_commands"};
+      {"overview", "sections", "source_files"};
   contract.required_metrics =
-      {"available_sources", "missing_sources", "blocked_runtime_items"};
+      {"available_sources", "missing_source_files", "invalid_sources"};
   contract.blockers = {"runtime_artifacts_stale"};
   contract.refresh_commands = {
-      "python3 scripts/summarize_benchmarks.py --repo-root . --results results/raw --output results/tables/benchmark_summary.md --json-output results/raw/benchmark_summary.json",
-      "python3 scripts/render_final_report.py --repo-root . --results results/raw --summary results/raw/benchmark_summary.json --output reports/final_report.md --json-output results/raw/final_report_index.json"};
+      "python3 scripts/summarize_benchmarks.py --repo-root . --results results/raw --output results/raw/benchmark_summary.json"};
   contract.claim_boundary =
-      "Final report is a derived consumer of existing evidence; rendering it does not create benchmark, replay, execute, freshness, or release evidence.";
+      "Benchmark summary is a derived consumer of existing evidence; generating it does not create benchmark, replay, execute, freshness, or release evidence.";
   return contract;
 }
 
@@ -169,7 +168,7 @@ Contract derived_report_contract() {
 
 const std::vector<Contract>& contract_extension_registry() {
   static const std::vector<Contract> contracts = [] {
-    constexpr std::size_t kExpectedNonCatalogContractCount = 33U;
+    constexpr std::size_t kExpectedNonCatalogContractCount = 31U;
     std::vector<Contract> contracts;
     contracts.reserve(kExpectedNonCatalogContractCount);
   contracts.push_back(deep_dive_wiring_contract(

@@ -611,36 +611,70 @@ _ROOT_CAUSE_CATALOG_FLOW_GOVERNANCE_FIELD_SPECS = (
     ("catalog_flow_repair_card_count", "count", 0),
 )
 
-_CATALOG_FLOW_SHORTEST_PATH_COMPATIBILITY_FIELDS = (
-    "root_cause_count",
-    "present",
-    "state",
-    "step_count",
-    "current_repo_step_count",
-    "target_machine_step_count",
-    "source_location_gap_count",
-    "primary_environment",
-    "first_surface",
-    "blocks_removal",
-    "release_repair_path_count",
-    "release_repair_path_source_location_gap_count",
+_CATALOG_FLOW_REMOVAL_HEAD_FIELD_SPECS = (
+    ("source", "text", "not_reported"),
+    ("direct_artifact_present", "bool", False),
+    ("root_cause_count", "count", 0),
+    ("present", "bool", False),
 )
-_CATALOG_FLOW_PARITY_GATE_COMPATIBILITY_FIELDS = (
-    "root_cause_count",
-    "present",
-    "decision",
-    "removal_allowed",
-    "blocker_count",
-    "blocking_surface_count",
-    "fallback_surface_count",
-    "parity_refresh_required_count",
-    "current_repo_action_count",
-    "target_machine_action_count",
-    "source_location_gap_count",
-    "first_surface",
-    "blocks_removal",
-    "release_repair_path_count",
-    "release_repair_path_source_location_gap_count",
+_CATALOG_FLOW_REMOVAL_TAIL_FIELD_SPECS = (
+    ("first_surface", "possibly_empty_text", ""),
+    ("blocks_removal", "bool", False),
+    ("release_repair_path_count", "count", 0),
+    ("release_repair_path_source_location_gap_count", "count", 0),
+)
+_CATALOG_FLOW_SHORTEST_PATH_FIELD_SPECS = (
+    *_CATALOG_FLOW_REMOVAL_HEAD_FIELD_SPECS,
+    ("state", "text", "not_reported"),
+    ("step_count", "count", 0),
+    ("current_repo_step_count", "count", 0),
+    ("target_machine_step_count", "count", 0),
+    ("source_location_gap_count", "count", 0),
+    ("primary_environment", "text", "not_applicable"),
+    *_CATALOG_FLOW_REMOVAL_TAIL_FIELD_SPECS,
+    ("claim_boundary", "text", CATALOG_FLOW_SHORTEST_PATH_CLAIM_BOUNDARY),
+)
+_CATALOG_FLOW_PARITY_GATE_FIELD_SPECS = (
+    *_CATALOG_FLOW_REMOVAL_HEAD_FIELD_SPECS,
+    ("decision", "text", "not_reported"),
+    ("removal_allowed", "bool", False),
+    ("blocker_count", "count", 0),
+    ("blocking_surface_count", "count", 0),
+    ("fallback_surface_count", "count", 0),
+    ("parity_refresh_required_count", "count", 0),
+    ("current_repo_action_count", "count", 0),
+    ("target_machine_action_count", "count", 0),
+    ("source_location_gap_count", "count", 0),
+    *_CATALOG_FLOW_REMOVAL_TAIL_FIELD_SPECS,
+    ("claim_boundary", "text", CATALOG_FLOW_PARITY_GATE_CLAIM_BOUNDARY),
+)
+
+_CATALOG_FLOW_REMOVAL_NON_COMPATIBILITY_FIELDS = frozenset(
+    {"source", "direct_artifact_present", "claim_boundary"}
+)
+_CATALOG_FLOW_FIELD_SUFFIX_OVERRIDES = {
+    "release_repair_path_count": "repair_path_count",
+    "release_repair_path_source_location_gap_count": (
+        "repair_path_source_location_gap_count"
+    ),
+}
+_CATALOG_FLOW_SHORTEST_PATH_COMPATIBILITY_FIELDS = tuple(
+    field_name
+    for field_name, _, _ in _CATALOG_FLOW_SHORTEST_PATH_FIELD_SPECS
+    if field_name not in _CATALOG_FLOW_REMOVAL_NON_COMPATIBILITY_FIELDS
+)
+_CATALOG_FLOW_PARITY_GATE_COMPATIBILITY_FIELDS = tuple(
+    field_name
+    for field_name, _, _ in _CATALOG_FLOW_PARITY_GATE_FIELD_SPECS
+    if field_name not in _CATALOG_FLOW_REMOVAL_NON_COMPATIBILITY_FIELDS
+)
+_CATALOG_FLOW_SHORTEST_PATH_ROOT_CAUSE_REVIEW_FIELDS = tuple(
+    field_name for field_name in _CATALOG_FLOW_SHORTEST_PATH_COMPATIBILITY_FIELDS
+    if field_name not in _CATALOG_FLOW_FIELD_SUFFIX_OVERRIDES
+)
+_CATALOG_FLOW_PARITY_GATE_ROOT_CAUSE_REVIEW_FIELDS = tuple(
+    field_name for field_name in _CATALOG_FLOW_PARITY_GATE_COMPATIBILITY_FIELDS
+    if field_name not in _CATALOG_FLOW_FIELD_SUFFIX_OVERRIDES
 )
 
 
@@ -747,22 +781,7 @@ class RootCauseNativeAuditManifestProjection:
 
 
 @dataclass(frozen=True)
-class RootCauseCatalogFlowShortestPathProjection:
-    source: Any
-    direct_artifact_present: bool
-    root_cause_count: int
-    present: bool
-    state: str
-    step_count: int
-    current_repo_step_count: int
-    target_machine_step_count: int
-    source_location_gap_count: int
-    primary_environment: str
-    first_surface: str
-    blocks_removal: bool
-    release_repair_path_count: int
-    release_repair_path_source_location_gap_count: int
-    claim_boundary: str
+class _CatalogFlowProjectionIntegrity:
     canonical_source: str
     canonical_gap_count: int
     source_drift_count: int
@@ -770,6 +789,44 @@ class RootCauseCatalogFlowShortestPathProjection:
     source_drift_sources: Tuple[str, ...]
     canonical_ready: bool
     source_consistent: bool
+
+    def to_integrity_dict(self) -> Dict[str, Any]:
+        return {
+            "canonical_source": self.canonical_source,
+            "canonical_gap_count": self.canonical_gap_count,
+            "source_drift_count": self.source_drift_count,
+            "source_drift_fields": list(self.source_drift_fields),
+            "source_drift_sources": list(self.source_drift_sources),
+            "canonical_ready": self.canonical_ready,
+            "source_consistent": self.source_consistent,
+        }
+
+
+@dataclass(frozen=True)
+class _RootCauseCatalogFlowRemovalProjection(
+    _CatalogFlowProjectionIntegrity
+):
+    source: Any
+    direct_artifact_present: bool
+    root_cause_count: int
+    present: bool
+    source_location_gap_count: int
+    first_surface: str
+    blocks_removal: bool
+    release_repair_path_count: int
+    release_repair_path_source_location_gap_count: int
+    claim_boundary: str
+
+
+@dataclass(frozen=True)
+class RootCauseCatalogFlowShortestPathProjection(
+    _RootCauseCatalogFlowRemovalProjection
+):
+    state: str
+    step_count: int
+    current_repo_step_count: int
+    target_machine_step_count: int
+    primary_environment: str
 
     def to_closure_dict(self) -> Dict[str, Any]:
         return {
@@ -790,13 +847,7 @@ class RootCauseCatalogFlowShortestPathProjection:
                 self.release_repair_path_source_location_gap_count
             ),
             "claim_boundary": self.claim_boundary,
-            "canonical_source": self.canonical_source,
-            "canonical_gap_count": self.canonical_gap_count,
-            "source_drift_count": self.source_drift_count,
-            "source_drift_fields": list(self.source_drift_fields),
-            "source_drift_sources": list(self.source_drift_sources),
-            "canonical_ready": self.canonical_ready,
-            "source_consistent": self.source_consistent,
+            **self.to_integrity_dict(),
         }
 
     def to_release_pipeline_dict(self) -> Dict[str, Any]:
@@ -810,16 +861,14 @@ class RootCauseCatalogFlowShortestPathProjection:
         return _catalog_flow_prefixed_fields(
             self.to_closure_dict(),
             "catalog_flow_fallback_removal_shortest_path_",
-            _CATALOG_FLOW_SHORTEST_PATH_COMPATIBILITY_FIELDS[:-2],
+            _CATALOG_FLOW_SHORTEST_PATH_ROOT_CAUSE_REVIEW_FIELDS,
         )
 
 
 @dataclass(frozen=True)
-class RootCauseCatalogFlowParityGateProjection:
-    source: Any
-    direct_artifact_present: bool
-    root_cause_count: int
-    present: bool
+class RootCauseCatalogFlowParityGateProjection(
+    _RootCauseCatalogFlowRemovalProjection
+):
     decision: str
     removal_allowed: bool
     blocker_count: int
@@ -828,19 +877,6 @@ class RootCauseCatalogFlowParityGateProjection:
     parity_refresh_required_count: int
     current_repo_action_count: int
     target_machine_action_count: int
-    source_location_gap_count: int
-    first_surface: str
-    blocks_removal: bool
-    release_repair_path_count: int
-    release_repair_path_source_location_gap_count: int
-    claim_boundary: str
-    canonical_source: str
-    canonical_gap_count: int
-    source_drift_count: int
-    source_drift_fields: Tuple[str, ...]
-    source_drift_sources: Tuple[str, ...]
-    canonical_ready: bool
-    source_consistent: bool
 
     def to_closure_dict(self) -> Dict[str, Any]:
         return {
@@ -866,13 +902,7 @@ class RootCauseCatalogFlowParityGateProjection:
                 self.release_repair_path_source_location_gap_count
             ),
             "claim_boundary": self.claim_boundary,
-            "canonical_source": self.canonical_source,
-            "canonical_gap_count": self.canonical_gap_count,
-            "source_drift_count": self.source_drift_count,
-            "source_drift_fields": list(self.source_drift_fields),
-            "source_drift_sources": list(self.source_drift_sources),
-            "canonical_ready": self.canonical_ready,
-            "source_consistent": self.source_consistent,
+            **self.to_integrity_dict(),
         }
 
     def to_release_pipeline_dict(self) -> Dict[str, Any]:
@@ -886,7 +916,7 @@ class RootCauseCatalogFlowParityGateProjection:
         projection = _catalog_flow_prefixed_fields(
             self.to_closure_dict(),
             "catalog_flow_fallback_removal_parity_gate_",
-            _CATALOG_FLOW_PARITY_GATE_COMPATIBILITY_FIELDS[:-2],
+            _CATALOG_FLOW_PARITY_GATE_ROOT_CAUSE_REVIEW_FIELDS,
         )
         projection[
             "catalog_flow_fallback_removal_parity_gate_"
@@ -896,27 +926,16 @@ class RootCauseCatalogFlowParityGateProjection:
 
 
 @dataclass(frozen=True)
-class RootCauseCatalogFlowGovernanceProjection:
+class RootCauseCatalogFlowGovernanceProjection(
+    _CatalogFlowProjectionIntegrity
+):
     values: Mapping[str, Any]
-    canonical_source: str
-    canonical_gap_count: int
-    source_drift_count: int
-    source_drift_fields: Tuple[str, ...]
-    source_drift_sources: Tuple[str, ...]
-    canonical_ready: bool
-    source_consistent: bool
     claim_boundary: str
 
     def to_closure_dict(self) -> Dict[str, Any]:
         return {
             **self.values,
-            "canonical_source": self.canonical_source,
-            "canonical_gap_count": self.canonical_gap_count,
-            "source_drift_count": self.source_drift_count,
-            "source_drift_fields": list(self.source_drift_fields),
-            "source_drift_sources": list(self.source_drift_sources),
-            "canonical_ready": self.canonical_ready,
-            "source_consistent": self.source_consistent,
+            **self.to_integrity_dict(),
             "claim_boundary": self.claim_boundary,
         }
 
@@ -929,16 +948,11 @@ def _catalog_flow_prefixed_fields(
     prefix: str,
     field_names: Tuple[str, ...],
 ) -> Dict[str, Any]:
-    suffix_overrides = {
-        "release_repair_path_count": "repair_path_count",
-        "release_repair_path_source_location_gap_count": (
-            "repair_path_source_location_gap_count"
-        ),
-    }
     return {
-        f"{prefix}{suffix_overrides.get(field_name, field_name)}": values.get(
-            field_name
-        )
+        (
+            f"{prefix}"
+            f"{_CATALOG_FLOW_FIELD_SUFFIX_OVERRIDES.get(field_name, field_name)}"
+        ): values.get(field_name)
         for field_name in field_names
     }
 
@@ -1031,28 +1045,22 @@ def _project_root_cause_catalog_flow_review(
     summary_prefix: str,
     mirror_prefix: str,
     field_specs: Tuple[Tuple[str, str, Any], ...],
-    summary_key_overrides: Mapping[str, str],
 ) -> Dict[str, Any]:
     canonical = dict_value(closure_review)
 
-    non_mirrored_fields = (
-        "source",
-        "direct_artifact_present",
-        "release_repair_path_count",
-        "release_repair_path_source_location_gap_count",
-        "claim_boundary",
-    )
     summary_keys = {
-        field_name: summary_key_overrides.get(
-            field_name, f"{summary_prefix}{field_name}"
+        field_name: (
+            f"{summary_prefix}"
+            f"{_CATALOG_FLOW_FIELD_SUFFIX_OVERRIDES.get(field_name, field_name)}"
         )
         for field_name, _, _ in field_specs
-        if field_name not in ("source", "direct_artifact_present", "claim_boundary")
+        if field_name not in _CATALOG_FLOW_REMOVAL_NON_COMPATIBILITY_FIELDS
     }
     mirror_keys = {
         field_name: f"{mirror_prefix}{field_name}"
         for field_name, _, _ in field_specs
-        if field_name not in non_mirrored_fields
+        if field_name not in _CATALOG_FLOW_REMOVAL_NON_COMPATIBILITY_FIELDS
+        and field_name not in _CATALOG_FLOW_FIELD_SUFFIX_OVERRIDES
     }
     mirrors = (
         (
@@ -1083,23 +1091,6 @@ def project_root_cause_catalog_flow_shortest_path(
     direct_root_cause_summary: Mapping[str, Any],
 ) -> RootCauseCatalogFlowShortestPathProjection:
     """Use the Pipeline nested closure and report mirror drift without voting."""
-    field_specs = (
-        ("source", "text", "not_reported"),
-        ("direct_artifact_present", "bool", False),
-        ("root_cause_count", "count", 0),
-        ("present", "bool", False),
-        ("state", "text", "not_reported"),
-        ("step_count", "count", 0),
-        ("current_repo_step_count", "count", 0),
-        ("target_machine_step_count", "count", 0),
-        ("source_location_gap_count", "count", 0),
-        ("primary_environment", "text", "not_applicable"),
-        ("first_surface", "possibly_empty_text", ""),
-        ("blocks_removal", "bool", False),
-        ("release_repair_path_count", "count", 0),
-        ("release_repair_path_source_location_gap_count", "count", 0),
-        ("claim_boundary", "text", CATALOG_FLOW_SHORTEST_PATH_CLAIM_BOUNDARY),
-    )
     return RootCauseCatalogFlowShortestPathProjection(
         **_project_root_cause_catalog_flow_review(
             closure_review,
@@ -1114,17 +1105,7 @@ def project_root_cause_catalog_flow_shortest_path(
             mirror_prefix=(
                 "catalog_flow_fallback_removal_shortest_path_"
             ),
-            field_specs=field_specs,
-            summary_key_overrides={
-                "release_repair_path_count": (
-                    "root_cause_catalog_flow_fallback_removal_shortest_path_"
-                    "repair_path_count"
-                ),
-                "release_repair_path_source_location_gap_count": (
-                    "root_cause_catalog_flow_fallback_removal_shortest_path_"
-                    "repair_path_source_location_gap_count"
-                ),
-            },
+            field_specs=_CATALOG_FLOW_SHORTEST_PATH_FIELD_SPECS,
         )
     )
 
@@ -1135,26 +1116,6 @@ def project_root_cause_catalog_flow_parity_gate(
     direct_root_cause_summary: Mapping[str, Any],
 ) -> RootCauseCatalogFlowParityGateProjection:
     """Use the Pipeline nested parity gate and report mirror drift."""
-    field_specs = (
-        ("source", "text", "not_reported"),
-        ("direct_artifact_present", "bool", False),
-        ("root_cause_count", "count", 0),
-        ("present", "bool", False),
-        ("decision", "text", "not_reported"),
-        ("removal_allowed", "bool", False),
-        ("blocker_count", "count", 0),
-        ("blocking_surface_count", "count", 0),
-        ("fallback_surface_count", "count", 0),
-        ("parity_refresh_required_count", "count", 0),
-        ("current_repo_action_count", "count", 0),
-        ("target_machine_action_count", "count", 0),
-        ("source_location_gap_count", "count", 0),
-        ("first_surface", "possibly_empty_text", ""),
-        ("blocks_removal", "bool", False),
-        ("release_repair_path_count", "count", 0),
-        ("release_repair_path_source_location_gap_count", "count", 0),
-        ("claim_boundary", "text", CATALOG_FLOW_PARITY_GATE_CLAIM_BOUNDARY),
-    )
     return RootCauseCatalogFlowParityGateProjection(
         **_project_root_cause_catalog_flow_review(
             closure_review,
@@ -1169,17 +1130,7 @@ def project_root_cause_catalog_flow_parity_gate(
             mirror_prefix=(
                 "catalog_flow_fallback_removal_parity_gate_"
             ),
-            field_specs=field_specs,
-            summary_key_overrides={
-                "release_repair_path_count": (
-                    "root_cause_catalog_flow_fallback_removal_parity_gate_"
-                    "repair_path_count"
-                ),
-                "release_repair_path_source_location_gap_count": (
-                    "root_cause_catalog_flow_fallback_removal_parity_gate_"
-                    "repair_path_source_location_gap_count"
-                ),
-            },
+            field_specs=_CATALOG_FLOW_PARITY_GATE_FIELD_SPECS,
         )
     )
 

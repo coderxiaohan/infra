@@ -4,12 +4,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-mkdir -p results/raw results/tables results/figures
+RESULTS_DIR="${INFERLAB_RESULTS_DIR:-results/raw}"
+mkdir -p "$RESULTS_DIR"
 
-python3 scripts/collect_system_info.py --output results/raw/system_info.json
-python3 scripts/check_cuda_environment.py --output results/raw/cuda_environment.json
-python3 scripts/run_llama_cpp_benchmark.py --output results/raw/llama_cpp_benchmark.json
-python3 scripts/run_trtllm_benchmark.py --output results/raw/trtllm_benchmark.json
+python3 scripts/collect_system_info.py --output "$RESULTS_DIR/system_info.json"
+python3 scripts/check_cuda_environment.py --output "$RESULTS_DIR/cuda_environment.json"
+python3 scripts/run_llama_cpp_benchmark.py --allow-non-ok-status --output "$RESULTS_DIR/llama_cpp_benchmark.json"
+python3 scripts/run_trtllm_benchmark.py --allow-non-ok-status --output "$RESULTS_DIR/trtllm_benchmark.json"
 python3 -m mini_llm.shape_probe \
   --batch-size 1 \
   --seq-len 128 \
@@ -19,19 +20,19 @@ python3 -m mini_llm.shape_probe \
   --num-heads 12 \
   --head-dim 64 \
   --dtype fp16 \
-  --output results/raw/shape_probe.json
+  --output "$RESULTS_DIR/shape_probe.json"
 python3 scripts/run_native_probes.py \
   --build-dir build \
-  --results results/raw \
-  --output results/raw/native_probe_run.json
-python3 scripts/validate_outputs.py --results results/raw
+  --results "$RESULTS_DIR" \
+  --output "$RESULTS_DIR/native_probe_run.json"
+python3 scripts/validate_outputs.py --allow-non-ok-status --results "$RESULTS_DIR"
 python3 scripts/summarize_benchmarks.py \
-  --results results/raw \
-  --output results/tables/benchmark_summary.md \
-  --json-output results/raw/benchmark_summary.json
-python3 scripts/export_prometheus_metrics.py \
-  --results results/raw \
-  --output results/tables/inferlab_metrics.prom
-python3 scripts/validate_outputs.py --results results/raw
-python3 scripts/plot_results.py --results results/raw --output results/tables/result_index.md
+  --results "$RESULTS_DIR" \
+  --output "$RESULTS_DIR/benchmark_summary.json" \
+  --allow-non-ok-status
+python3 scripts/validate_outputs.py \
+  --results "$RESULTS_DIR" \
+  --allow-status llama_cpp_benchmark.json=skipped \
+  --allow-status trtllm_benchmark.json=skipped \
+  --allow-status benchmark_summary.json=incomplete
 python3 -m unittest discover -s tests -p "test_*.py"

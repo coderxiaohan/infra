@@ -29,6 +29,18 @@ class MiniTransformerBottleneckAdvisorTest(unittest.TestCase):
         self.assertTrue(report["cached_decode"]["group_rankings"])
         self.assertTrue(report["full_recompute"]["group_rankings"])
         self.assertTrue(report["recommendations"])
+        for strategy_name in ("cached_decode", "full_recompute"):
+            strategy = report[strategy_name]
+            self.assertAlmostEqual(
+                sum(float(item["flops_share"] or 0.0) for item in strategy["group_rankings"]),
+                1.0,
+            )
+            self.assertAlmostEqual(
+                sum(float(item["bytes_share"] or 0.0) for item in strategy["group_rankings"]),
+                1.0,
+            )
+            self.assertEqual(strategy["attribution"]["unattributed_flops"], 0)
+            self.assertEqual(strategy["attribution"]["unattributed_bytes"], 0)
 
 
 if __name__ == "__main__":

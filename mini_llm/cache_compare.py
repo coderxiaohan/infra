@@ -7,26 +7,14 @@ import json
 from pathlib import Path
 from typing import Any, Sequence
 
-from .cli_io import require_float_range, require_int_range, write_text_file
+from .cli_io import (
+    parse_prompt_token_ids,
+    require_float_range,
+    require_int_range,
+    write_text_file,
+)
 from .transformer import MiniTransformerConfig, run_generation_trace
-
-
-def _parse_prompt(raw_tokens: Sequence[str]) -> list[int]:
-    if len(raw_tokens) == 1 and "," in raw_tokens[0]:
-        raw_tokens = [piece for piece in raw_tokens[0].split(",") if piece]
-    try:
-        tokens = [int(token) for token in raw_tokens]
-    except ValueError as exc:
-        raise ValueError("prompt token ids must be integers") from exc
-    if not tokens:
-        raise ValueError("prompt must contain at least one token id")
-    return tokens
-
-
-def _ratio(numerator: int | float, denominator: int | float) -> float | None:
-    if denominator == 0:
-        return None
-    return float(numerator) / float(denominator)
+from .workload_profile import safe_ratio
 
 
 def _attention_score_elements(
@@ -106,7 +94,7 @@ def compare_cache_strategies(
                 "cached_attention_score_elements": cached_scores,
                 "recompute_attention_score_elements": recompute_scores,
                 "attention_score_element_savings": savings,
-                "attention_score_element_savings_ratio": _ratio(savings, recompute_scores),
+                "attention_score_element_savings_ratio": safe_ratio(savings, recompute_scores),
                 "cached_kv_cache_total_bytes": cached_record.get("kv_cache_total_bytes", 0),
                 "cached_kv_cache_lengths": cached_record.get("kv_cache_lengths", []),
                 "recompute_kv_cache_total_bytes": recompute_record.get("kv_cache_total_bytes", 0),
@@ -135,11 +123,11 @@ def compare_cache_strategies(
             "cached_input_tokens": cached_total_input,
             "recompute_input_tokens": recompute_total_input,
             "input_token_savings": input_savings,
-            "input_token_savings_ratio": _ratio(input_savings, recompute_total_input),
+            "input_token_savings_ratio": safe_ratio(input_savings, recompute_total_input),
             "cached_attention_score_elements": cached_total_scores,
             "recompute_attention_score_elements": recompute_total_scores,
             "attention_score_element_savings": score_savings,
-            "attention_score_element_savings_ratio": _ratio(score_savings, recompute_total_scores),
+            "attention_score_element_savings_ratio": safe_ratio(score_savings, recompute_total_scores),
             "cached_max_kv_cache_total_bytes": _max_kv_bytes(cached_records),
             "recompute_max_kv_cache_total_bytes": _max_kv_bytes(recompute_records),
         },
@@ -187,7 +175,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         comparison = compare_cache_strategies(
             config,
-            _parse_prompt(args.prompt),
+            parse_prompt_token_ids(args.prompt),
             max_new_tokens=require_int_range("--max-new-tokens", args.max_new_tokens, 0, 10_000_000),
             seed=args.seed,
         )

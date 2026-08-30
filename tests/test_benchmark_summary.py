@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.summarize_benchmarks import build_summary, to_markdown, write_summary
+from scripts.summarize_benchmarks import build_summary, write_summary
 
 
 class BenchmarkSummaryTest(unittest.TestCase):
@@ -57,25 +57,37 @@ class BenchmarkSummaryTest(unittest.TestCase):
             summary = build_summary(Path(tmp))
 
             self.assertEqual(summary["overview"]["available_sources"], 0)
+            self.assertEqual(summary["status"], "incomplete")
             self.assertIn("cuda_environment.json", summary["overview"]["missing_sources"])
             self.assertTrue(all(section["status"] == "missing" for section in summary["sections"]))
 
-    def test_write_summary_emits_markdown_and_json(self):
+    def test_write_summary_emits_json(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             summary = build_summary(root)
-            markdown_path = root / "tables" / "benchmark_summary.md"
             json_path = root / "raw" / "benchmark_summary.json"
 
-            write_summary(summary, markdown_path, json_path)
+            write_summary(summary, json_path)
 
-            markdown = markdown_path.read_text(encoding="utf-8")
-            self.assertIn("# Benchmark Summary", markdown)
-            self.assertIn("cuda_environment.json", markdown)
             loaded = json.loads(json_path.read_text(encoding="utf-8"))
             self.assertEqual(loaded["schema_version"], 1)
+            self.assertIn("cuda_environment.json", loaded["overview"]["missing_sources"])
 
-    def test_markdown_contains_extracted_metrics(self):
+    def test_non_success_source_status_is_not_silently_promoted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.write_json(root, "vllm_serving_benchmark.json", {"status": "partial"})
+
+            summary = build_summary(root)
+            section = next(
+                item for item in summary["sections"] if item["source"] == "vllm_serving_benchmark.json"
+            )
+
+            self.assertEqual(section["status"], "partial")
+            self.assertIn("vllm_serving_benchmark.json", summary["overview"]["unavailable_sources"])
+            self.assertEqual(summary["status"], "incomplete")
+
+    def test_summary_contains_extracted_metrics(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.write_json(
@@ -93,11 +105,10 @@ class BenchmarkSummaryTest(unittest.TestCase):
                 },
             )
 
-            markdown = to_markdown(build_summary(root))
-
-            self.assertIn("Weight-Only Quantization", markdown)
-            self.assertIn("int4_storage_ratio_percent", markdown)
-            self.assertIn("25", markdown)
+            summary = build_summary(root)
+            section = next(item for item in summary["sections"] if item["title"] == "Weight-Only Quantization")
+            metrics = {item["name"]: item["value"] for item in section["metrics"]}
+            self.assertEqual(metrics["int4_storage_ratio_percent"], 25.0)
 
     def test_scheduler_request_lifecycle_metrics_are_aggregated(self):
         with tempfile.TemporaryDirectory() as tmp:

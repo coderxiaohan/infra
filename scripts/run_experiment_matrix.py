@@ -18,10 +18,10 @@ from benchmark_matrix_commands import command_for_entry, load_matrix_entries_wit
 from bounded_process import run_bounded_process
 from cli_validation import require_int_range
 from command_redaction import (
-    artifact_command_parts as shared_artifact_command_parts,
+    artifact_command_parts,
+    artifact_output_tail,
     artifact_path_payload as path_payload,
     command_line,
-    redact_artifact_output,
     redact_path_error,
     redact_sensitive_text,
     redact_value,
@@ -32,17 +32,6 @@ from text_output import try_write_text_file as write_text_file
 
 
 EXPERIMENT_MATRIX_STREAM_LIMIT_BYTES = 16 * 1024 * 1024
-
-
-def artifact_command_parts(parts: List[str]) -> List[str]:
-    return shared_artifact_command_parts(parts)
-
-
-def artifact_output_tail(text: str, command: List[str], cwd: Path, max_lines: int) -> str:
-    return redact_artifact_output(
-        "\n".join(str(text).splitlines()[-max_lines:]),
-        paths=[cwd, *command],
-    )
 
 
 def artifact_path(repo_root: Path, artifact: str) -> Path | None:

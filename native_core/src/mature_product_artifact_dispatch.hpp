@@ -27,51 +27,51 @@ struct ArtifactDispatchSpec {
 
 inline constexpr std::array<ArtifactDispatchSpec, 19> kArtifactDispatchSpecs{{
     {"native_streaming_backpressure_deep_dive", ArtifactFamily::p2,
-     "streaming_backpressure", "reports/75_streaming_backpressure_deep_dive.md"},
+     "streaming_backpressure", "results/raw/native_streaming_backpressure_deep_dive.json"},
     {"native_structured_output_parser_contract", ArtifactFamily::p2,
      "structured_output_parser_contract",
-     "reports/76_structured_output_parser_contract.md"},
+     "results/raw/native_structured_output_parser_contract.json"},
     {"native_autoscaler_cost_slo_deep_dive", ArtifactFamily::p2,
-     "autoscaler_cost_slo", "reports/77_autoscaler_cost_slo_deep_dive.md"},
+     "autoscaler_cost_slo", "results/raw/native_autoscaler_cost_slo_deep_dive.json"},
     {"native_lora_adapter_cache_deep_dive", ArtifactFamily::p2,
-     "lora_adapter_cache", "reports/78_lora_adapter_cache_deep_dive.md"},
+     "lora_adapter_cache", "results/raw/native_lora_adapter_cache_deep_dive.json"},
     {"native_grammar_backend_matrix", ArtifactFamily::p2,
-     "grammar_backend_matrix", "reports/79_grammar_backend_matrix.md"},
+     "grammar_backend_matrix", "results/raw/native_grammar_backend_matrix.json"},
     {"native_edge_compiler_artifact_matrix", ArtifactFamily::p2,
      "edge_compiler_artifact_matrix",
-     "reports/80_edge_compiler_artifact_matrix.md"},
+     "results/raw/native_edge_compiler_artifact_matrix.json"},
     {"native_kv_transport_timeline_deep_dive", ArtifactFamily::borrowed_gap,
-     "kv_transport_timeline", "reports/81_kv_transport_timeline_deep_dive.md"},
+     "kv_transport_timeline", "results/raw/native_kv_transport_timeline_deep_dive.json"},
     {"native_radix_prefix_cache_deep_dive", ArtifactFamily::borrowed_gap,
-     "radix_prefix_cache", "reports/82_radix_prefix_cache_deep_dive.md"},
+     "radix_prefix_cache", "results/raw/native_radix_prefix_cache_deep_dive.json"},
     {"native_kv_compression_blend_risk", ArtifactFamily::borrowed_gap,
-     "kv_compression_blend_risk", "reports/83_kv_compression_blend_risk.md"},
+     "kv_compression_blend_risk", "results/raw/native_kv_compression_blend_risk.json"},
     {"native_chunked_prefill_stall_free_deep_dive",
      ArtifactFamily::borrowed_gap, "chunked_prefill_stall_free",
-     "reports/84_chunked_prefill_stall_free_deep_dive.md"},
+     "results/raw/native_chunked_prefill_stall_free_deep_dive.json"},
     {"native_tenant_quota_admission_deep_dive",
      ArtifactFamily::borrowed_gap, "tenant_quota_admission",
-     "reports/85_tenant_quota_admission_deep_dive.md"},
+     "results/raw/native_tenant_quota_admission_deep_dive.json"},
     {"native_live_request_migration_deep_dive",
      ArtifactFamily::borrowed_gap, "live_request_migration",
-     "reports/86_live_request_migration_deep_dive.md"},
+     "results/raw/native_live_request_migration_deep_dive.json"},
     {"native_quant_correctness_contract", ArtifactFamily::borrowed_gap,
-     "quant_correctness_contract", "reports/87_quant_correctness_contract.md"},
+     "quant_correctness_contract", "results/raw/native_quant_correctness_contract.json"},
     {"native_paged_kv_gather_kernel_contract", ArtifactFamily::borrowed_gap,
      "paged_kv_gather_kernel_contract",
-     "reports/88_paged_kv_gather_kernel_contract.md"},
+     "results/raw/native_paged_kv_gather_kernel_contract.json"},
     {"native_flashinfer_replay_alignment", ArtifactFamily::borrowed_gap,
-     "flashinfer_replay_alignment", "reports/89_flashinfer_replay_alignment.md"},
+     "flashinfer_replay_alignment", "results/raw/native_flashinfer_replay_alignment.json"},
     {"native_trtllm_engine_quant_alignment", ArtifactFamily::borrowed_gap,
      "trtllm_engine_quant_alignment",
-     "reports/90_trtllm_engine_quant_alignment.md"},
+     "results/raw/native_trtllm_engine_quant_alignment.json"},
     {"native_gateway_policy_matrix", ArtifactFamily::borrowed_gap,
-     "gateway_policy_matrix", "reports/91_gateway_policy_matrix.md"},
+     "gateway_policy_matrix", "results/raw/native_gateway_policy_matrix.json"},
     {"native_deployment_readiness_matrix", ArtifactFamily::borrowed_gap,
-     "deployment_readiness_matrix", "reports/92_deployment_readiness_matrix.md"},
+     "deployment_readiness_matrix", "results/raw/native_deployment_readiness_matrix.json"},
     {"native_openai_api_conformance_matrix", ArtifactFamily::borrowed_gap,
      "openai_api_conformance_matrix",
-     "reports/93_openai_api_conformance_matrix.md"},
+     "results/raw/native_openai_api_conformance_matrix.json"},
 }};
 
 inline constexpr std::string_view canonical_target(
@@ -139,8 +139,8 @@ inline constexpr bool dispatch_registry_is_valid() {
         !is_safe_dispatch_token(spec.artifact_type) ||
         !is_safe_dispatch_token(compatibility) ||
         !is_safe_dispatch_token(spec.legacy_bundle_name) ||
-        !starts_with(spec.report_path, "reports/") ||
-        !ends_with(spec.report_path, ".md")) {
+        !starts_with(spec.report_path, "results/raw/") ||
+        !ends_with(spec.report_path, ".json")) {
       return false;
     }
     for (std::size_t j = i + 1; j < kArtifactDispatchSpecs.size(); ++j) {

@@ -1,8 +1,8 @@
 {
+  "report_sections": ["results/raw/product_lmcache_kv_offload_profile.json"],
   "product": "kv_offload",
   "endpoint": "http://127.0.0.1:8000",
   "metrics_url": "http://127.0.0.1:8000/metrics",
-  "report_sections": ["reports/51_product_kv_offload_profile.md"],
   "paths": {
     "cache_dir": "/var/lib/inferlab/kv-cache"
   },

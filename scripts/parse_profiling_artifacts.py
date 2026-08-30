@@ -277,33 +277,6 @@ def summarize(files: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# Profiling Artifact Import",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Artifact root: `{payload['artifact_root']}`",
-        "",
-        "## Summary",
-        "",
-        "| Category | Files | Bytes | Metrics |",
-        "|---|---:|---:|---:|",
-    ]
-    categories = payload["summary"]["categories"]
-    for category, item in sorted(categories.items()):
-        lines.append(f"| {category} | {item['files']} | {item['bytes']} | {item['metrics']} |")
-    if not categories:
-        lines.append("| _none_ | 0 | 0 | 0 |")
-    lines.extend(["", "## Files", "", "| Path | Category | Bytes | Metrics |", "|---|---|---:|---:|"])
-    for item in payload["files"]:
-        lines.append(f"| `{item['path']}` | {item['category']} | {item['size_bytes']} | {len(item.get('metrics', []))} |")
-    if payload.get("discovery_issues"):
-        lines.extend(["", "## Discovery Issues", "", "| Path | Status | Error |", "|---|---|---|"])
-        for issue in payload["discovery_issues"]:
-            error = str(issue.get("error", "")).replace("|", "\\|")
-            lines.append(f"| `{issue.get('path')}` | `{issue.get('status')}` | {error} |")
-    lines.extend(["", "## Notes", "", "- Binary `.ncu-rep` and `.nsys-rep` files are tracked by path and size; export CSV/text alongside them to expose detailed metrics.", "- Prometheus text snapshots, perf stat logs, llama.cpp timing logs, and simple CSV metric exports are parsed into normalized metric rows.", "- This importer does not execute profilers; it only converts already-collected artifacts into reportable JSON."])
-    return "\n".join(lines) + "\n"
 
 
 def main() -> None:
@@ -311,7 +284,6 @@ def main() -> None:
     parser.add_argument("--repo-root", default=str(default_repo_root()))
     parser.add_argument("--artifact-root", default="profiling")
     parser.add_argument("--output", default="results/raw/profiling_artifacts.json")
-    parser.add_argument("--report", default="reports/profiling_artifacts.md")
     parser.add_argument("--text-limit", type=int, default=200000)
     parser.add_argument("--metric-limit", type=int, default=2000)
     args = parser.parse_args()
@@ -337,10 +309,7 @@ def main() -> None:
     }
     output = resolve_repo_path(repo_root, args.output)
     write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    write_text_file(report, markdown(payload))
     print(f"wrote {metric_path_label(output.as_posix())}")
-    print(f"wrote {metric_path_label(report.as_posix())}")
 
 
 if __name__ == "__main__":

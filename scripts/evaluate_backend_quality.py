@@ -541,53 +541,6 @@ def summarize(records: List[Dict[str, Any]], pairs: List[Dict[str, Any]]) -> Dic
     }
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# Backend Quality Evaluation",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Prompt file: `{payload['prompt_file']}`",
-        f"- Check file: `{payload['check_file']}`",
-        "",
-        "## Backend Summary",
-        "",
-        "| Backend | Records | OK | Full text | Redacted preview | Pass | Fail | Unchecked | Redacted |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|",
-    ]
-    for backend, summary in sorted(payload["summary"]["backend_summary"].items()):
-        lines.append(
-            f"| {backend} | {summary['records']} | {summary['ok_records']} | {summary['with_full_text']} | {summary['with_redacted_preview']} | {summary['pass']} | {summary['fail']} | {summary['unchecked']} | {summary['redacted']} |"
-        )
-    lines.extend(["", "## Prompt Records", "", "| Backend | Prompt | Status | Quality | Text source | Chars | Words |", "|---|---|---|---|---|---:|---:|"])
-    for record in payload["records"]:
-        lines.append(
-            f"| {record.get('backend')} | `{record.get('prompt_id')}` | `{record.get('status')}` | `{record.get('quality_status')}` | `{record.get('text_source', 'unknown')}` | {record.get('text_chars', 0)} | {record.get('text_words', 0)} |"
-        )
-    lines.extend(["", "## Pairwise Output Diff", "", "| Prompt | Left | Right | Exact | Token Jaccard | Length Delta |", "|---|---|---|---:|---:|---:|"])
-    for item in payload["pairwise"]:
-        score = item.get("token_jaccard")
-        score_text = "" if score is None else f"{score:.4f}"
-        lines.append(
-            f"| `{item['prompt_id']}` | {item['left_backend']} | {item['right_backend']} | `{item['exact_match']}` | {score_text} | {item['length_delta_chars']} |"
-        )
-    if not payload["pairwise"]:
-        lines.append("| _none_ |  |  |  |  |  |")
-    prompt_errors = payload.get("prompt_file_errors", [])
-    if prompt_errors:
-        lines.extend(["", "## Prompt File Issues", "", "| Line | Status | Error |", "|---:|---|---|"])
-        for error in prompt_errors:
-            error_text = str(error.get("error", "")).replace("|", "\\|")
-            lines.append(
-                f"| {error.get('line', '')} | `{error.get('status')}` | {error_text} |"
-            )
-    check_errors = payload.get("check_file_errors", [])
-    if check_errors:
-        lines.extend(["", "## Check File Issues", "", "| Status | Error |", "|---|---|"])
-        for error in check_errors:
-            error_text = str(error.get("error", "")).replace("|", "\\|")
-            lines.append(f"| `{error.get('status')}` | {error_text} |")
-    lines.extend(["", "## Notes", "", "- This report is a small-sample quality signal, not a full accuracy benchmark.", "- Add `expected_contains`, `expected_regex`, `reference_answer`, or `numeric_answer` fields to prompt/check configs to make rows actionable.", "- Backends that only emitted preflight data are recorded as unchecked until real text output is available.", "- Redacted rows had only a completion hash or policy-limited preview available, so full-text quality checks are intentionally not claimed."])
-    return "\n".join(lines) + "\n"
 
 
 def main() -> None:
@@ -598,7 +551,6 @@ def main() -> None:
     parser.add_argument("--checks", default="configs/quality_checks.example.json")
     parser.add_argument("--sources", nargs="*", default=["vllm_serving_benchmark.json", "llama_cpp_benchmark.json", "trtllm_benchmark.json"])
     parser.add_argument("--output", default="results/raw/backend_quality_eval.json")
-    parser.add_argument("--report", default="reports/quality_evaluation.md")
     args = parser.parse_args()
 
     repo_root = resolved_repo_root(args.repo_root)
@@ -638,10 +590,7 @@ def main() -> None:
 
     output = resolve_repo_path(repo_root, args.output)
     write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    write_text_file(report, markdown(payload))
     print(f"wrote {path_label(output)}")
-    print(f"wrote {path_label(report)}")
 
 
 if __name__ == "__main__":

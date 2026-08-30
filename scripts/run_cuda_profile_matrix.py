@@ -17,7 +17,7 @@ from typing import Any, Dict, List, Sequence
 from bounded_process import command_result_succeeded as command_ok, run_bounded_process
 from cli_validation import require_int_range
 from command_redaction import (
-    artifact_command_parts as shared_artifact_command_parts,
+    artifact_command_parts,
     artifact_output_tail,
     artifact_path_payload as path_payload,
     command_line,
@@ -31,7 +31,6 @@ from text_output import try_write_text_file as write_text_file
 
 
 DEFAULT_TARGETS = [
-    {"name": "vector_add", "target": "vector_add_cuda_test", "binary": "vector_add_cuda_test", "kind": "correctness_timing"},
     {"name": "matrix_ops", "target": "matrix_ops_cuda_test", "binary": "matrix_ops_cuda_test", "kind": "gemm_gemv_softmax"},
     {"name": "normalization", "target": "normalization_cuda_test", "binary": "normalization_cuda_test", "kind": "rmsnorm"},
     {"name": "rope", "target": "rope_cuda_test", "binary": "rope_cuda_test", "kind": "rotary_embedding"},
@@ -40,10 +39,6 @@ DEFAULT_TARGETS = [
     {"name": "paged_kv_gather", "target": "paged_kv_cuda_test", "binary": "paged_kv_cuda_test", "kind": "paged_kv"},
 ]
 CUDA_COMMAND_STREAM_LIMIT_BYTES = 16 * 1024 * 1024
-
-
-def artifact_command_parts(parts: Sequence[str]) -> List[str]:
-    return shared_artifact_command_parts(parts)
 
 
 def run(command: Sequence[str], timeout: int, cwd: Path | None = None) -> Dict[str, Any]:
@@ -274,40 +269,6 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
     }
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# CUDA Profiling Matrix",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Status: `{payload['status']}`",
-        f"- Executed: `{payload['executed']}`",
-    ]
-    selection = payload.get("target_selection", {})
-    unknown_targets = selection.get("unknown") if isinstance(selection, dict) else []
-    if unknown_targets:
-        lines.extend([
-            "",
-            "## Target Selection Issue",
-            "",
-            f"- Unknown targets: `{', '.join(str(item) for item in unknown_targets)}`",
-            "- No configure, build, target, or profiler commands were executed for this invalid selection.",
-            "",
-        ])
-    lines.extend([
-        "",
-        "## Targets",
-        "",
-        "| Name | CMake target | Kind |",
-        "|---|---|---|",
-    ])
-    for item in payload["targets"]:
-        lines.append(f"| {item['name']} | `{item['target']}` | {item['kind']} |")
-    lines.extend(["", "## Commands", ""])
-    for item in payload["commands"]:
-        label = item["stage"] if not item.get("name") else f"{item['stage']}:{item['name']}"
-        lines.append(f"- `{label}`: `{item['shell']}`")
-    lines.extend(["", "## Notes", "", "- Run with `--execute` only on a CUDA machine.", "- Use `--profile-tool ncu`, `--profile-tool nsys`, or `--profile-tool both` to collect profiler reports."])
-    return "\n".join(lines) + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -326,7 +287,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--nsys", default="nsys")
     parser.add_argument("--timeout-seconds", type=int, default=1800)
     parser.add_argument("--output", default="results/raw/cuda_profile_matrix.json")
-    parser.add_argument("--report", default="reports/cuda_profile_matrix.md")
     return parser.parse_args()
 
 
@@ -342,17 +302,11 @@ def main() -> int:
     payload = build_payload(args, repo_root)
     output = resolve_repo_path(repo_root, args.output)
     output_status = write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    report_status = write_text_file(report, markdown(payload))
     if output_status["status"] == "ok":
         print(f"wrote {path_label(output)}")
     else:
         print(f"failed to write {path_label(output)}: {output_status.get('error')}")
-    if report_status["status"] == "ok":
-        print(f"wrote {path_label(report)}")
-    else:
-        print(f"failed to write {path_label(report)}: {report_status.get('error')}")
-    return 0 if output_status["status"] == "ok" and report_status["status"] == "ok" else 1
+    return 0 if output_status["status"] == "ok" else 1
 
 
 if __name__ == "__main__":

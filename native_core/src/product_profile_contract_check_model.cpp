@@ -221,7 +221,7 @@ const ArtifactSpec& artifact_spec() {
       "native_product_profile_contract_check",
       "inferlab_product_profile_contract_check",
       "results/raw/native_product_profile_contract_check.json",
-      "reports/57_product_profile_contract_check.md",
+      "results/raw/native_product_profile_contract_check.json",
       "./build/inferlab_product_profile_contract_check --repo-root . --results results/raw --output results/raw/native_product_profile_contract_check.json --format json",
       "static structural and semantic contract audit of existing product_profile.v1 artifacts; it does not execute products, collect metrics, prove performance, or approve release",
   };

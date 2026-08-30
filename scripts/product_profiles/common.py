@@ -29,11 +29,19 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 try:
-    from scripts.cli_validation import require_float_range, require_int_range
+    from scripts.cli_validation import (
+        normalize_env_var_name,
+        require_float_range,
+        require_int_range,
+    )
     from scripts.text_output import try_write_text_file as write_text_file
     from scripts.time_utils import utc_now
 except ModuleNotFoundError:
-    from cli_validation import require_float_range, require_int_range
+    from cli_validation import (  # type: ignore
+        normalize_env_var_name,
+        require_float_range,
+        require_int_range,
+    )
     from text_output import try_write_text_file as write_text_file
     from time_utils import utc_now
 
@@ -100,7 +108,6 @@ REPLAY_EXTENSIONS = {
     ".sqlite",
 }
 
-ENV_VAR_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 PROMETHEUS_RE = re.compile(
     r"^(?P<name>[a-zA-Z_:][a-zA-Z0-9_:]*)(?:\{(?P<labels>[^}]*)\})?\s+"
     r"(?P<value>[-+0-9.eE]+)"
@@ -121,7 +128,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "serving_engine",
         "scope": "default_required",
         "artifact": "results/raw/product_vllm_capability_profile.json",
-        "report": "reports/49_product_vllm_profile.md",
+        "report": "results/raw/product_vllm_capability_profile.json",
         "config": "configs/product_profiles/vllm.example.yaml",
         "default_endpoint": "http://127.0.0.1:8000",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -140,7 +147,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "serving_engine",
         "scope": "default_required",
         "artifact": "results/raw/product_sglang_capability_profile.json",
-        "report": "reports/50_product_sglang_profile.md",
+        "report": "results/raw/product_sglang_capability_profile.json",
         "config": "configs/product_profiles/sglang.example.yaml",
         "default_endpoint": "http://127.0.0.1:30000",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -159,7 +166,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "kv_cache_system",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_lmcache_kv_offload_profile.json",
-        "report": "reports/51_product_kv_offload_profile.md",
+        "report": "results/raw/product_lmcache_kv_offload_profile.json",
         "config": "configs/product_profiles/kv_offload.example.yaml",
         "default_endpoint": "http://127.0.0.1:8000",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -178,7 +185,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "kv_cache_system",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_mooncake_kv_profile.json",
-        "report": "reports/51_product_kv_offload_profile.md",
+        "report": "results/raw/product_mooncake_kv_profile.json",
         "config": "configs/product_profiles/mooncake.example.yaml",
         "default_endpoint": "http://127.0.0.1:8000",
         "health_paths": ["/health", "/metrics"],
@@ -197,7 +204,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "runtime_backend",
         "scope": "default_required",
         "artifact": "results/raw/product_tensorrtllm_runtime_profile.json",
-        "report": "reports/52_product_runtime_backend_profile.md",
+        "report": "results/raw/product_tensorrtllm_runtime_profile.json",
         "config": "configs/product_profiles/tensorrtllm.example.yaml",
         "default_endpoint": "http://127.0.0.1:8000",
         "health_paths": ["/v2/health/ready", "/v2/models", "/metrics"],
@@ -216,7 +223,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "runtime_backend",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_lmdeploy_runtime_profile.json",
-        "report": "reports/52_product_runtime_backend_profile.md",
+        "report": "results/raw/product_lmdeploy_runtime_profile.json",
         "config": "configs/product_profiles/lmdeploy.example.yaml",
         "default_endpoint": "http://127.0.0.1:23333",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -235,7 +242,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "kernel_library",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_flashinfer_kernel_profile.json",
-        "report": "reports/53_product_kernel_library_profile.md",
+        "report": "results/raw/product_flashinfer_kernel_profile.json",
         "config": "configs/product_profiles/flashinfer.example.yaml",
         "default_endpoint": "",
         "health_paths": [],
@@ -247,14 +254,14 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "optional_tools": ["nvidia-smi"],
         "expected_metrics": ["kernel_available", "supported_shape_ratio", "dtype_coverage", "fallback_count", "latency_ms"],
         "not_implemented": ["FlashInfer attention kernels", "FlashInfer GEMM kernels", "FlashInfer MoE kernels"],
-        "local_optimization_scope": ["capability matrix", "shape coverage report", "fallback explanation"],
+        "local_optimization_scope": ["capability matrix", "shape coverage analysis", "fallback explanation"],
     },
     "ktransformers": {
         "name": "KTransformers",
         "category": "hybrid_runtime",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_ktransformers_hybrid_profile.json",
-        "report": "reports/53_product_kernel_library_profile.md",
+        "report": "results/raw/product_ktransformers_hybrid_profile.json",
         "config": "configs/product_profiles/ktransformers.example.yaml",
         "default_endpoint": "http://127.0.0.1:10002",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -266,14 +273,14 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "optional_tools": ["nvidia-smi"],
         "expected_metrics": ["load_time_ms", "cpu_memory_bytes", "gpu_memory_bytes", "tokens_per_s", "expert_placement_ratio", "fallback_count"],
         "not_implemented": ["KTransformers runtime", "heterogeneous MoE placement runtime", "custom kernels"],
-        "local_optimization_scope": ["placement artifact schema", "memory/cost explanation", "fallback report"],
+        "local_optimization_scope": ["placement artifact schema", "memory/cost explanation", "fallback analysis"],
     },
     "dynamo": {
         "name": "NVIDIA Dynamo",
         "category": "cloud_control_plane",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_dynamo_serving_profile.json",
-        "report": "reports/54_product_cloud_control_plane_profile.md",
+        "report": "results/raw/product_dynamo_serving_profile.json",
         "config": "configs/product_profiles/dynamo.example.yaml",
         "default_endpoint": "http://127.0.0.1:8000",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -292,7 +299,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "cloud_control_plane",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_kserve_llmd_profile.json",
-        "report": "reports/54_product_cloud_control_plane_profile.md",
+        "report": "results/raw/product_kserve_llmd_profile.json",
         "config": "configs/product_profiles/kserve_llmd.example.yaml",
         "default_endpoint": "",
         "health_paths": [],
@@ -311,7 +318,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "category": "cloud_control_plane",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_ray_serve_profile.json",
-        "report": "reports/54_product_cloud_control_plane_profile.md",
+        "report": "results/raw/product_ray_serve_profile.json",
         "config": "configs/product_profiles/ray_serve.example.yaml",
         "default_endpoint": "http://127.0.0.1:8000",
         "health_paths": ["/health", "/v1/models", "/metrics"],
@@ -323,14 +330,14 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "optional_tools": ["ray"],
         "expected_metrics": ["deployment_ready", "replica_count", "autoscaling_status", "qps", "p99_latency_ms", "kv_offload_status"],
         "not_implemented": ["Ray Serve controller", "Serve DAG runtime", "autoscaler", "KV offload engine"],
-        "local_optimization_scope": ["deployment graph snapshot", "autoscaling policy report", "profile normalization"],
+        "local_optimization_scope": ["deployment graph snapshot", "autoscaling policy analysis", "profile normalization"],
     },
     "tgi": {
         "name": "Hugging Face TGI",
         "category": "serving_engine",
         "scope": "optional_on_demand",
         "artifact": "results/raw/product_tgi_profile.json",
-        "report": "reports/52_product_runtime_backend_profile.md",
+        "report": "results/raw/product_tgi_profile.json",
         "config": "configs/product_profiles/tgi.example.yaml",
         "default_endpoint": "http://127.0.0.1:8081",
         "health_paths": ["/health", "/info", "/metrics"],
@@ -342,7 +349,7 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "optional_tools": ["text-generation-launcher", "nvidia-smi"],
         "expected_metrics": ["first_chunk_ms", "stream_gap_ms", "request_throughput_per_s", "tokens_per_s", "prometheus_metric_count", "error_rate"],
         "not_implemented": ["TGI server", "continuous batching runtime", "attention backend", "quantization runtime"],
-        "local_optimization_scope": ["HTTP/SSE artifact schema", "Prometheus metric normalization", "streaming latency report"],
+        "local_optimization_scope": ["HTTP/SSE artifact schema", "Prometheus metric normalization", "streaming latency analysis"],
     },
 }
 
@@ -377,7 +384,6 @@ def prepare_path_args(args: argparse.Namespace) -> None:
     args.repo_root_path = repo_root
     args.config_path = resolve_repo_path(repo_root, args.config)
     args.output_path = resolve_repo_path(repo_root, args.output)
-    args.report_path = resolve_repo_path(repo_root, args.report)
     args.evidence_dir_paths = [resolve_repo_path(repo_root, item) for item in args.evidence_dir or []]
     args.evidence_file_paths = [resolve_repo_path(repo_root, item) for item in args.evidence_file or []]
     args.metrics_file_paths = [resolve_repo_path(repo_root, item) for item in args.metrics_file or []]
@@ -1367,17 +1373,6 @@ def nvidia_smi_snapshot(execute: bool, timeout_seconds: float) -> Dict[str, Any]
     return result
 
 
-def normalize_env_var_name(label: str, value: Any) -> str:
-    if value is None:
-        return ""
-    name = str(value).strip()
-    if not name:
-        return ""
-    if not ENV_VAR_NAME_RE.fullmatch(name):
-        raise SystemExit(f"{label} must be an environment variable name, not a secret value")
-    return name
-
-
 def is_sensitive_config_key(key: str) -> bool:
     return is_sensitive_field_name(key, redact_env_names=True)
 
@@ -1482,9 +1477,9 @@ def version_capture(config: Dict[str, Any], execute: bool, timeout_seconds: floa
 def planned_commands(product_key: str, args: argparse.Namespace, config: Dict[str, Any]) -> Dict[str, Any]:
     repo_root = args.repo_root
     prefix = product_profile_command_prefix(product_key)
-    dry = [*prefix, "--repo-root", repo_root, "--config", args.config, "--output", args.output, "--report", args.report, "--dry-run"]
-    execute = [*prefix, "--repo-root", repo_root, "--config", args.config, "--output", args.output, "--report", args.report, "--execute"]
-    replay = [*prefix, "--repo-root", repo_root, "--config", args.config, "--output", args.output, "--report", args.report, "--replay"]
+    dry = [*prefix, "--repo-root", repo_root, "--config", args.config, "--output", args.output, "--dry-run"]
+    execute = [*prefix, "--repo-root", repo_root, "--config", args.config, "--output", args.output, "--execute"]
+    replay = [*prefix, "--repo-root", repo_root, "--config", args.config, "--output", args.output, "--replay"]
     endpoint = args.endpoint or config.get("endpoint") or config.get("default_endpoint")
     if endpoint:
         execute.extend(["--endpoint", str(endpoint)])
@@ -1698,7 +1693,7 @@ def build_payload(product_key: str, args: argparse.Namespace) -> Dict[str, Any]:
         ),
         "requires_target_environment": execute,
         "requires_external_product_core": True,
-        "inferlab_role": "adapter/profile/config/artifact/report/contract; product core remains external",
+        "inferlab_role": "adapter/profile/config/artifact/contract; product core remains external",
         "notes": [
             "dry-run artifacts are plans only",
             "execute artifacts are collected by probing a target environment",
@@ -1727,13 +1722,11 @@ def build_payload(product_key: str, args: argparse.Namespace) -> Dict[str, Any]:
             "repo_root": metric_path_label(repo_root.as_posix()),
             **metric_path_payload(args.config, "config", "config_path_redacted"),
             **metric_path_payload(args.output, "artifact", "artifact_path_redacted"),
-            **metric_path_payload(args.report, "report", "report_path_redacted"),
             "resolved_config": metric_path_label(getattr(args, "config_path", resolve_repo_path(repo_root, args.config)).as_posix()),
             "resolved_artifact": metric_path_label(getattr(args, "output_path", resolve_repo_path(repo_root, args.output)).as_posix()),
-            "resolved_report": metric_path_label(getattr(args, "report_path", resolve_repo_path(repo_root, args.report)).as_posix()),
             "paths_redacted": True,
             "adapter_type": "external_product_profile",
-            "boundary": "adapter/profile/config/artifact/report only; product core remains external",
+            "boundary": "adapter/profile/config/artifact only; product core remains external",
         },
         "config_load": config_status,
         "environment_preflight": preflight,
@@ -1762,7 +1755,7 @@ def build_payload(product_key: str, args: argparse.Namespace) -> Dict[str, Any]:
         "raw_metrics": raw_metrics,
         "replay_evidence": replay_evidence,
         "config_schema_errors": config_schema_errors,
-        "report_sections": normalized_config_list(config, "report_sections"),
+        "structured_report_artifacts": normalized_config_list(config, "report_sections"),
         "key_features": normalized_config_list(config, "key_features"),
         "risks": normalized_config_list(config, "risks"),
         "not_implemented_by_inferlab": normalized_config_list(config, "not_implemented"),
@@ -1779,86 +1772,12 @@ def write_json(path: str | Path, payload: Dict[str, Any]) -> Dict[str, Any]:
     return write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
-def md_cell(value: Any) -> str:
-    if isinstance(value, (list, dict)):
-        text = json.dumps(value, ensure_ascii=False, sort_keys=True)
-    else:
-        text = str(value)
-    return text.replace("|", "\\|").replace("\n", "<br>")
-
-
-def write_report(path: str | Path, payload: Dict[str, Any]) -> Dict[str, Any]:
-    preflight = payload.get("environment_preflight", {})
-    raw_metrics = payload.get("raw_metrics", {})
-    replay = payload.get("replay_evidence", {})
-    replay_summary = replay.get("summary", {}) if isinstance(replay, dict) else {}
-    rows = [
-        ("Product", payload.get("product_name")),
-        ("Mode", payload.get("mode")),
-        ("Status", payload.get("status")),
-        ("Artifact", payload.get("inferlab_adapter", {}).get("artifact")),
-        ("Config", payload.get("inferlab_adapter", {}).get("config")),
-        ("Missing preflight", preflight.get("missing")),
-        ("Expected metrics", raw_metrics.get("expected_metrics")),
-        ("Collected metrics", raw_metrics.get("collected")),
-        ("Replay evidence files", replay_summary.get("evidence_file_count")),
-        ("Replay parsed metrics", replay_summary.get("parsed_metric_count")),
-    ]
-    lines = [
-        f"# {payload.get('product_name')} Product Profile",
-        "",
-        f"- Generated: `{payload.get('generated_at')}`",
-        f"- Mode: `{payload.get('mode')}`",
-        f"- Status: `{payload.get('status')}`",
-        "",
-        "## Boundary",
-        "",
-        "InferLab uses this product through adapters, configuration, artifact contracts, and reports. It does not reimplement the product core.",
-        "",
-        "## Summary",
-        "",
-        "| Field | Value |",
-        "|---|---|",
-    ]
-    lines.extend(f"| {md_cell(key)} | {md_cell(value)} |" for key, value in rows)
-    lines.extend(["", "## Product Capabilities", ""])
-    lines.extend(f"- {item}" for item in payload.get("key_features", []))
-    lines.extend(["", "## InferLab Does Not Implement", ""])
-    lines.extend(f"- {item}" for item in payload.get("not_implemented_by_inferlab", []))
-    lines.extend(["", "## Local Optimization / Integration Scope", ""])
-    lines.extend(f"- {item}" for item in payload.get("local_optimization_scope", []))
-    lines.extend(["", "## Official Sources", ""])
-    lines.extend(f"- {item}" for item in payload.get("official_sources", []))
-    lines.extend(["", "## Commands", "", "```bash"])
-    commands = payload.get("planned_commands", {})
-    for key in ("dry_run", "execute"):
-        if commands.get(key):
-            lines.append(str(commands[key]))
-    if commands.get("replay"):
-        lines.append(str(commands["replay"]))
-    lines.append("```")
-    if replay_summary:
-        lines.extend([
-            "",
-            "## Offline Replay Evidence",
-            "",
-            "| Field | Value |",
-            "|---|---|",
-            f"| Evidence files | {md_cell(replay_summary.get('evidence_file_count'))} |",
-            f"| Parsed metrics | {md_cell(replay_summary.get('parsed_metric_count'))} |",
-            f"| Canonical metrics | {md_cell(replay_summary.get('canonical_metric_count'))} |",
-        ])
-    output = Path(path)
-    return write_text_file(output, "\n".join(lines) + "\n")
-
-
 def parse_args(product_key: str) -> argparse.Namespace:
     definition = PRODUCTS[product_key]
     parser = argparse.ArgumentParser(description=f"Profile {definition['name']} as an external InferLab product backend.")
-    parser.add_argument("--repo-root", default=str(default_repo_root()), help="InferLab project root used to resolve relative config/output/report/evidence paths.")
+    parser.add_argument("--repo-root", default=str(default_repo_root()), help="InferLab project root used to resolve relative config/output/evidence paths.")
     parser.add_argument("--config", default=definition["config"])
     parser.add_argument("--output", default=definition["artifact"])
-    parser.add_argument("--report", default=definition["report"])
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--dry-run", action="store_true", help="Force plan-only mode. This is the default unless --execute or --replay is passed.")
     mode.add_argument("--execute", action="store_true", help="Probe real endpoint/tools. Does not install products or download models.")
@@ -1892,13 +1811,8 @@ def main_for_product(product_key: str) -> int:
     prepare_path_args(args)
     payload = build_payload(product_key, args)
     output_status = write_json(args.output_path, payload)
-    report_status = write_report(args.report_path, payload)
     if output_status["status"] == "ok":
         print(f"wrote {metric_path_label(args.output_path.as_posix())}")
     else:
         print(f"failed to write {metric_path_label(args.output_path.as_posix())}: {output_status.get('error')}")
-    if report_status["status"] == "ok":
-        print(f"wrote {metric_path_label(args.report_path.as_posix())}")
-    else:
-        print(f"failed to write {metric_path_label(args.report_path.as_posix())}: {report_status.get('error')}")
-    return 0 if output_status["status"] == "ok" and report_status["status"] == "ok" else 1
+    return 0 if output_status["status"] == "ok" else 1

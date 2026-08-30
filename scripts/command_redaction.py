@@ -135,11 +135,30 @@ CONTENT_COMMAND_OPTION_NAMES = {
     "request-body",
 }
 
-SECRET_KEY_VALUE_RE = re.compile(
-    r"(?i)\b(?P<key>x[-_]?api[-_]?key|api[-_]?key|access[-_]?token|"
-    r"auth[-_]?token|bearer[-_]?token|password|passwd|secret|"
-    r"credential)s?\b(?P<pre>\s*)(?P<sep>[:=])(?P<post>\s*)"
+KEY_VALUE_RE = re.compile(
+    r"(?i)\b(?P<key>[a-z][a-z0-9_.-]{0,63})(?P<pre>\s*)"
+    r"(?P<sep>[:=])(?P<post>\s*)"
     r"(?P<quote>['\"]?)(?P<value>[^'\"\s,;]+)(?P=quote)"
+)
+QUOTED_KEY_VALUE_RE = re.compile(
+    r"(?is)\b(?P<key>[a-z][a-z0-9_.-]{0,63})(?P<pre>\s*)"
+    r"(?P<sep>[:=])(?P<post>\s*)"
+    r"(?P<quote>['\"])(?P<value>.*?)(?P=quote)"
+)
+PEM_ASSIGNMENT_START_RE = re.compile(
+    r"(?i)\b(?P<key>[a-z][a-z0-9_.-]{0,63})(?P<pre>\s*)"
+    r"(?P<sep>[:=])(?P<post>[ \t]*)(?P<quote>['\"]?)"
+    r"(?P<header>-----BEGIN[ \t]+"
+    r"(?P<label>[a-z0-9][a-z0-9 _./-]{0,80})-----)"
+)
+PEM_RECORD_BOUNDARY_RE = re.compile(
+    r"\r?\n(?=(?:[ \t]*\r?(?:\n|\Z)|"
+    r"[ \t]*[a-z][a-z0-9_.-]{0,63}[ \t]*[:=]))",
+    re.IGNORECASE | re.MULTILINE,
+)
+INLINE_FIELD_BOUNDARY_RE = re.compile(
+    r"[ \t]+(?=[a-z][a-z0-9_.-]{0,63}[ \t]*[:=])",
+    re.IGNORECASE,
 )
 AUTHORIZATION_HEADER_RE = re.compile(
     r"(?i)\b((?:proxy[-_])?authorization\s*[:=]\s*)(['\"]?)([^'\"\r\n,;]+)(\2)"
@@ -148,6 +167,19 @@ BEARER_VALUE_RE = re.compile(r"(?i)\b(bearer\s+)([A-Za-z0-9._~+/-]{8,})")
 OPENAI_KEY_RE = re.compile(r"\bsk-[A-Za-z0-9_-]{12,}\b")
 URL_CREDENTIAL_RE = re.compile(r"(?i)\b([a-z][a-z0-9+.-]*://)([^/\s:@]+):([^/\s@]+)@")
 USERPASS_RE = re.compile(r"^[^:\s/@]+:[^:\s/@]+$")
+BARE_USERPASS_RE = re.compile(
+    r"(?i)(?<![a-z0-9._%+-])(?P<username>[a-z][a-z0-9._-]{0,63}):"
+    r"(?P<password>[^\s/@:,;]{4,})(?![a-z0-9._%+-])"
+)
+COMMON_CREDENTIAL_USERNAMES = {
+    "admin",
+    "client",
+    "proxy",
+    "root",
+    "service",
+    "user",
+    "username",
+}
 
 SAFE_ENV_NAME_OPTIONS = {"api_key_env"}
 SENSITIVE_COMMAND_OPTION_NAMES = {
@@ -195,6 +227,9 @@ def is_sensitive_field_name(name: str, *, redact_env_names: bool = False) -> boo
         or normalized.endswith("_passwd")
         or normalized.endswith("_secret")
         or normalized.endswith("_token")
+        or normalized == "private_key"
+        or normalized.endswith("_private_key")
+        or "secret" in normalized.split("_")
         or (redact_env_names and normalized.endswith("_env"))
         or "api_key" in normalized
     )
@@ -205,6 +240,50 @@ def is_sensitive_command_option(option: str) -> bool:
     if "=" in raw:
         raw = raw.split("=", 1)[0]
     return is_sensitive_field_name(raw.lstrip("-"))
+
+
+def redact_pem_assignments(text: str) -> str:
+    chunks = []
+    cursor = 0
+    search_from = 0
+    while True:
+        match = PEM_ASSIGNMENT_START_RE.search(text, search_from)
+        if match is None:
+            break
+        if not is_sensitive_field_name(match.group("key")):
+            search_from = match.end("header")
+            continue
+
+        value_start = match.start("header")
+        end_marker = re.compile(
+            rf"-----END[ \t]+{re.escape(match.group('label'))}-----",
+            re.IGNORECASE,
+        ).search(text, match.end("header"))
+        if end_marker is not None:
+            value_end = end_marker.end()
+        else:
+            boundary_matches = [
+                candidate
+                for candidate in (
+                    PEM_RECORD_BOUNDARY_RE.search(text, match.end("header")),
+                    INLINE_FIELD_BOUNDARY_RE.search(text, match.end("header")),
+                )
+                if candidate is not None
+            ]
+            value_end = min(
+                (candidate.start() for candidate in boundary_matches),
+                default=len(text),
+            )
+
+        chunks.append(text[cursor:value_start])
+        chunks.append(REDACTED_VALUE)
+        cursor = value_end
+        search_from = value_end
+
+    if not chunks:
+        return text
+    chunks.append(text[cursor:])
+    return "".join(chunks)
 
 
 def redact_sensitive_text(value: Any) -> str:
@@ -219,14 +298,39 @@ def redact_sensitive_text(value: Any) -> str:
     text = BEARER_VALUE_RE.sub(lambda match: f"{match.group(1)}{REDACTED_VALUE}", text)
     text = OPENAI_KEY_RE.sub(REDACTED_VALUE, text)
 
-    def replace_secret(match: re.Match[str]) -> str:
+    def replace_quoted_secret(match: re.Match[str]) -> str:
+        if not is_sensitive_field_name(match.group("key")):
+            return match.group(0)
         return (
             f"{match.group('key')}{match.group('pre')}{match.group('sep')}"
             f"{match.group('post')}{match.group('quote')}{REDACTED_VALUE}"
             f"{match.group('quote')}"
         )
 
-    return SECRET_KEY_VALUE_RE.sub(replace_secret, text)
+    text = QUOTED_KEY_VALUE_RE.sub(replace_quoted_secret, text)
+    text = redact_pem_assignments(text)
+
+    def replace_secret(match: re.Match[str]) -> str:
+        if not is_sensitive_field_name(match.group("key")):
+            return match.group(0)
+        return (
+            f"{match.group('key')}{match.group('pre')}{match.group('sep')}"
+            f"{match.group('post')}{match.group('quote')}{REDACTED_VALUE}"
+            f"{match.group('quote')}"
+        )
+
+    text = KEY_VALUE_RE.sub(replace_secret, text)
+
+    def replace_userpass(match: re.Match[str]) -> str:
+        username = match.group("username").lower()
+        password = match.group("password")
+        has_mixed_secret_shape = (
+            len(password) >= 8
+            or (any(char.isalpha() for char in password) and any(char.isdigit() for char in password))
+        )
+        return REDACTED_VALUE if username in COMMON_CREDENTIAL_USERNAMES or has_mixed_secret_shape else match.group(0)
+
+    return BARE_USERPASS_RE.sub(replace_userpass, text)
 
 
 def redacted_path_label(value: Any) -> str:

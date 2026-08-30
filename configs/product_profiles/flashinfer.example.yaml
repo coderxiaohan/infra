@@ -1,6 +1,6 @@
 {
+  "report_sections": ["results/raw/product_flashinfer_kernel_profile.json"],
   "product": "flashinfer",
-  "report_sections": ["reports/53_product_kernel_library_profile.md"],
   "shape_matrix": [
     {"batch": 1, "heads": 32, "head_dim": 128, "kv_pages": 128, "dtype": "fp16"},
     {"batch": 8, "heads": 32, "head_dim": 128, "kv_pages": 512, "dtype": "bf16"}

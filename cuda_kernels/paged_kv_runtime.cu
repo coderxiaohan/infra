@@ -181,6 +181,8 @@ __device__ int logical_index(const int head, const int token, const int dim,
 __global__ void gather_paged_kv_kernel(const float* physical_cache,
                                        const int* block_table, float* output,
                                        const int token_count,
+                                       const int shared_prefix_tokens,
+                                       const int private_block_start,
                                        const int num_heads,
                                        const int block_size_tokens,
                                        const int head_dim) {
@@ -193,8 +195,17 @@ __global__ void gather_paged_kv_kernel(const float* physical_cache,
   const int dim = index % head_dim;
   const int token = (index / head_dim) % token_count;
   const int head = index / (token_count * head_dim);
-  const int logical_block = token / block_size_tokens;
-  const int block_offset = token % block_size_tokens;
+  int logical_block = 0;
+  int block_offset = 0;
+  if (token < shared_prefix_tokens) {
+    logical_block = token / block_size_tokens;
+    block_offset = token % block_size_tokens;
+  } else {
+    const int private_token = token - shared_prefix_tokens;
+    logical_block =
+        private_block_start + private_token / block_size_tokens;
+    block_offset = private_token % block_size_tokens;
+  }
   const int block_id = block_table[logical_block];
   output[logical_index(head, token, dim, token_count, head_dim)] =
       physical_cache[physical_index(block_id, head, block_offset, dim,
@@ -207,24 +218,47 @@ void validate_inputs(const std::vector<float>& physical_cache,
       shape.block_size_tokens <= 0) {
     throw std::invalid_argument("CUDA paged KV shape dimensions must be positive");
   }
-  if (blocks.token_count < 0) {
-    throw std::invalid_argument("CUDA paged KV token count must be non-negative");
+  if (blocks.token_count < 0 || blocks.shared_prefix_tokens < 0 ||
+      blocks.shared_prefix_tokens > blocks.token_count ||
+      blocks.private_block_start < 0) {
+    throw std::invalid_argument("CUDA paged KV request layout is invalid");
   }
-  const std::size_t required_blocks =
-      ceil_div_size(blocks.token_count, shape.block_size_tokens,
-                    "CUDA paged KV required blocks");
-  if (required_blocks > blocks.block_table.size()) {
+  const std::size_t required_prefix_blocks =
+      ceil_div_size(blocks.shared_prefix_tokens, shape.block_size_tokens,
+                    "CUDA paged KV shared prefix blocks");
+  if (required_prefix_blocks >
+      static_cast<std::size_t>(blocks.private_block_start)) {
+    throw std::invalid_argument(
+        "CUDA paged KV private block segment overlaps shared prefix blocks");
+  }
+  const int block_table_size =
+      checked_int_count(blocks.block_table.size(),
+                        "CUDA paged KV block table");
+  const auto private_block_start =
+      static_cast<std::size_t>(blocks.private_block_start);
+  if (blocks.private_block_start > block_table_size) {
+    throw std::invalid_argument(
+        "CUDA paged KV private block segment starts outside block table");
+  }
+  const int private_tokens =
+      blocks.token_count - blocks.shared_prefix_tokens;
+  const std::size_t required_private_blocks =
+      ceil_div_size(private_tokens, shape.block_size_tokens,
+                    "CUDA paged KV private blocks");
+  if (required_private_blocks >
+      blocks.block_table.size() - private_block_start) {
     throw std::invalid_argument("CUDA paged KV block table missing logical block");
   }
-  if (required_blocks == 0) {
-    return;
+
+  int max_block = -1;
+  for (const int block_id : blocks.block_table) {
+    if (block_id < 0) {
+      throw std::invalid_argument("CUDA paged KV block id must be non-negative");
+    }
+    max_block = std::max(max_block, block_id);
   }
-  const auto max_block =
-      *std::max_element(blocks.block_table.begin(),
-                        blocks.block_table.begin() +
-                            static_cast<std::ptrdiff_t>(required_blocks));
   if (max_block < 0) {
-    throw std::invalid_argument("CUDA paged KV block id must be non-negative");
+    return;
   }
   const auto block_elements =
       checked_product(shape.num_heads, shape.block_size_tokens, shape.head_dim,
@@ -253,9 +287,6 @@ CudaPagedKVResult gather_paged_kv_cache_cuda_runtime_profiled(
     const std::vector<float>& physical_cache, const RequestBlocks& blocks,
     const PagedKVShape& shape) {
   validate_inputs(physical_cache, blocks, shape);
-  const std::size_t required_blocks =
-      ceil_div_size(blocks.token_count, shape.block_size_tokens,
-                    "CUDA paged KV required blocks");
   const auto output_count =
       checked_product(shape.num_heads, blocks.token_count, shape.head_dim,
                       "CUDA paged KV output");
@@ -264,11 +295,7 @@ CudaPagedKVResult gather_paged_kv_cache_cuda_runtime_profiled(
   }
   const int total = checked_int_count(output_count, "CUDA paged KV output");
 
-  std::vector<int> block_table;
-  block_table.reserve(required_blocks);
-  for (std::size_t i = 0; i < required_blocks; ++i) {
-    block_table.push_back(blocks.block_table[i]);
-  }
+  const std::vector<int>& block_table = blocks.block_table;
 
   DeviceBuffer<float> device_physical(physical_cache.size());
   DeviceBuffer<int> device_block_table(block_table.size());
@@ -283,7 +310,8 @@ CudaPagedKVResult gather_paged_kv_cache_cuda_runtime_profiled(
   check_cuda(cudaEventRecord(start.get(), nullptr), "cudaEventRecord start");
   gather_paged_kv_kernel<<<grid, kBlockSize>>>(
       device_physical.data(), device_block_table.data(), device_output.data(),
-      blocks.token_count, shape.num_heads, shape.block_size_tokens,
+      blocks.token_count, blocks.shared_prefix_tokens,
+      blocks.private_block_start, shape.num_heads, shape.block_size_tokens,
       shape.head_dim);
   check_cuda(cudaGetLastError(), "gather_paged_kv_kernel launch");
   check_cuda(cudaEventRecord(stop.get(), nullptr), "cudaEventRecord stop");

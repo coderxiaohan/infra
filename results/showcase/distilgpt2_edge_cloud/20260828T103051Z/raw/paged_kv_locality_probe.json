@@ -1,0 +1,56 @@
+{
+  "artifact_type": "native_paged_kv_locality_probe",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU Paged KV block-table locality analysis over synthetic block ids only; not measured memory traffic, GPU cache locality, latency, throughput, or benchmark evidence.",
+  "config": {
+    "block_size_tokens": 4,
+    "head_dim": 8,
+    "num_heads": 4,
+    "token_count": 9
+  },
+  "fixture_limits": {
+    "max_paged_kv_probe_blocks": 1048576
+  },
+  "locality": {
+    "contiguous": {
+      "average_physical_jump": 1.000000,
+      "backward_transitions": 0,
+      "block_element_amplification": 1.333333,
+      "block_table": [0, 1, 2],
+      "contiguous_forward_transitions": 2,
+      "logical_blocks": 3,
+      "logical_element_reads": 288,
+      "max_physical_jump": 1,
+      "non_contiguous_transitions": 0,
+      "physical_span_blocks": 3,
+      "physical_span_elements": 384,
+      "span_element_amplification": 1.333333,
+      "token_count": 9,
+      "touched_block_elements": 384,
+      "transitions": 2,
+      "unique_physical_blocks": 3
+    },
+    "fragmented": {
+      "average_physical_jump": 3.000000,
+      "backward_transitions": 0,
+      "block_element_amplification": 1.333333,
+      "block_table": [0, 4, 6],
+      "contiguous_forward_transitions": 0,
+      "logical_blocks": 3,
+      "logical_element_reads": 288,
+      "max_physical_jump": 4,
+      "non_contiguous_transitions": 2,
+      "physical_span_blocks": 7,
+      "physical_span_elements": 896,
+      "span_element_amplification": 3.111111,
+      "token_count": 9,
+      "touched_block_elements": 384,
+      "transitions": 2,
+      "unique_physical_blocks": 3
+    },
+    "fragmented_vs_contiguous_span_amplification_delta": 1.777778
+  },
+  "reference_simulation_only": true
+}

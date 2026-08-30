@@ -1,0 +1,42 @@
+{
+  "schema_version": 4,
+  "target_platform": "linux-x86_64",
+  "runtime_rows": [
+    {
+      "row_id": "llama_cpp_distilgpt2_f16_x86_64",
+      "runtime": "llama_cpp",
+      "runtime_version": "11cd988",
+      "model_format": "gguf",
+      "backend": "cpu",
+      "logical_model_id": "distilgpt2",
+      "checkpoint_revision": "local-distilgpt2-clean-hf",
+      "tokenizer_id": "distilgpt2-gguf-embedded",
+      "conversion_provenance": "local F16 GGUF validation asset",
+      "quantization": "F16",
+      "model_path": "models/distilgpt2-f16.gguf",
+      "prompt": "Explain KV cache in one sentence.",
+      "seed": 42,
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "thread_count": 4,
+      "target_physical_core_count": 4,
+      "context_tokens": 512,
+      "batch_size": 1,
+      "concurrent_sessions": 1,
+      "maximum_output_tokens": 8,
+      "warmup_iterations": 0,
+      "minimum_measurement_iterations": 1,
+      "minimum_sustained_duration_ms": 0,
+      "maximum_measurement_iterations": 1,
+      "maximum_generation_duration_ms": 30000,
+      "layers": 6,
+      "kv_heads": 12,
+      "head_dim": 64,
+      "kv_dtype": "fp16",
+      "mmap_requested": true,
+      "runtime_workspace_budget_bytes": 536870912,
+      "system_memory_budget_bytes": 8589934592,
+      "system_reserve_bytes": 1073741824
+    }
+  ]
+}

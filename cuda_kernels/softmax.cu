@@ -1,6 +1,6 @@
 // Row-wise softmax kernel skeleton. One block handles one row.
-// Launch contract: blockDim.x must be a power of two, and dynamic shared memory
-// must provide at least blockDim.x floats. The production runtime wrapper uses
+// Launch contract: dynamic shared memory must provide at least blockDim.x
+// floats. The production runtime wrapper uses
 // cuda_kernels/matrix_ops_runtime.cu for checked launches; this skeleton is kept
 // as a low-level kernel entry for external experiments.
 
@@ -20,9 +20,11 @@ extern "C" __global__ void inferlab_row_softmax_f32(
   scratch[threadIdx.x] = local_max;
   __syncthreads();
 
-  for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
-    if (threadIdx.x < stride) {
-      float other = scratch[threadIdx.x + stride];
+  for (int active = blockDim.x; active > 1; active = (active + 1) / 2) {
+    const int next_active = (active + 1) / 2;
+    const int paired = active - next_active;
+    if (threadIdx.x < paired) {
+      float other = scratch[threadIdx.x + next_active];
       scratch[threadIdx.x] = other > scratch[threadIdx.x] ? other : scratch[threadIdx.x];
     }
     __syncthreads();
@@ -37,8 +39,10 @@ extern "C" __global__ void inferlab_row_softmax_f32(
   }
   scratch[threadIdx.x] = local_sum;
   __syncthreads();
-  for (int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
-    if (threadIdx.x < stride) scratch[threadIdx.x] += scratch[threadIdx.x + stride];
+  for (int active = blockDim.x; active > 1; active = (active + 1) / 2) {
+    const int next_active = (active + 1) / 2;
+    const int paired = active - next_active;
+    if (threadIdx.x < paired) scratch[threadIdx.x] += scratch[threadIdx.x + next_active];
     __syncthreads();
   }
   float row_sum = scratch[0];

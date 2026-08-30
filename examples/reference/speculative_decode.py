@@ -11,9 +11,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from mini_llm.cli_io import (
     require_float_range,
@@ -21,9 +26,9 @@ from mini_llm.cli_io import (
     require_non_negative_float,
     require_positive_float,
     require_positive_int,
-    redacted_path_label,
     write_text_file,
 )
+from scripts.command_redaction import redacted_path_label
 
 
 DEFAULT_SCENARIOS = (
@@ -108,7 +113,9 @@ def _speculative_cost(
     verify_window: int,
 ) -> dict[str, Any]:
     expected_accept = _expected_accepted_tokens(acceptance_rate, verify_window)
-    expected_progress = max(1.0, expected_accept + (1.0 - acceptance_rate**verify_window))
+    # Every verification round emits the accepted draft prefix plus one target
+    # token, including the bonus token when the whole draft window is accepted.
+    expected_progress = 1.0 + expected_accept
     rounds = output_tokens / expected_progress if expected_progress > 0 else float(output_tokens)
     draft_tokens = rounds * verify_window
     target_verify_calls = rounds

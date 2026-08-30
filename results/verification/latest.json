@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "snapshot_date": "2026-08-30",
+  "verification_scope": "core_runtime_and_experiment_harness",
+  "snapshot_status": "verified_with_declared_boundaries",
+  "source": {
+    "base_git_commit": "81d15ca934a67ac076f38771408a78b22b272981",
+    "worktree_state": "dirty",
+    "note": "Validated against the current working tree. Commit the reviewed changes before treating this snapshot as an immutable release record."
+  },
+  "checks": [
+    {
+      "name": "python_regression",
+      "status": "passed",
+      "passed": 78,
+      "skipped": 5,
+      "total": 83,
+      "command": "python3 -m unittest discover -s tests -p test_*.py",
+      "verified_on": "2026-08-30"
+    },
+    {
+      "name": "cpp_cuda_ctest",
+      "status": "passed",
+      "passed": 22,
+      "total": 22,
+      "cpu_tests": 15,
+      "cuda_tests": 7,
+      "environment": {
+        "cuda": "13.1",
+        "gpu": "NVIDIA GeForce RTX 4070 SUPER"
+      },
+      "command_pattern": "ctest --test-dir <cuda-build-dir> --output-on-failure",
+      "verified_on": "2026-08-30"
+    },
+    {
+      "name": "edge_cloud_showcase",
+      "status": "passed",
+      "source_artifact": "results/showcase/latest.json",
+      "source_artifact_timestamp": "2026-08-28T10:32:07.730116Z",
+      "verified_on": "2026-08-28"
+    },
+    {
+      "name": "acceptance_checklist",
+      "status": "complete",
+      "completed": 12,
+      "total": 12,
+      "source_artifact": "results/raw/evidence_checklist.json",
+      "source_artifact_tracked": false,
+      "verified_on": "2026-08-29"
+    }
+  ],
+  "boundaries": {
+    "android_arm64": {
+      "acceptance_status": "complete",
+      "completion_basis": "project_owner_confirmation",
+      "current_device_performance_evidence": "not_claimed"
+    },
+    "optional_backends": "Profiles and preflight artifacts do not imply successful execution of every external runtime.",
+    "distribution_license": "missing"
+  }
+}

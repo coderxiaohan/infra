@@ -1,8 +1,8 @@
 {
+  "report_sections": ["results/raw/product_tgi_profile.json"],
   "product": "tgi",
   "endpoint": "http://127.0.0.1:8081",
   "metrics_url": "http://127.0.0.1:8081/metrics",
-  "report_sections": ["reports/52_product_runtime_backend_profile.md"],
   "planned_commands": {
     "start_example": "text-generation-launcher --model-id /models/model --port 8081",
     "dry_run": "python3 -m scripts.product_profiles.profile_tgi --repo-root . --config configs/product_profiles/tgi.example.yaml --dry-run",

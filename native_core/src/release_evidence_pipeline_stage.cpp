@@ -9,8 +9,8 @@
 namespace inferlab_release_pipeline {
 namespace {
 
-constexpr std::size_t kExpectedPipelineStageCount = 10U;
-constexpr std::size_t kExpectedCurrentDecisionStageCount = 5U;
+constexpr std::size_t kExpectedPipelineStageCount = 9U;
+constexpr std::size_t kExpectedCurrentDecisionStageCount = 4U;
 constexpr std::size_t kExpectedPostGenerationStageCount = 5U;
 
 PipelineStage managed_stage(const std::string& id,
@@ -210,7 +210,7 @@ std::vector<PipelineStage> default_pipeline_stages() {
       fallback_stage(
           "benchmark_summary", "summary", "benchmark_summary.json",
           "summary_report_input",
-          "python3 scripts/summarize_benchmarks.py --repo-root . --results results/raw --output results/tables/benchmark_summary.md --json-output results/raw/benchmark_summary.json",
+          "python3 scripts/summarize_benchmarks.py --repo-root . --results results/raw --output results/raw/benchmark_summary.json",
           false, PipelineStagePhase::PostGenerationConsumer,
           "scripts/summarize_benchmarks.py",
           "extend the central catalog to describe Python report-glue producers and verify summary parity before removing this fallback"),

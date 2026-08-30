@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import struct
 import sys
 from pathlib import Path
@@ -16,12 +15,8 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from artifact_json import path_label, write_json_file as write_json_artifact_file
+from artifact_json import path_label, write_json_file
 from command_redaction import redact_path_error
-
-
-def write_json_file(path: Path, payload: dict) -> None:
-    write_json_artifact_file(path, payload)
 
 
 def main() -> None:

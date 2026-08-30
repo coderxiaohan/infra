@@ -18,8 +18,8 @@ option(INFERLAB_REQUIRE_EDGE_RUNTIME_LINKED "Fail configuration unless at least 
 option(INFERLAB_ENABLE_ANDROID_JNI "Build the Android JNI bridge for the unified edge runtime" OFF)
 option(INFERLAB_ENABLE_EDGE_CLOUD_CURL "Enable the optional libcurl OpenAI-compatible edge-cloud transport" OFF)
 set(INFERLAB_LLAMA_CPP_SOURCE_DIR "" CACHE PATH
-  "Path to an existing llama.cpp checkout pinned at e9fa078; InferLab never downloads it implicitly")
-set(INFERLAB_LLAMA_CPP_EXPECTED_REVISION "e9fa078")
+  "Path to an existing llama.cpp checkout pinned at 11cd988; InferLab never downloads it implicitly")
+set(INFERLAB_LLAMA_CPP_EXPECTED_REVISION "11cd988")
 set(INFERLAB_EXECUTORCH_SOURCE_DIR "" CACHE PATH
   "Path to the ExecuTorch source checkout used to build the external SDK")
 set(INFERLAB_EXECUTORCH_INSTALL_DIR "" CACHE PATH
@@ -154,82 +154,9 @@ function(inferlab_configure_kernel_microbench_target target_name)
   endif()
 endfunction()
 
-# Compile a command dispatcher once while preserving explicitly named
-# compatibility executables during the internal caller migration window.
-function(inferlab_add_shared_dispatch_group)
-  set(options)
-  set(one_value_args OBJECT_TARGET SOURCE CANONICAL_TARGET)
-  set(multi_value_args SOURCES COMPATIBILITY_TARGETS)
-  cmake_parse_arguments(DISPATCH "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
-
-  if(NOT DISPATCH_OBJECT_TARGET OR NOT DISPATCH_CANONICAL_TARGET)
-    message(FATAL_ERROR "inferlab_add_shared_dispatch_group requires OBJECT_TARGET and CANONICAL_TARGET")
-  endif()
-  set(dispatch_sources ${DISPATCH_SOURCE} ${DISPATCH_SOURCES})
-  if(NOT dispatch_sources)
-    message(FATAL_ERROR "inferlab_add_shared_dispatch_group requires SOURCE or SOURCES")
-  endif()
-
-  add_library(${DISPATCH_OBJECT_TARGET} OBJECT ${dispatch_sources})
-  target_link_libraries(${DISPATCH_OBJECT_TARGET} PRIVATE inferlab_native_core)
-
-  set(dispatch_targets
-    ${DISPATCH_CANONICAL_TARGET}
-    ${DISPATCH_COMPATIBILITY_TARGETS}
-  )
-  foreach(target_name IN LISTS dispatch_targets)
-    add_executable(${target_name} $<TARGET_OBJECTS:${DISPATCH_OBJECT_TARGET}>)
-    target_link_libraries(${target_name} PRIVATE inferlab_native_core)
-    # All dispatcher sources are compiled by the object target above. Keep
-    # compile-time high-value capabilities there instead of duplicating them on
-    # source-free canonical and compatibility executable shells.
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_CANONICAL_EXECUTABLE ${DISPATCH_CANONICAL_TARGET})
-  endforeach()
-
-  set_property(TARGET ${DISPATCH_CANONICAL_TARGET} PROPERTY
-    INFERLAB_DISPATCH_ROLE canonical)
-  set_property(TARGET ${DISPATCH_CANONICAL_TARGET} PROPERTY
-    INFERLAB_COMPATIBILITY_STATUS canonical)
-  foreach(target_name IN LISTS DISPATCH_COMPATIBILITY_TARGETS)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_DISPATCH_ROLE compatibility)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_OWNER ${DISPATCH_CANONICAL_TARGET})
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_STATUS active_compatibility)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_CALLERS
-      "repository_runtime_callers_require_bounded_scan;documentation_references_are_not_runtime_callers;external_callers_require_inventory")
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_REPOSITORY_RUNTIME_CALLER_STATUS
-      runtime_scan_required)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_DOCUMENTATION_REFERENCE_STATUS
-      retained_non_runtime_reference)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_EXTERNAL_CALLER_AUDIT_STATUS
-      pending_external_inventory)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_PARITY_STATUS evidence_import_required)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_REMOVAL_ALLOWED FALSE)
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_REMOVAL_CONDITION
-      "canonical command parity is validated and external callers have migrated")
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_REMOVAL_BLOCKER
-      "runtime governance evidence must be imported by the lifecycle gate")
-    set_property(TARGET ${target_name} PROPERTY
-      INFERLAB_COMPATIBILITY_TARGET_RELEASE post_dispatch_parity_validation)
-    set_property(GLOBAL APPEND PROPERTY INFERLAB_COMPATIBILITY_MANIFEST_ENTRIES
-      "{\"entry_id\":\"cmake.${target_name}\",\"compatibility_target\":\"${target_name}\",\"canonical_target\":\"${DISPATCH_CANONICAL_TARGET}\",\"path\":\"$<TARGET_FILE:${target_name}>\",\"replacement\":\"$<TARGET_FILE:${DISPATCH_CANONICAL_TARGET}>\",\"target_release\":\"post_dispatch_parity_validation\"}")
-  endforeach()
-endfunction()
-
 find_package(Threads REQUIRED)
 
-enable_testing()
+include(CTest)
 
 add_library(inferlab_native_core
   native_core/src/advanced_serving_capacity.cpp
@@ -337,7 +264,6 @@ add_library(inferlab_native_core
   native_core/src/trace_clock_calibration_view.cpp
   native_core/src/trace_correlation_contract.cpp
   native_core/src/trace_span_lifecycle_contract.cpp
-  native_core/src/vector_add.cpp
 )
 target_include_directories(inferlab_native_core
   PUBLIC
@@ -824,15 +750,12 @@ add_executable(inferlab_kv_offload_hierarchy_plan
 )
 target_link_libraries(inferlab_kv_offload_hierarchy_plan PRIVATE inferlab_native_core)
 
-inferlab_add_shared_dispatch_group(
-  OBJECT_TARGET inferlab_engine_memory_planner_objects
-  SOURCE native_core/src/engine_memory_planner_main.cpp
-  SOURCES
-    native_core/src/engine_memory_planner_model.cpp
-    native_core/src/engine_memory_planner_view.cpp
-  CANONICAL_TARGET inferlab_engine_memory_planner
-  COMPATIBILITY_TARGETS inferlab_engine_memory_plan
+add_executable(inferlab_engine_memory_planner
+  native_core/src/engine_memory_planner_main.cpp
+  native_core/src/engine_memory_planner_model.cpp
+  native_core/src/engine_memory_planner_view.cpp
 )
+target_link_libraries(inferlab_engine_memory_planner PRIVATE inferlab_native_core)
 
 add_executable(inferlab_gateway_policy_matrix_plan
   native_core/src/gateway_policy_matrix_plan_main.cpp
@@ -971,43 +894,40 @@ add_executable(inferlab_release_evidence_pipeline
 )
 target_link_libraries(inferlab_release_evidence_pipeline PRIVATE inferlab_native_core)
 
-inferlab_add_shared_dispatch_group(
-  OBJECT_TARGET inferlab_evidence_query_objects
-  SOURCE native_core/src/evidence_query_main.cpp
-  SOURCES
-    native_core/src/evidence_warehouse_index_model.cpp
-    native_core/src/evidence_query_operation_contract_view.cpp
-    native_core/src/evidence_query_source_projection.cpp
-    native_core/src/evidence_query_native_trace_projection.cpp
-    native_core/src/evidence_query_request.cpp
-    native_core/src/evidence_query_artifact_support_view.cpp
-    native_core/src/evidence_query_result_artifact_projection.cpp
-    native_core/src/evidence_query_result_artifact_summary_core_view.cpp
-    native_core/src/evidence_query_result_artifact_summary_query_ux_view.cpp
-    native_core/src/evidence_query_result_artifact_summary_catalog_review_view.cpp
-    native_core/src/evidence_query_result_artifact_summary_native_audit_core_view.cpp
-    native_core/src/evidence_query_result_artifact_summary_snapshot_view.cpp
-    native_core/src/evidence_query_result_artifact_body_view.cpp
-    native_core/src/evidence_query_result_artifact_view.cpp
-    native_core/src/evidence_query_repair_path_query_view.cpp
-    native_core/src/evidence_query_selector_export_artifact_view.cpp
-    native_core/src/evidence_query_text_view.cpp
-    native_core/src/evidence_query_text_overview_view.cpp
-    native_core/src/evidence_query_text_filter_view.cpp
-    native_core/src/evidence_query_text_native_audit_view.cpp
-    native_core/src/evidence_query_text_repair_view.cpp
-    native_core/src/evidence_query_catalog_filter_view.cpp
-    native_core/src/evidence_query_native_audit_filter_view.cpp
-    native_core/src/deep_dive_trace_time_window.cpp
-    native_core/src/deep_dive_trace_token_join.cpp
-    native_core/src/deep_dive_trace_token_join_policy.cpp
-    native_core/src/deep_dive_trace_token_join_validation.cpp
-    native_core/src/deep_dive_trace_token_join_view.cpp
-    native_core/src/deep_dive_trace_span_lineage.cpp
-    native_core/src/deep_dive_trace_span_lifecycle.cpp
-  CANONICAL_TARGET inferlab_evidence_query
-  COMPATIBILITY_TARGETS inferlab_evidence_query_selector_repair_card_export
+add_executable(inferlab_evidence_query
+  native_core/src/evidence_query_main.cpp
+  native_core/src/evidence_warehouse_index_model.cpp
+  native_core/src/evidence_query_operation_contract_view.cpp
+  native_core/src/evidence_query_source_projection.cpp
+  native_core/src/evidence_query_native_trace_projection.cpp
+  native_core/src/evidence_query_request.cpp
+  native_core/src/evidence_query_artifact_support_view.cpp
+  native_core/src/evidence_query_result_artifact_projection.cpp
+  native_core/src/evidence_query_result_artifact_summary_core_view.cpp
+  native_core/src/evidence_query_result_artifact_summary_query_ux_view.cpp
+  native_core/src/evidence_query_result_artifact_summary_catalog_review_view.cpp
+  native_core/src/evidence_query_result_artifact_summary_native_audit_core_view.cpp
+  native_core/src/evidence_query_result_artifact_summary_snapshot_view.cpp
+  native_core/src/evidence_query_result_artifact_body_view.cpp
+  native_core/src/evidence_query_result_artifact_view.cpp
+  native_core/src/evidence_query_repair_path_query_view.cpp
+  native_core/src/evidence_query_selector_export_artifact_view.cpp
+  native_core/src/evidence_query_text_view.cpp
+  native_core/src/evidence_query_text_overview_view.cpp
+  native_core/src/evidence_query_text_filter_view.cpp
+  native_core/src/evidence_query_text_native_audit_view.cpp
+  native_core/src/evidence_query_text_repair_view.cpp
+  native_core/src/evidence_query_catalog_filter_view.cpp
+  native_core/src/evidence_query_native_audit_filter_view.cpp
+  native_core/src/deep_dive_trace_time_window.cpp
+  native_core/src/deep_dive_trace_token_join.cpp
+  native_core/src/deep_dive_trace_token_join_policy.cpp
+  native_core/src/deep_dive_trace_token_join_validation.cpp
+  native_core/src/deep_dive_trace_token_join_view.cpp
+  native_core/src/deep_dive_trace_span_lineage.cpp
+  native_core/src/deep_dive_trace_span_lifecycle.cpp
 )
+target_link_libraries(inferlab_evidence_query PRIVATE inferlab_native_core)
 
 add_executable(inferlab_dependency_sbom_gate
   native_core/src/dependency_sbom_gate_main.cpp
@@ -1056,51 +976,15 @@ add_executable(inferlab_product_replay_semantic_events
 )
 target_link_libraries(inferlab_product_replay_semantic_events PRIVATE inferlab_native_core)
 
-# Canonical mature-product runners select an artifact with --artifact. The old
-# artifact-named executables remain thin compatibility dispatch names until
-# target-machine parity and external caller migration are complete.
-inferlab_add_shared_dispatch_group(
-  OBJECT_TARGET inferlab_mature_product_p2_artifacts_objects
-  SOURCE native_core/src/mature_product_p2_artifacts_main.cpp
-  CANONICAL_TARGET inferlab_mature_product_p2_artifacts
-  COMPATIBILITY_TARGETS
-    inferlab_streaming_backpressure_deep_dive
-    inferlab_structured_output_parser_contract
-    inferlab_autoscaler_cost_slo_deep_dive
-    inferlab_lora_adapter_cache_deep_dive
-    inferlab_grammar_backend_matrix
-    inferlab_edge_compiler_artifact_matrix
+add_executable(inferlab_mature_product_p2_artifacts
+  native_core/src/mature_product_p2_artifacts_main.cpp
 )
+target_link_libraries(inferlab_mature_product_p2_artifacts PRIVATE inferlab_native_core)
 
-inferlab_add_shared_dispatch_group(
-  OBJECT_TARGET inferlab_mature_product_borrowed_gap_artifacts_objects
-  SOURCE native_core/src/mature_product_borrowed_gap_artifacts_main.cpp
-  CANONICAL_TARGET inferlab_mature_product_borrowed_gap_artifacts
-  COMPATIBILITY_TARGETS
-    inferlab_kv_transport_timeline_deep_dive
-    inferlab_radix_prefix_cache_deep_dive
-    inferlab_kv_compression_blend_risk
-    inferlab_chunked_prefill_stall_free_deep_dive
-    inferlab_tenant_quota_admission_deep_dive
-    inferlab_live_request_migration_deep_dive
-    inferlab_quant_correctness_contract
-    inferlab_paged_kv_gather_kernel_contract
-    inferlab_flashinfer_replay_alignment
-    inferlab_trtllm_engine_quant_alignment
-    inferlab_gateway_policy_matrix
-    inferlab_deployment_readiness_matrix
-    inferlab_openai_api_conformance_matrix
+add_executable(inferlab_mature_product_borrowed_gap_artifacts
+  native_core/src/mature_product_borrowed_gap_artifacts_main.cpp
 )
-
-get_property(inferlab_compatibility_manifest_entries GLOBAL PROPERTY
-  INFERLAB_COMPATIBILITY_MANIFEST_ENTRIES)
-if(inferlab_compatibility_manifest_entries)
-  list(JOIN inferlab_compatibility_manifest_entries ",\n    "
-    inferlab_compatibility_manifest_body)
-  file(GENERATE
-    OUTPUT "${CMAKE_BINARY_DIR}/inferlab_compatibility_manifest.json"
-    CONTENT "{\n  \"schema_version\": 3,\n  \"entries\": [\n    ${inferlab_compatibility_manifest_body}\n  ]\n}\n")
-endif()
+target_link_libraries(inferlab_mature_product_borrowed_gap_artifacts PRIVATE inferlab_native_core)
 
 add_executable(inferlab_product_replay_alignment
   native_core/src/product_replay_alignment_main.cpp
@@ -1142,6 +1026,7 @@ add_executable(inferlab_runtime_evidence_freshness_gate
 )
 target_link_libraries(inferlab_runtime_evidence_freshness_gate PRIVATE inferlab_native_core)
 
+if(BUILD_TESTING)
 add_executable(kv_cache_test
   native_core/tests/kv_cache_test.cpp
 )
@@ -1190,12 +1075,6 @@ add_executable(quantization_test
 target_link_libraries(quantization_test PRIVATE inferlab_native_core)
 add_test(NAME quantization_test COMMAND quantization_test)
 
-add_executable(vector_add_test
-  native_core/tests/vector_add_test.cpp
-)
-target_link_libraries(vector_add_test PRIVATE inferlab_native_core)
-add_test(NAME vector_add_test COMMAND vector_add_test)
-
 add_executable(matrix_ops_test
   native_core/tests/matrix_ops_test.cpp
 )
@@ -1237,6 +1116,7 @@ add_executable(gguf_test
 )
 target_link_libraries(gguf_test PRIVATE inferlab_native_core)
 add_test(NAME gguf_test COMMAND gguf_test)
+endif()
 
 if(INFERLAB_ENABLE_CUDA)
   enable_language(CUDA)
@@ -1248,8 +1128,6 @@ if(INFERLAB_ENABLE_CUDA)
     cuda_kernels/quantization_runtime.cu
     cuda_kernels/rope_runtime.cu
     cuda_kernels/softmax.cu
-    cuda_kernels/vector_add.cu
-    cuda_kernels/vector_add_runtime.cu
   )
   set_target_properties(inferlab_cuda_kernels PROPERTIES
     CUDA_STANDARD 17
@@ -1265,16 +1143,7 @@ if(INFERLAB_ENABLE_CUDA)
     PRIVATE inferlab_cuda_kernels
   )
 
-  add_executable(vector_add_cuda_test
-    cuda_kernels/vector_add_cuda_test.cpp
-  )
-  target_link_libraries(vector_add_cuda_test
-    PRIVATE
-      inferlab_cuda_kernels
-      inferlab_native_core
-  )
-  add_test(NAME vector_add_cuda_test COMMAND vector_add_cuda_test)
-
+  if(BUILD_TESTING)
   add_executable(matrix_ops_cuda_test
     cuda_kernels/matrix_ops_cuda_test.cpp
   )
@@ -1334,4 +1203,15 @@ if(INFERLAB_ENABLE_CUDA)
       inferlab_native_core
   )
   add_test(NAME paged_kv_cuda_test COMMAND paged_kv_cuda_test)
+
+  add_executable(softmax_kernel_cuda_test
+    cuda_kernels/softmax_kernel_cuda_test.cu
+  )
+  target_link_libraries(softmax_kernel_cuda_test
+    PRIVATE
+      inferlab_cuda_kernels
+      inferlab_native_core
+  )
+  add_test(NAME softmax_kernel_cuda_test COMMAND softmax_kernel_cuda_test)
+  endif()
 endif()

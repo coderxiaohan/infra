@@ -1,6 +1,7 @@
 #include "product_replay_semantic_linkage_projection.hpp"
 
 #include "artifact_contract_model.hpp"
+#include "artifact_evidence_contract.hpp"
 #include "artifact_field_projection.hpp"
 #include "checked_index.hpp"
 #include "high_value_artifact_catalog.hpp"
@@ -166,24 +167,39 @@ ArtifactContractPolicy structural_contract_policy() {
   return policy;
 }
 
-const inferlab_high_value::ManagedArtifact& require_rule_native_artifact(
+std::string contract_artifact_filename(
+    const inferlab_artifact_contract::Contract& contract) {
+  return fs::path(contract.artifact).filename().generic_string();
+}
+
+std::string require_rule_native_artifact_filename(
     const std::string& filename) {
-  const inferlab_high_value::ManagedArtifact* match = nullptr;
+  bool matched = false;
   for (const auto& artifact : inferlab_high_value::managed_artifacts()) {
     if (artifact.artifact != filename) continue;
-    if (match != nullptr) {
+    if (matched) {
+      throw std::logic_error(
+        "product replay correlation native artifact is ambiguous: " +
+          filename);
+    }
+    matched = true;
+  }
+  for (const auto& contract :
+       inferlab_artifact_contract::contract_extension_registry()) {
+    if (contract_artifact_filename(contract) != filename) continue;
+    if (matched) {
       throw std::logic_error(
           "product replay correlation native artifact is ambiguous: " +
           filename);
     }
-    match = &artifact;
+    matched = true;
   }
-  if (match == nullptr) {
+  if (!matched) {
     throw std::logic_error(
-        "product replay correlation native artifact is not catalog managed: " +
+        "product replay correlation native artifact is not registered: " +
         filename);
   }
-  return *match;
+  return filename;
 }
 
 void project_correlation_rules(
@@ -202,10 +218,10 @@ void project_correlation_rules(
       throw std::logic_error(
           "product replay correlation rule uses a non-canonical semantic source");
     }
-    const auto& native_artifact =
-        require_rule_native_artifact(rule.native_artifact);
+    const auto native_artifact =
+        require_rule_native_artifact_filename(rule.native_artifact);
     const auto& native_snapshot =
-        snapshots.get(results_path / native_artifact.artifact);
+        snapshots.get(results_path / native_artifact);
     const auto native_contract = evaluate_artifact_contract(
         native_snapshot, structural_contract_policy());
     if (semantic_contract.ready && native_contract.ready) {

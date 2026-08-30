@@ -6,7 +6,7 @@
   "mode": "dry_run",
   "executed": false,
   "replayed": false,
-  "claim_scope": "artifact fixture lacking summary/final report wiring",
+  "claim_scope": "artifact fixture lacking summary/catalog wiring",
   "summary": {
     "evidence_confidence": "stale_or_blocked",
     "release_decision": "blocked",
@@ -15,13 +15,13 @@
   "blockers": [
     {
       "category": "report_wiring_missing",
-      "message": "artifact is not wired into summary, Prometheus, final report, or report README"
+      "message": "artifact is not wired into the benchmark summary or artifact catalog"
     }
   ],
   "expected_confidence": "stale_or_blocked",
   "expected_blocker_category": "report_wiring_missing",
   "expected_release_decision": "blocked",
   "expected_repair_environment": "current_repo_fixable",
-  "expected_repair_action": "wire artifact into summary, Prometheus, final report, and markdown report",
+  "expected_repair_action": "wire artifact into the benchmark summary and artifact catalog",
   "forbidden_claims": ["report_ready", "release_ready"]
 }

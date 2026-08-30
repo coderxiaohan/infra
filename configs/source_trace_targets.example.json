@@ -1,25 +1,56 @@
 {
   "repositories": {
-    "transformers": "/src/transformers",
-    "vllm": "/src/vllm",
-    "tensorrt_llm": "/src/TensorRT-LLM",
-    "llama_cpp": "/src/llama.cpp"
+    "transformers": {
+      "root": "~/.venvs/inferlab-vllm/lib/python3.12/site-packages",
+      "identity": {
+        "type": "python_distribution",
+        "distribution": "transformers",
+        "version": "5.15.1",
+        "metadata_path": "transformers-5.15.1.dist-info/METADATA"
+      }
+    },
+    "vllm": {
+      "root": "~/.venvs/inferlab-vllm/lib/python3.12/site-packages",
+      "identity": {
+        "type": "python_distribution",
+        "distribution": "vllm",
+        "version": "0.27.1",
+        "metadata_path": "vllm-0.27.1.dist-info/METADATA"
+      }
+    },
+    "tensorrt_llm": {
+      "root": "~/.venvs/inferlab-trtllm/lib/python3.12/site-packages",
+      "identity": {
+        "type": "python_distribution",
+        "distribution": "tensorrt_llm",
+        "version": "1.2.1",
+        "metadata_path": "tensorrt_llm-1.2.1.dist-info/METADATA"
+      }
+    },
+    "llama_cpp": {
+      "root": "third_party/llama.cpp",
+      "identity": {
+        "type": "git",
+        "revision": "11cd98842874cc1b87ac274bd2d5cceb38102bb2"
+      }
+    }
   },
   "checks": {
     "transformers": [
-      {"path": "src/transformers/generation/utils.py", "patterns": ["generate", "past_key_values"]},
-      {"path": "src/transformers/cache_utils.py", "patterns": ["Cache", "update"]}
+      {"path": "transformers/generation/utils.py", "patterns": ["class GenerationMixin", "def generate", "past_key_values"]},
+      {"path": "transformers/cache_utils.py", "patterns": ["class Cache", "def update"]}
     ],
     "vllm": [
-      {"path": "vllm/engine/llm_engine.py", "patterns": ["add_request", "step"]},
-      {"path": "vllm/core/scheduler.py", "patterns": ["Scheduler", "waiting"]}
+      {"path": "vllm/v1/engine/llm_engine.py", "patterns": ["class LLMEngine", "def add_request"]},
+      {"path": "vllm/v1/core/sched/scheduler.py", "patterns": ["class Scheduler", "def schedule"]}
     ],
     "tensorrt_llm": [
       {"path": "tensorrt_llm/runtime/session.py", "patterns": ["Session"]},
       {"path": "tensorrt_llm/builder.py", "patterns": ["Builder"]}
     ],
     "llama_cpp": [
-      {"path": "src/llama.cpp", "patterns": ["llama_decode", "llama_model_load"]},
+      {"path": "src/llama-context.cpp", "patterns": ["llama_decode"]},
+      {"path": "src/llama.cpp", "patterns": ["llama_model_load", "llama_model_load_from_file"]},
       {"path": "ggml/src/ggml.c", "patterns": ["ggml_graph"]}
     ]
   }

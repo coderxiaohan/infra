@@ -1,0 +1,337 @@
+{
+  "build_dir": "path_bc207a627ffcac2a",
+  "build_dir_redacted": true,
+  "counts": {
+    "failed": 0,
+    "partial": 0,
+    "passed": 20,
+    "skipped": 0
+  },
+  "coverage_manifest": "scripts/run_native_probes.py::PROBES",
+  "coverage_source": "native_probe_runner",
+  "covered_probe_count": 20,
+  "covered_probes": [
+    {
+      "artifact": "native_shape_probe.json",
+      "target": "inferlab_shape_probe"
+    },
+    {
+      "artifact": "scheduler_trace.json",
+      "target": "inferlab_scheduler_trace"
+    },
+    {
+      "artifact": "scheduler_pressure_sweep.json",
+      "target": "inferlab_scheduler_pressure_sweep"
+    },
+    {
+      "artifact": "scheduler_workload_sweep.json",
+      "target": "inferlab_scheduler_workload_sweep"
+    },
+    {
+      "artifact": "scheduler_capacity_sweep.json",
+      "target": "inferlab_scheduler_capacity_sweep"
+    },
+    {
+      "artifact": "scheduler_admission_policy_sweep.json",
+      "target": "inferlab_scheduler_admission_policy_sweep"
+    },
+    {
+      "artifact": "scheduler_runtime_policy_sweep.json",
+      "target": "inferlab_scheduler_runtime_policy_sweep"
+    },
+    {
+      "artifact": "scheduler_fairness_sweep.json",
+      "target": "inferlab_scheduler_fairness_sweep"
+    },
+    {
+      "artifact": "kv_allocation_compare.json",
+      "target": "inferlab_kv_allocation_compare"
+    },
+    {
+      "artifact": "prefix_cache_compare.json",
+      "target": "inferlab_prefix_cache_compare"
+    },
+    {
+      "artifact": "kv_fragmentation_probe.json",
+      "target": "inferlab_kv_fragmentation_probe"
+    },
+    {
+      "artifact": "paged_kv_locality_probe.json",
+      "target": "inferlab_paged_kv_locality_probe"
+    },
+    {
+      "artifact": "quantization_probe.json",
+      "target": "inferlab_quantization_probe"
+    },
+    {
+      "artifact": "quantization_sweep.json",
+      "target": "inferlab_quantization_sweep"
+    },
+    {
+      "artifact": "quantization_channel_compare.json",
+      "target": "inferlab_quantization_channel_compare"
+    },
+    {
+      "artifact": "attention_probe.json",
+      "target": "inferlab_attention_probe"
+    },
+    {
+      "artifact": "matrix_ops_profile.json",
+      "target": "inferlab_matrix_ops_profile"
+    },
+    {
+      "artifact": "decoder_probe.json",
+      "target": "inferlab_decoder_probe"
+    },
+    {
+      "artifact": "decoder_kv_probe.json",
+      "target": "inferlab_decoder_kv_probe"
+    },
+    {
+      "artifact": "gguf_probe.json",
+      "target": "inferlab_gguf_probe"
+    }
+  ],
+  "probes": [
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.78,
+      "name": "inferlab_shape_probe",
+      "output": "path_ccff1de40e1c15d9.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.063,
+      "name": "inferlab_scheduler_trace",
+      "output": "path_64b2064f4804591d.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.186,
+      "name": "inferlab_scheduler_pressure_sweep",
+      "output": "path_df4be8e2015d48d7.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.053,
+      "name": "inferlab_scheduler_workload_sweep",
+      "output": "path_948e265b0c58808e.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 10.956,
+      "name": "inferlab_scheduler_capacity_sweep",
+      "output": "path_2804509b3e2a4e28.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.141,
+      "name": "inferlab_scheduler_admission_policy_sweep",
+      "output": "path_c8d684ec9a4e233d.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 10.994,
+      "name": "inferlab_scheduler_runtime_policy_sweep",
+      "output": "path_9df3ee19855714fa.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.083,
+      "name": "inferlab_scheduler_fairness_sweep",
+      "output": "path_8c28077364138878.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 10.981,
+      "name": "inferlab_kv_allocation_compare",
+      "output": "path_2c6ee6bdd763b094.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.802,
+      "name": "inferlab_prefix_cache_compare",
+      "output": "path_8253a4523a97a679.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.21,
+      "name": "inferlab_kv_fragmentation_probe",
+      "output": "path_d39b5821b7c82753.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.292,
+      "name": "inferlab_paged_kv_locality_probe",
+      "output": "path_4d8211b2a7c13500.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.103,
+      "name": "inferlab_quantization_probe",
+      "output": "path_3cb7f4728360fc9b.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 10.99,
+      "name": "inferlab_quantization_sweep",
+      "output": "path_c187e4206f037a0e.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 10.962,
+      "name": "inferlab_quantization_channel_compare",
+      "output": "path_6bf031e4a04bbf8f.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 10.986,
+      "name": "inferlab_attention_probe",
+      "output": "path_c81d7071e84670f2.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.134,
+      "name": "inferlab_matrix_ops_profile",
+      "output": "path_eb32a2eb23918762.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.135,
+      "name": "inferlab_decoder_probe",
+      "output": "path_29296800fddfd398.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.098,
+      "name": "inferlab_decoder_kv_probe",
+      "output": "path_cf8a8e2df01ea842.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    },
+    {
+      "artifact_status": "present_json",
+      "elapsed_ms": 11.115,
+      "name": "inferlab_gguf_probe",
+      "output": "path_e05f4aff5628a385.json",
+      "output_redacted": true,
+      "returncode": 0,
+      "status": "passed",
+      "timeout_disabled": false,
+      "timeout_seconds": 300.0
+    }
+  ],
+  "repo_root": "path_e4b9a6eb8d7718ba",
+  "repo_root_redacted": true,
+  "results_dir": "path_534f0ad9744f580e",
+  "results_dir_redacted": true,
+  "schema_version": 1,
+  "timeout_policy": {
+    "default_timeout_seconds": 300.0,
+    "disable_timeout_value": null,
+    "maximum_timeout_seconds": 86400.0,
+    "minimum_timeout_seconds": 0.001,
+    "per_probe_timeout_seconds": 300.0,
+    "timeout_disable_supported": false,
+    "timeout_disabled": false
+  },
+  "timestamp_utc": "2026-08-28T10:31:02.000011+00:00",
+  "timing": {
+    "slowest_probe": "inferlab_prefix_cache_compare",
+    "slowest_probe_elapsed_ms": 11.802,
+    "total_elapsed_ms": 223.064
+  }
+}

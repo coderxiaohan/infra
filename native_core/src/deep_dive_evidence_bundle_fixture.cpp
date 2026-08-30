@@ -13,7 +13,7 @@ bool ends_with(const std::string& value, const std::string& suffix) {
 }
 
 void validate_specs(const std::vector<ArtifactWiringSpec>& specs) {
-  constexpr std::size_t kExpectedSpecCount = 9U;
+  constexpr std::size_t kExpectedSpecCount = 8U;
   if (specs.size() != kExpectedSpecCount) {
     throw std::logic_error(
         "deep-dive artifact wiring registry count drift");
@@ -52,7 +52,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_kv_lifecycle_deep_dive.json",
        "kv_lifecycle",
        "native_core/src/kv_lifecycle_deep_dive_model.cpp",
-       "reports/94_kv_lifecycle_deep_dive.md",
+       "results/raw/native_kv_lifecycle_deep_dive.json",
        "inferlab_kv_lifecycle_deep_dive",
        "native_kv_lifecycle_deep_dive_refresh",
        "./build/inferlab_kv_lifecycle_deep_dive --repo-root . --output results/raw/native_kv_lifecycle_deep_dive.json"},
@@ -60,7 +60,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_kv_tier_decision_deep_dive.json",
        "kv_tier_decision",
        "native_core/src/kv_tier_decision_deep_dive_model.cpp",
-       "reports/69_kv_tier_decision_deep_dive.md",
+       "results/raw/native_kv_tier_decision_deep_dive.json",
        "inferlab_kv_tier_decision_deep_dive",
        "native_kv_tier_decision_deep_dive_refresh",
        "./build/inferlab_kv_tier_decision_deep_dive --repo-root . --output results/raw/native_kv_tier_decision_deep_dive.json"},
@@ -68,7 +68,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_pd_split_crossover_deep_dive.json",
        "pd_split_crossover",
        "native_core/src/pd_split_crossover_deep_dive_main.cpp",
-       "reports/70_pd_split_crossover_deep_dive.md",
+       "results/raw/native_pd_split_crossover_deep_dive.json",
        "inferlab_pd_split_crossover_deep_dive",
        "native_pd_split_crossover_deep_dive_refresh",
        "./build/inferlab_pd_split_crossover_deep_dive --repo-root . --output results/raw/native_pd_split_crossover_deep_dive.json"},
@@ -76,7 +76,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_scheduler_root_cause_deep_dive.json",
        "scheduler_root_cause",
        "native_core/src/scheduler_root_cause_deep_dive_main.cpp",
-       "reports/71_scheduler_root_cause_deep_dive.md",
+       "results/raw/native_scheduler_root_cause_deep_dive.json",
        "inferlab_scheduler_root_cause_deep_dive",
        "native_scheduler_root_cause_deep_dive_refresh",
        "./build/inferlab_scheduler_root_cause_deep_dive --repo-root . --output results/raw/native_scheduler_root_cause_deep_dive.json"},
@@ -84,7 +84,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_kernel_compatibility_matrix.json",
        "kernel_compatibility_matrix",
        "native_core/src/kernel_compatibility_matrix_main.cpp",
-       "reports/72_kernel_compatibility_matrix.md",
+       "results/raw/native_kernel_compatibility_matrix.json",
        "inferlab_kernel_compatibility_matrix",
        "native_kernel_compatibility_matrix_refresh",
        "./build/inferlab_kernel_compatibility_matrix --repo-root . --output results/raw/native_kernel_compatibility_matrix.json"},
@@ -92,7 +92,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "product_replay_semantic_events.json",
        "product_replay_semantic_events",
        "native_core/src/product_replay_semantic_events_main.cpp",
-       "reports/74_product_replay_semantic_events.md",
+       "results/raw/product_replay_semantic_events.json",
        "inferlab_product_replay_semantic_events",
        "product_replay_semantic_events_refresh",
        "./build/inferlab_product_replay_semantic_events --repo-root . --results results/raw --output results/raw/product_replay_semantic_events.json --format json"},
@@ -100,7 +100,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_product_replay_alignment.json",
        "product_replay_alignment",
        "native_core/src/product_replay_alignment_main.cpp",
-       "reports/64_product_replay_alignment.md",
+       "results/raw/native_product_replay_alignment.json",
        "inferlab_product_replay_alignment",
        "native_product_replay_alignment_refresh",
        "./build/inferlab_product_replay_alignment --repo-root . --results results/raw --output results/raw/native_product_replay_alignment.json --format json"},
@@ -108,7 +108,7 @@ const std::vector<ArtifactWiringSpec>& artifact_wiring_specs() {
        "native_deep_dive_contract_check.json",
        "deep_dive_contract_check",
        "native_core/src/deep_dive_contract_check_main.cpp",
-       "reports/65_deep_dive_contract_check.md",
+       "results/raw/native_deep_dive_contract_check.json",
        "inferlab_deep_dive_contract_check",
        "native_deep_dive_contract_check_refresh",
        "./build/inferlab_deep_dive_contract_check --repo-root . --results results/raw --output results/raw/native_deep_dive_contract_check.json --format json"}};

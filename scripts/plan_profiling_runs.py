@@ -3,23 +3,23 @@
 
 The planner does not execute Nsight, vLLM, TensorRT-LLM, llama.cpp, perf,
 simpleperf, Docker, or Android commands. It records local tool availability and
-writes a JSON plus Markdown command plan that can be moved to a capable machine.
+writes a JSON command plan that can be moved to a capable machine.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import platform
 import shutil
 from time_utils import utc_now
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
+from artifact_json import write_json_file as write_json
 from command_redaction import (
     artifact_command_parts as shared_artifact_command_parts,
     artifact_command_template_parts as shared_artifact_command_template_parts,
-    artifact_path_or_value,
+    artifact_path_or_value as artifact_path_value,
     artifact_path_payload as path_payload,
     looks_like_local_path,
     redact_path_error,
@@ -51,12 +51,10 @@ PATH_COMMAND_OPTIONS = {
     "--cuda-build-dir",
     "--engine-dir",
     "--export",
-    "--json-output",
     "--llama-binary",
     "--llama-model",
     "--output",
     "--profiling-root",
-    "--report",
     "--results",
 }
 
@@ -64,10 +62,6 @@ CONTENT_COMMAND_OPTIONS = {
     "-p",
     "--prompt",
 }
-
-
-def artifact_path_value(value: Any) -> str:
-    return artifact_path_or_value(value)
 
 
 def artifact_command_parts(parts: Iterable[Any]) -> List[str]:
@@ -197,7 +191,6 @@ def cuda_commands(args: argparse.Namespace) -> List[Dict[str, Any]]:
         ),
     ]
     cuda_targets = [
-        "vector_add_cuda_test",
         "matrix_ops_cuda_test",
         "normalization_cuda_test",
         "rope_cuda_test",
@@ -413,12 +406,10 @@ def edge_commands(args: argparse.Namespace) -> List[Dict[str, Any]]:
                 "--model",
                 args.android_model,
                 "--output",
-                "reports/android_deploy_plan.md",
-                "--json-output",
                 "results/raw/android_deploy_plan.json",
             ],
             "Regenerate Android/ARM command plan on the host that has NDK and adb.",
-            "reports/android_deploy_plan.md",
+            "results/raw/android_deploy_plan.json",
         ),
     ]
 
@@ -436,12 +427,10 @@ def refresh_commands(args: argparse.Namespace) -> List[Dict[str, Any]]:
                 "--results",
                 "results/raw",
                 "--output",
-                "results/tables/benchmark_summary.md",
-                "--json-output",
                 "results/raw/benchmark_summary.json",
             ],
-            "Refresh human and machine-readable benchmark summary after runtime runs.",
-            "results/tables/benchmark_summary.md",
+            "Refresh the machine-readable benchmark summary after runtime runs.",
+            "results/raw/benchmark_summary.json",
         ),
         command_record(
             "export_prometheus_metrics",
@@ -458,22 +447,6 @@ def refresh_commands(args: argparse.Namespace) -> List[Dict[str, Any]]:
             ],
             "Refresh node_exporter textfile metrics from raw JSON artifacts.",
             "results/tables/inferlab_metrics.prom",
-        ),
-        command_record(
-            "render_final_report",
-            "reporting",
-            [
-                "python3",
-                "scripts/render_final_report.py",
-                "--repo-root",
-                ".",
-                "--output",
-                "reports/final_report.md",
-                "--json-output",
-                "results/raw/final_report_index.json",
-            ],
-            "Refresh final report after benchmark and profiling evidence is collected.",
-            "reports/final_report.md",
         ),
     ]
 
@@ -517,69 +490,17 @@ def build_plan(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
             "Run vLLM commands with a legal model path and model name accepted by the server.",
             "Run TensorRT-LLM commands only after building an engine for the target GPU and sequence bounds.",
             "Run llama.cpp and Android commands only with legal GGUF model files and the required device/toolchain.",
-            "After collecting runtime JSON/logs, run the reporting commands at the end of the plan.",
+            "After collecting runtime JSON/logs, run the structured export commands at the end of the plan.",
         ],
     }
 
 
-def write_json(path: Path, payload: Dict[str, Any]) -> None:
-    write_text_file(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-
-
-def markdown(plan: Dict[str, Any]) -> str:
-    lines = [
-        "# InferLab Runtime Profiling Plan",
-        "",
-        f"- Generated: `{plan['timestamp_utc']}`",
-        f"- Host: `{plan['host']['platform']}` / `{plan['host']['machine']}`",
-        "",
-        "## Tool Preflight",
-        "",
-        "| Tool | Path | Available |",
-        "|---|---|---:|",
-    ]
-    for name, probe in sorted(plan["preflight"]["tools"].items()):
-        lines.append(f"| `{name}` | `{probe.get('path') or ''}` | `{bool(probe.get('available'))}` |")
-    lines.extend(["", "## Path Preflight", "", "| Path | Exists | Kind |", "|---|---:|---|"])
-    for name, probe in sorted(plan["preflight"]["paths"].items()):
-        kind = "dir" if probe.get("is_dir") else "file" if probe.get("is_file") else ""
-        lines.append(f"| `{name}`: `{probe.get('path')}` | `{bool(probe.get('exists'))}` | {kind} |")
-
-    categories = []
-    for command in plan["commands"]:
-        category = command["category"]
-        if category not in categories:
-            categories.append(category)
-
-    for category in categories:
-        lines.extend(["", f"## {category.replace('_', ' ').title()} Commands", ""])
-        for command in [item for item in plan["commands"] if item["category"] == category]:
-            lines.extend(
-                [
-                    f"### {command['name']}",
-                    "",
-                    command["purpose"],
-                    "",
-                    "```bash",
-                    command["command"],
-                    "```",
-                ]
-            )
-            if command.get("output"):
-                lines.extend(["", f"Expected artifact: `{command['output']}`"])
-            lines.append("")
-
-    lines.extend(["## Notes", ""])
-    for note in plan["notes"]:
-        lines.append(f"- {note}")
-    return "\n".join(lines).rstrip() + "\n"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=str(default_repo_root()))
-    parser.add_argument("--output", default="reports/profiling_plan.md")
-    parser.add_argument("--json-output", default="results/raw/profiling_plan.json")
+    parser.add_argument("--output", default="results/raw/profiling_plan.json")
     parser.add_argument("--cuda-build-dir", default="build-cuda")
     parser.add_argument("--jobs", type=int, default=8)
     parser.add_argument("--ncu-set", default="full")
@@ -619,12 +540,9 @@ def main() -> None:
     validate_args(args)
     repo_root = resolved_repo_root(args.repo_root)
     plan = build_plan(args, repo_root)
-    json_output = resolve_repo_path(repo_root, args.json_output)
     output = resolve_repo_path(repo_root, args.output)
-    write_json(json_output, plan)
-    write_text_file(output, markdown(plan))
+    write_json(output, plan)
     print(f"wrote {path_label(output)}")
-    print(f"wrote {path_label(json_output)}")
 
 
 if __name__ == "__main__":

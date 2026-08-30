@@ -1,9 +1,8 @@
 """Script helpers exposed for direct-file and ``python -m scripts.*`` entrypoints.
 
-Most InferLab Python files under this package are glue scripts that historically
-supported direct execution, for example ``python3 scripts/render_final_report.py``.
-Adding the package directory to ``sys.path`` preserves those same sibling
-imports when a command is normalized to ``python3 -m scripts.render_final_report``.
+Most InferLab Python files under this package are glue scripts that support
+both direct execution and ``python3 -m scripts.<module>``. Adding the package
+directory to ``sys.path`` preserves their sibling imports in both forms.
 """
 
 from __future__ import annotations

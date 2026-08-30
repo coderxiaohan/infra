@@ -36,10 +36,9 @@ from android_benchmark_output import (
     path_label,
     project_android_scenario_observation,
     public_command_results,
-    render_android_benchmark_markdown,
     simpleperf_placeholder,
     utc_now,
-    validate_output_paths,
+    validate_output_path,
 )
 from bounded_process import command_result_succeeded as command_ok, run_bounded_process
 from text_output import try_write_text_file as write_text_file
@@ -403,7 +402,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--simpleperf", action="store_true")
     parser.add_argument("--timeout-seconds", type=int, default=900)
     parser.add_argument("--output", default="results/raw/android_edge_benchmark.json")
-    parser.add_argument("--report", default="reports/android_edge_benchmark.md")
     return parser.parse_args()
 
 
@@ -447,24 +445,18 @@ def main() -> int:
     validate_args(args)
     repo_root = resolved_repo_root(args.repo_root)
     output = resolve_repo_path(repo_root, args.output)
-    report = resolve_repo_path(repo_root, args.report)
     protected = [resolve_repo_path(repo_root, args.model)] if args.model else []
     try:
-        validate_output_paths(output, report, protected)
+        validate_output_path(output, protected)
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
     payload = build_payload(args, repo_root)
     output_status = write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report_status = write_text_file(report, render_android_benchmark_markdown(payload))
     if output_status["status"] == "ok":
         print(f"wrote {path_label(output)}")
     else:
         print(f"failed to write {path_label(output)}: {output_status.get('error')}")
-    if report_status["status"] == "ok":
-        print(f"wrote {path_label(report)}")
-    else:
-        print(f"failed to write {path_label(report)}: {report_status.get('error')}")
-    return 0 if output_status["status"] == "ok" and report_status["status"] == "ok" else 1
+    return 0 if output_status["status"] == "ok" else 1
 
 
 if __name__ == "__main__":

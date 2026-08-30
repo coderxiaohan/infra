@@ -107,8 +107,8 @@ def command_projection(parts: Sequence[str]) -> Dict[str, Any]:
     return {"command": command, "shell": command_line(command)}
 
 
-def validate_output_paths(output: Path, report: Path, protected: List[Path]) -> None:
-    candidates = [("output", output), ("report", report), *[("protected input", path) for path in protected]]
+def validate_output_path(output: Path, protected: List[Path]) -> None:
+    candidates = [("output", output), *[("protected input", path) for path in protected]]
     resolved: List[tuple[str, Path]] = []
     for label, path in candidates:
         try:
@@ -123,10 +123,8 @@ def validate_output_paths(output: Path, report: Path, protected: List[Path]) -> 
         except OSError as exc:
             raise ValueError(f"path identity cannot be inspected: {redact_path_error(exc, left, right)}") from exc
 
-    if aliases(resolved[0][1], resolved[1][1]):
-        raise ValueError("--output and --report must resolve to different paths")
-    for label, path in resolved[2:]:
-        if aliases(resolved[0][1], path) or aliases(resolved[1][1], path):
+    for label, path in resolved[1:]:
+        if aliases(resolved[0][1], path):
             raise ValueError(f"artifact destination aliases {label} {path_label(path)}")
 
 
@@ -458,118 +456,3 @@ def public_command_results(records: List[Dict[str, Any]]) -> List[Dict[str, Any]
         item.pop("output_observation", None)
         projected.append(item)
     return projected
-
-
-def _markdown_cell(value: Any) -> str:
-    return (
-        str(value if value is not None else "")
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("`", "&#96;")
-        .replace("|", "\\|")
-        .replace("\n", " ")
-    )
-
-
-def render_android_benchmark_markdown(payload: Dict[str, Any]) -> str:
-    device = payload.get("device_evidence", {})
-    identity = device.get("device_identity", {})
-    resource = device.get("resource_window", {})
-    before = resource.get("before", {})
-    after = resource.get("after", {})
-    battery_interval = resource.get("battery_counter_interval", {})
-    footprint = device.get("deployment_footprint", {})
-    package = footprint.get("package", {})
-    lines = [
-        "# Android Edge Benchmark",
-        "",
-        f"- Generated: `{_markdown_cell(payload.get('timestamp_utc'))}`",
-        f"- Mode: `{_markdown_cell(payload.get('mode'))}`",
-        f"- Status: `{_markdown_cell(payload.get('status'))}`",
-        f"- Executed: `{bool(payload.get('executed'))}`",
-        "",
-        "## Device Evidence",
-        "",
-        "| Model | SoC | API | ABI | Evidence |",
-        "|---|---|---:|---|---|",
-        "| "
-        + " | ".join(
-            _markdown_cell(value)
-            for value in (
-                identity.get("device_model"),
-                identity.get("soc_identity"),
-                identity.get("android_api_level"),
-                identity.get("primary_abi"),
-                device.get("status"),
-            )
-        )
-        + " |",
-        "",
-        "| Resource | Before | After |",
-        "|---|---:|---:|",
-        f"| Maximum thermal mC | {_markdown_cell(before.get('thermal', {}).get('maximum_millicelsius'))} | {_markdown_cell(after.get('thermal', {}).get('maximum_millicelsius'))} |",
-        f"| Thermal service status | {_markdown_cell(before.get('thermal', {}).get('thermal_service_status_name'))} | {_markdown_cell(after.get('thermal', {}).get('thermal_service_status_name'))} |",
-        f"| Battery energy counter uWh | {_markdown_cell(before.get('battery', {}).get('energy_now'))} | {_markdown_cell(after.get('battery', {}).get('energy_now'))} |",
-        f"| Battery charge counter uAh | {_markdown_cell(before.get('battery', {}).get('charge_counter'))} | {_markdown_cell(after.get('battery', {}).get('charge_counter'))} |",
-        "",
-        "## Footprint And Counter Method",
-        "",
-        f"- Battery method: `{_markdown_cell(battery_interval.get('measurement_method'))}`",
-        f"- Signed stored-energy change (uWh): `{_markdown_cell(battery_interval.get('stored_energy_counter_change_uwh'))}`",
-        f"- Runtime binary bytes: `{_markdown_cell(footprint.get('runtime_binary_bytes'))}`",
-        f"- Model file bytes: `{_markdown_cell(footprint.get('model_file_bytes'))}`",
-        f"- Package status/bytes: `{_markdown_cell(package.get('status'))}` / `{_markdown_cell(package.get('total_archive_bytes'))}`",
-        "",
-        "## Scenarios",
-        "",
-        "| Threads | Status | Command |",
-        "|---:|---|---|",
-    ]
-    for item in payload.get("records", []):
-        lines.append(
-            f"| {_markdown_cell(item.get('threads'))} | `{_markdown_cell(item.get('status'))}` | `{_markdown_cell(item.get('shell'))}` |"
-        )
-    if payload.get("summary", {}).get("simpleperf_requested"):
-        lines.extend(
-            [
-                "",
-                "## Simpleperf",
-                "",
-                "| Threads | Status | CPU cycles | Instructions | Cache misses | Task clock | Test time (s) | Issues / not counted |",
-                "|---:|---|---:|---:|---:|---:|---:|---:|",
-            ]
-        )
-        for item in payload.get("records", []):
-            observation = item.get("simpleperf_observation", {})
-            counters = observation.get("counters", {})
-            counter_value = lambda name: counters.get(name, {}).get("value")
-            lines.append(
-                "| "
-                + " | ".join(
-                    _markdown_cell(value)
-                    for value in (
-                        item.get("threads"),
-                        observation.get("status"),
-                        counter_value("cpu-cycles"),
-                        counter_value("instructions"),
-                        counter_value("cache-misses"),
-                        counter_value("task-clock"),
-                        observation.get("total_test_time_seconds"),
-                        f"{observation.get('issue_count', 0)} / {observation.get('summary', {}).get('not_counted_count', 0)}",
-                    )
-                )
-                + " |"
-            )
-    lines.extend(
-        [
-            "",
-            "## Notes",
-            "",
-            "- Use `--execute` on an adb-connected Android/ARM target.",
-            "- Enable `--simpleperf` to collect CPU counters with the same command contract.",
-            "- Signed battery-counter changes are whole-device observations, not workload-exclusive energy.",
-            "- This standalone CLI runner does not validate the InferLab JNI/AAR lifecycle.",
-        ]
-    )
-    return "\n".join(lines) + "\n"

@@ -18,7 +18,9 @@ from advanced_serving.common import (
     artifact_safe_value,
     base_parser,
     command_record,
+    config_backend_map,
     config_object_list,
+    config_raw_string_value,
     config_string_value,
     path_label,
     read_json,
@@ -26,7 +28,6 @@ from advanced_serving.common import (
     status_from_execution,
     utc_now,
     write_json,
-    write_report,
 )
 
 
@@ -152,38 +153,10 @@ def _bool_value(name: str, value: Any) -> bool:
     return value
 
 
-def _text_value(name: str, value: Any, allow_empty: bool = False) -> str:
-    if isinstance(value, bool) or not isinstance(value, str):
-        raise SystemExit(f"{name} must be a string, got {value!r}")
-    if not allow_empty and not value.strip():
-        raise SystemExit(f"{name} must be a non-empty string")
-    return value
-
-
 def _string_list(name: str, raw: Any) -> List[str]:
     if not isinstance(raw, list):
         raise SystemExit(f"{name} must be a string list")
     return [config_string_value(f"{name}[{index}]", item) for index, item in enumerate(raw, start=1)]
-
-
-def _normalize_backends(config: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
-    raw = config.get("backends", DEFAULT_CONFIG["backends"])
-    if not isinstance(raw, dict) or not raw:
-        raise SystemExit("config.backends must be a non-empty object")
-    backends: Dict[str, Dict[str, str]] = {}
-    for name, backend in raw.items():
-        backend_name = config_string_value("config.backends.<name>", name)
-        if not isinstance(backend, dict):
-            raise SystemExit(f"config.backends.{backend_name} must be an object")
-        backends[backend_name] = {
-            "base_url": config_string_value(f"config.backends.{backend_name}.base_url", backend.get("base_url", "")),
-            "model": config_string_value(f"config.backends.{backend_name}.model", backend.get("model", "model")),
-            "tool_call_parser": config_string_value(
-                f"config.backends.{backend_name}.tool_call_parser",
-                backend.get("tool_call_parser", "auto"),
-            ),
-        }
-    return backends
 
 
 def _normalize_tools(config: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -229,7 +202,7 @@ def _normalize_cases(config: Dict[str, Any]) -> List[Dict[str, Any]]:
                     f"config.cases[{index}].expect_reasoning",
                     case.get("expect_reasoning", False),
                 ),
-                "raw_output": _text_value(
+                "raw_output": config_raw_string_value(
                     f"config.cases[{index}].raw_output",
                     case.get("raw_output", ""),
                     allow_empty=True,
@@ -240,7 +213,11 @@ def _normalize_cases(config: Dict[str, Any]) -> List[Dict[str, Any]]:
 
 
 def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    config["backends"] = _normalize_backends(config)
+    config["backends"] = config_backend_map(
+        config,
+        DEFAULT_CONFIG["backends"],
+        {"tool_call_parser": "auto"},
+    )
     config["tools"] = _normalize_tools(config)
     config["cases"] = _normalize_cases(config)
     return config
@@ -379,31 +356,10 @@ def main() -> int:
     parser = base_parser(__doc__ or "")
     parser.add_argument("--config", default="configs/tool_call_cases.example.json")
     parser.add_argument("--output", default="results/raw/tool_call_parser_benchmark.json")
-    parser.add_argument("--report", default="reports/17_tool_call_reasoning_parser.md")
     args = parser.parse_args()
     payload = build_payload(args)
     write_json(args.output, payload)
-    write_report(
-        args.report,
-        "Tool Calling And Reasoning Parser",
-        payload,
-        (
-            (
-                r["id"],
-                r["parser"],
-                r["expected_tool"],
-                r["parsed_tool"],
-                r["argument_schema_valid"],
-                r["reasoning_wrapper_ok"],
-                r["status"],
-            )
-            for r in payload["records"]
-        ),
-        ("Case", "Parser", "Expected", "Parsed", "Schema", "Reasoning", "Status"),
-        payload["next_actions"],
-    )
     print(f"wrote {path_label(args.output)}")
-    print(f"wrote {path_label(args.report)}")
     return 0
 
 

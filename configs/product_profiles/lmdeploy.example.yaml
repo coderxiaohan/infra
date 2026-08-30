@@ -1,8 +1,8 @@
 {
+  "report_sections": ["results/raw/product_lmdeploy_runtime_profile.json"],
   "product": "lmdeploy",
   "endpoint": "http://127.0.0.1:23333",
   "metrics_url": "http://127.0.0.1:23333/metrics",
-  "report_sections": ["reports/52_product_runtime_backend_profile.md"],
   "paths": {
     "model_path": "/models/model",
     "workspace": "/var/lib/inferlab/lmdeploy",

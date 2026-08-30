@@ -234,7 +234,7 @@ inline std::string repair_action_for_blocker(const std::string& category) {
     return "refresh or repair summary projection before allowing report claims";
   }
   if (category == "report_wiring_missing") {
-    return "wire artifact into summary, Prometheus, final report, and markdown report";
+    return "wire artifact into structured summary, Prometheus, and JSON evidence indexes";
   }
   if (category == "freshness_stale") {
     return "refresh runtime evidence freshness gate after artifact refresh";

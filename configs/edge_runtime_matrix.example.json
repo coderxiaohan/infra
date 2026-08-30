@@ -5,7 +5,7 @@
     {
       "row_id": "llama_cpp_cpu_neon_q4",
       "runtime": "llama_cpp",
-      "runtime_version": "b10173-e9fa078",
+      "runtime_version": "11cd988",
       "model_format": "gguf",
       "backend": "cpu-neon",
       "logical_model_id": "example-logical-model",

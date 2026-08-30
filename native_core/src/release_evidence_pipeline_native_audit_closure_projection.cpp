@@ -1,5 +1,7 @@
 #include "release_evidence_pipeline_native_audit_closure_projection.hpp"
 
+#include "native_core_audit_field_catalog.hpp"
+
 #include <string>
 
 namespace inferlab_release_pipeline {

@@ -123,7 +123,7 @@ std::string runtime_configure_command(const std::string& target_platform,
   }
   if (row.runtime_id == "llama_cpp") {
     command +=
-        " -DINFERLAB_LLAMA_CPP_SOURCE_DIR=/path/to/llama.cpp-e9fa078";
+        " -DINFERLAB_LLAMA_CPP_SOURCE_DIR=/path/to/llama.cpp";
   } else if (row.runtime_id == "executorch") {
     command +=
         " -DINFERLAB_EXECUTORCH_SOURCE_DIR=/path/to/executorch-v1.2.0"

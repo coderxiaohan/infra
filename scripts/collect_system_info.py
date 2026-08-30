@@ -7,7 +7,6 @@ import argparse
 import json
 import platform
 import shutil
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -18,12 +17,8 @@ except ModuleNotFoundError:
 from command_redaction import artifact_path_payload as path_payload, redact_path_error
 from cli_validation import require_float_range
 from repo_paths import default_repo_root, resolve_repo_path, resolved_repo_root
-from text_output import write_text_file
-
-
-def first_line(value: str) -> str:
-    lines = value.splitlines()
-    return lines[0] if lines else ""
+from text_output import first_text_line as first_line, write_text_file
+from time_utils import utc_now_precise
 
 
 def run(command: List[str], cwd: Optional[Path] = None, timeout: float = 15.0) -> str:
@@ -52,7 +47,7 @@ def run(command: List[str], cwd: Optional[Path] = None, timeout: float = 15.0) -
 
 def collect(repo_root: Path, command_timeout: float) -> Dict[str, object]:
     info: Dict[str, object] = {
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "timestamp_utc": utc_now_precise(),
         **path_payload(repo_root, "repo_root"),
         "platform": platform.platform(),
         "python": platform.python_version(),

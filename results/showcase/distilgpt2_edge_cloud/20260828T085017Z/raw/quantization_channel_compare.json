@@ -1,0 +1,31 @@
+{
+  "artifact_type": "native_quantization_channel_compare",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU granularity comparison only; not calibration evidence, a production packed-weight implementation, or a CUDA/product performance result.",
+  "config": {
+    "cols": 16,
+    "fp32_bytes": 256,
+    "per_group_size": 4,
+    "rows": 4
+  },
+  "comparison": {
+    "per_channel": {
+      "group_size": 16,
+      "max_abs_error": 0.142857,
+      "mean_abs_error": 0.061607,
+      "scale_count": 4,
+      "storage_bytes": 48,
+      "storage_ratio_vs_fp32": 0.187500
+    },
+    "per_group": {
+      "group_size": 4,
+      "max_abs_error": 0.142857,
+      "mean_abs_error": 0.032701,
+      "scale_count": 16,
+      "storage_bytes": 96,
+      "storage_ratio_vs_fp32": 0.375000
+    }
+  }
+}

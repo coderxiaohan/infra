@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "model": {
+    "name": "distilgpt2",
+    "path": "models/distilgpt2_clean_hf",
+    "dtype": "float16"
+  },
+  "engine": {
+    "output_dir": "results/raw/trtllm_distilgpt2_dynamic_engine",
+    "workspace": "results/raw/trtllm_distilgpt2_dynamic_workspace",
+    "tensor_parallel_size": 1,
+    "pipeline_parallel_size": 1,
+    "max_input_len": 64,
+    "max_seq_len": 96,
+    "opt_batch_size": 1,
+    "max_batch_size": 1,
+    "opt_num_tokens": 16,
+    "max_num_tokens": 64,
+    "multiple_profiles": false,
+    "use_paged_context_fmha": true
+  }
+}

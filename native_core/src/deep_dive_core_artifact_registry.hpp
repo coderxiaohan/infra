@@ -162,8 +162,8 @@ inline void validate_registry(const std::vector<ArtifactSpec>& specs) {
         !starts_with(spec.source_path, "native_core/src/") ||
         !ends_with(spec.source_path, "_main.cpp") ||
         !safe_relative_repository_path(spec.report_path) ||
-        !starts_with(spec.report_path, "reports/") ||
-        !ends_with(spec.report_path, ".md") ||
+        !starts_with(spec.report_path, "results/raw/") ||
+        !ends_with(spec.report_path, ".json") ||
         !starts_with(spec.target, "inferlab_") ||
         !safe_identity_token(spec.target) ||
         spec.matrix_entry != expected_matrix_entry ||
@@ -196,7 +196,7 @@ inline const std::vector<ArtifactSpec>& artifact_specs() {
        "kv_paged_attention",
        "native_kv_paged_attention_deep_dive.json",
        "native_core/src/kv_paged_attention_deep_dive_main.cpp",
-       "reports/61_kv_paged_attention_deep_dive.md",
+       "results/raw/native_kv_paged_attention_deep_dive.json",
        "inferlab_kv_paged_attention_deep_dive",
        "native_kv_paged_attention_deep_dive_refresh",
        "./build/inferlab_kv_paged_attention_deep_dive --repo-root . --output results/raw/native_kv_paged_attention_deep_dive.json",
@@ -214,7 +214,7 @@ inline const std::vector<ArtifactSpec>& artifact_specs() {
        "scheduler_batching",
        "native_scheduler_batching_deep_dive.json",
        "native_core/src/scheduler_batching_deep_dive_main.cpp",
-       "reports/62_scheduler_batching_deep_dive.md",
+       "results/raw/native_scheduler_batching_deep_dive.json",
        "inferlab_scheduler_batching_deep_dive",
        "native_scheduler_batching_deep_dive_refresh",
        "./build/inferlab_scheduler_batching_deep_dive --repo-root . --output results/raw/native_scheduler_batching_deep_dive.json",
@@ -233,7 +233,7 @@ inline const std::vector<ArtifactSpec>& artifact_specs() {
        "cuda_quant_microkernel",
        "native_cuda_quant_microkernel_deep_dive.json",
        "native_core/src/cuda_quant_microkernel_deep_dive_main.cpp",
-       "reports/63_cuda_quant_microkernel_deep_dive.md",
+       "results/raw/native_cuda_quant_microkernel_deep_dive.json",
        "inferlab_cuda_quant_microkernel_deep_dive",
        "native_cuda_quant_microkernel_deep_dive_refresh",
        "./build/inferlab_cuda_quant_microkernel_deep_dive --repo-root . --output results/raw/native_cuda_quant_microkernel_deep_dive.json",

@@ -4,10 +4,8 @@
 from __future__ import annotations
 
 import argparse
-import json
 import struct
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,8 +13,9 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from artifact_json import path_label, path_payload, write_json_file as write_json_artifact_file
+from artifact_json import path_label, path_payload, write_json_file
 from command_redaction import redact_path_error
+from time_utils import utc_now_precise
 
 TYPE_NAMES = {0: "uint8", 1: "int8", 2: "uint16", 3: "int16", 4: "uint32", 5: "int32", 6: "float32", 7: "bool", 8: "string", 9: "array", 10: "uint64", 11: "int64", 12: "float64"}
 MAX_DIMS = 16
@@ -110,7 +109,7 @@ def parse(path: Path, max_metadata: int = 8192, max_tensors: int = 100000, max_a
         tensors.append({"name": name, "dims": dims, "tensor_type": tensor_type, "relative_offset": relative_offset})
     return {
         "run_id": "gguf_binary_parser",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": utc_now_precise(),
         "backend": "python-binary-parser",
         "model": path.name,
         "precision": "mixed-gguf",
@@ -124,10 +123,6 @@ def parse(path: Path, max_metadata: int = 8192, max_tensors: int = 100000, max_a
         "tensors": tensors,
         "tensor_info_end_offset": reader.offset,
     }
-
-
-def write_json_file(path: Path, payload: dict) -> None:
-    write_json_artifact_file(path, payload)
 
 
 def main() -> None:

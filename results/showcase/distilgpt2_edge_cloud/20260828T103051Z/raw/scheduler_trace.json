@@ -1,0 +1,189 @@
+{
+  "artifact_type": "native_scheduler_trace",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU continuous-batching scheduler reference only; not product serving, wall-clock latency, throughput benchmark, or GPU runtime evidence.",
+  "pressure_profile": {
+    "average_active_requests": 1.000000,
+    "average_cache_utilization": 0.659722,
+    "average_decode_steps_per_token": 1.000000,
+    "average_queue_wait_steps": 1.666667,
+    "average_ttft_steps": 1.666667,
+    "average_used_blocks": 1.166667,
+    "finished_request_count": 3,
+    "peak_active_requests": 2,
+    "peak_cache_utilization": 1.000000,
+    "peak_reserved_bytes": 3072,
+    "peak_total_tokens": 17,
+    "peak_used_blocks": 3,
+    "rejected_request_count": 0,
+    "request_count": 3,
+    "steps": 6,
+    "tokens_per_step": 1.500000,
+    "total_admitted": 3,
+    "total_backpressure_deferred": 0,
+    "total_decoded_tokens": 9,
+    "total_finished": 3,
+    "total_rejected": 0
+  },
+  "reference_simulation_only": true,
+  "requests": [
+    {
+      "decode_steps_per_token": 1.000000,
+      "finished_step": 3,
+      "first_decode_step": 1,
+      "first_scheduled_step": 1,
+      "generated_tokens": 3,
+      "max_decode_tokens": 3,
+      "prompt_tokens": 6,
+      "queue_wait_steps": 1,
+      "request_id": 1,
+      "state": "finished",
+      "submitted_step": 0,
+      "time_to_first_token_steps": 1,
+      "total_latency_steps": 3
+    },
+    {
+      "decode_steps_per_token": 1.000000,
+      "finished_step": 2,
+      "first_decode_step": 1,
+      "first_scheduled_step": 1,
+      "generated_tokens": 2,
+      "max_decode_tokens": 2,
+      "prompt_tokens": 9,
+      "queue_wait_steps": 1,
+      "request_id": 2,
+      "state": "finished",
+      "submitted_step": 0,
+      "time_to_first_token_steps": 1,
+      "total_latency_steps": 2
+    },
+    {
+      "decode_steps_per_token": 1.000000,
+      "finished_step": 6,
+      "first_decode_step": 3,
+      "first_scheduled_step": 3,
+      "generated_tokens": 4,
+      "max_decode_tokens": 4,
+      "prompt_tokens": 4,
+      "queue_wait_steps": 3,
+      "request_id": 3,
+      "state": "finished",
+      "submitted_step": 0,
+      "time_to_first_token_steps": 3,
+      "total_latency_steps": 6
+    }
+  ],
+  "simulation_step_budget": 9,
+  "steps": [
+    {
+      "admitted": 2,
+      "backpressure_deferred": 0,
+      "cache": {
+        "active_requests": 2,
+        "free_blocks": 5,
+        "reserved_bytes": 3072,
+        "total_blocks": 8,
+        "total_tokens": 17,
+        "used_blocks": 3,
+        "used_bytes": 2176,
+        "utilization": 0.708333
+      },
+      "decoded": 2,
+      "finished": 0,
+      "rejected": 0,
+      "step": 1
+    },
+    {
+      "admitted": 0,
+      "backpressure_deferred": 0,
+      "cache": {
+        "active_requests": 1,
+        "free_blocks": 7,
+        "reserved_bytes": 1024,
+        "total_blocks": 8,
+        "total_tokens": 8,
+        "used_blocks": 1,
+        "used_bytes": 1024,
+        "utilization": 1.000000
+      },
+      "decoded": 2,
+      "finished": 1,
+      "rejected": 0,
+      "step": 2
+    },
+    {
+      "admitted": 1,
+      "backpressure_deferred": 0,
+      "cache": {
+        "active_requests": 1,
+        "free_blocks": 7,
+        "reserved_bytes": 1024,
+        "total_blocks": 8,
+        "total_tokens": 5,
+        "used_blocks": 1,
+        "used_bytes": 640,
+        "utilization": 0.625000
+      },
+      "decoded": 2,
+      "finished": 1,
+      "rejected": 0,
+      "step": 3
+    },
+    {
+      "admitted": 0,
+      "backpressure_deferred": 0,
+      "cache": {
+        "active_requests": 1,
+        "free_blocks": 7,
+        "reserved_bytes": 1024,
+        "total_blocks": 8,
+        "total_tokens": 6,
+        "used_blocks": 1,
+        "used_bytes": 768,
+        "utilization": 0.750000
+      },
+      "decoded": 1,
+      "finished": 0,
+      "rejected": 0,
+      "step": 4
+    },
+    {
+      "admitted": 0,
+      "backpressure_deferred": 0,
+      "cache": {
+        "active_requests": 1,
+        "free_blocks": 7,
+        "reserved_bytes": 1024,
+        "total_blocks": 8,
+        "total_tokens": 7,
+        "used_blocks": 1,
+        "used_bytes": 896,
+        "utilization": 0.875000
+      },
+      "decoded": 1,
+      "finished": 0,
+      "rejected": 0,
+      "step": 5
+    },
+    {
+      "admitted": 0,
+      "backpressure_deferred": 0,
+      "cache": {
+        "active_requests": 0,
+        "free_blocks": 8,
+        "reserved_bytes": 0,
+        "total_blocks": 8,
+        "total_tokens": 0,
+        "used_blocks": 0,
+        "used_bytes": 0,
+        "utilization": 0.000000
+      },
+      "decoded": 1,
+      "finished": 1,
+      "rejected": 0,
+      "step": 6
+    }
+  ]
+}

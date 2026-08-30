@@ -259,49 +259,6 @@ def build_plan(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
     }
 
 
-def markdown_plan(plan: Dict[str, Any]) -> str:
-    lines: List[str] = [
-        "# InferLab Android Deployment Plan",
-        "",
-        f"- Generated: `{plan['timestamp_utc']}`",
-        f"- ABI: `{plan['target']['abi']}`",
-        f"- Android platform: `{plan['target']['android_platform']}`",
-        f"- Device directory: `{plan['target']['device_dir']}`",
-        "",
-        "## Preflight",
-        "",
-        "| Item | Value | Ready |",
-        "|---|---:|---:|",
-    ]
-    preflight = plan["preflight"]
-    rows = [
-        ("NDK root", preflight["android_ndk_root"], preflight["android_ndk_exists"]),
-        ("CMake toolchain", preflight["toolchain_file"], preflight["toolchain_file_exists"]),
-        ("clang++", preflight["clangxx"], preflight["clangxx_exists"]),
-        ("sysroot", preflight["sysroot"], preflight["sysroot_exists"]),
-        ("adb", preflight["adb"].get("path"), preflight["adb"].get("available")),
-        ("cmake", preflight["cmake"].get("path"), preflight["cmake"].get("available")),
-        ("llama.cpp dir", preflight["llama_cpp_dir"], preflight["llama_cpp_dir_exists"]),
-        ("GGUF model", preflight["model"], preflight["model_exists"]),
-    ]
-    for name, value, ready in rows:
-        lines.append(f"| {name} | `{value or ''}` | `{bool(ready)}` |")
-    templates_by_title = plan.get("command_templates", {})
-    for title, commands in plan["commands"].items():
-        templates = templates_by_title.get(title, [])
-        if templates:
-            lines.extend(["", f"## {title.replace('_', ' ').title()} Template", "", "```bash"])
-            lines.extend(templates)
-            lines.append("```")
-            lines.extend(["", "Artifact-safe recorded commands:", "", "```bash"])
-        else:
-            lines.extend(["", f"## {title.replace('_', ' ').title()}", "", "```bash"])
-        lines.extend(commands)
-        lines.append("```")
-    lines.extend(["", "## Notes", ""])
-    for note in plan["notes"]:
-        lines.append(f"- {note}")
-    return "\n".join(lines) + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -315,15 +272,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--android-platform", default="android-24")
     parser.add_argument("--device-dir", default="/data/local/tmp/inferlab")
     parser.add_argument("--native-build-dir", default="build/android-native-hello")
-    parser.add_argument("--llama-cpp-dir", default="../llama.cpp")
+    parser.add_argument("--llama-cpp-dir", default="third_party/llama.cpp")
     parser.add_argument("--llama-build-dir", default="build/llama.cpp-android")
     parser.add_argument("--model", default="")
     parser.add_argument("--prompt", default="InferLab edge inference")
     parser.add_argument("--n-predict", default="32")
     parser.add_argument("--threads", default="4")
     parser.add_argument("--jobs", default="4")
-    parser.add_argument("--output", default="reports/android_deploy_plan.md")
-    parser.add_argument("--json-output", default="results/raw/android_deploy_plan.json")
+    parser.add_argument("--output", default="results/raw/android_deploy_plan.json")
     return parser.parse_args()
 
 
@@ -332,11 +288,8 @@ def main() -> int:
     repo_root = resolved_repo_root(args.repo_root)
     plan = build_plan(args, repo_root)
     output = resolve_repo_path(repo_root, args.output)
-    json_output = resolve_repo_path(repo_root, args.json_output)
-    write_text_file(output, markdown_plan(plan))
-    write_text_file(json_output, json.dumps(plan, indent=2, sort_keys=True) + "\n")
+    write_text_file(output, json.dumps(plan, indent=2, sort_keys=True) + "\n")
     print(f"wrote {path_label(output)}")
-    print(f"wrote {path_label(json_output)}")
     return 0
 
 

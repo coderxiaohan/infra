@@ -7,7 +7,6 @@ import argparse
 import json
 import math
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
 
@@ -16,8 +15,9 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from artifact_json import path_label, write_json_file as write_json_artifact_file
+from artifact_json import path_label, write_json_file
 from command_redaction import redact_path_error
+from time_utils import utc_now_precise
 
 
 def load_json_object(path: Path) -> dict:
@@ -48,10 +48,6 @@ def finite_number_list(name: str, values: object) -> list[float]:
     return parsed
 
 
-def write_json_file(path: Path, payload: dict) -> None:
-    write_json_artifact_file(path, payload)
-
-
 def percentile(values: list[float], pct: float) -> float:
     if not values:
         return 0.0
@@ -80,7 +76,7 @@ def main() -> None:
     errors = [abs(a - b) for a, b in zip(values, restored)]
     payload = {
         "run_id": "quantization_error_analysis",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": utc_now_precise(),
         "backend": "python-reference",
         "model": source.get("model", "synthetic-weight-vector"),
         "precision": source.get("precision", "unknown"),

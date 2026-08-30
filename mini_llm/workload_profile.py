@@ -74,7 +74,7 @@ def dtype_size(dtype: str) -> int:
         raise ValueError(f"Unsupported dtype for workload profile: {dtype}") from exc
 
 
-def _ratio(numerator: int | float, denominator: int | float) -> float | None:
+def safe_ratio(numerator: int | float, denominator: int | float) -> float | None:
     if denominator == 0:
         return None
     return float(numerator) / float(denominator)
@@ -103,7 +103,7 @@ def _layer_step(
 
     per_layer_flops = {
         "qkv_projection": _dense_flops(query_tokens, hidden, 3 * hidden, batch=batch),
-        "rope_qk": int(12 * batch * heads * query_tokens * head_dim),
+        "rope_qk": int(6 * batch * heads * query_tokens * head_dim),
         "attention_scores": int(2 * batch * heads * query_tokens * key_tokens * head_dim),
         "attention_values": int(2 * batch * heads * query_tokens * key_tokens * head_dim),
         "attention_output_projection": _dense_flops(query_tokens, hidden, hidden, batch=batch),
@@ -262,15 +262,15 @@ def build_workload_report(
         "full_recompute": recompute,
         "comparison": {
             "input_tokens_saved": input_saved,
-            "input_tokens_saved_ratio": _ratio(input_saved, recompute["input_tokens_processed"]),
+            "input_tokens_saved_ratio": safe_ratio(input_saved, recompute["input_tokens_processed"]),
             "attention_score_elements_saved": score_saved,
-            "attention_score_elements_saved_ratio": _ratio(
+            "attention_score_elements_saved_ratio": safe_ratio(
                 score_saved, recompute["attention_score_elements"]
             ),
             "flops_saved": flops_saved,
-            "flops_saved_ratio": _ratio(flops_saved, recompute["total_flops"]),
+            "flops_saved_ratio": safe_ratio(flops_saved, recompute["total_flops"]),
             "bytes_saved": bytes_saved,
-            "bytes_saved_ratio": _ratio(bytes_saved, recompute["total_bytes"]),
+            "bytes_saved_ratio": safe_ratio(bytes_saved, recompute["total_bytes"]),
             "cached_persistent_kv_cache_bytes": cached["max_persistent_kv_cache_bytes"],
             "recompute_persistent_kv_cache_bytes": recompute["max_persistent_kv_cache_bytes"],
         },

@@ -226,7 +226,6 @@ std::string registry_sources_json(const int indent) {
       {"native_core/src/high_value_artifact_catalog.hpp", "configs/schemas/",
        "configs/benchmark_matrix.yaml", "scripts/summarize_benchmarks.py",
        "scripts/export_prometheus_metrics.py",
-       "scripts/render_final_report.py",
        "native_core/src/artifact_contract_model.cpp",
        "native_core/src/runtime_evidence_freshness_gate_model.cpp",
        "native_core/src/evidence_query_native_trace_projection.cpp"},

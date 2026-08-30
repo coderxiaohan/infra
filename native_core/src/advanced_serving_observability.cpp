@@ -37,6 +37,8 @@ double zero_capacity_utilization(const double demand,
   return require_finite(demand / capacity, name);
 }
 
+}  // namespace
+
 ObservabilitySloResult estimate_observability_slo(
     const ObservabilitySloScenario& scenario) {
   const double request_qps = non_negative_finite_or_zero(

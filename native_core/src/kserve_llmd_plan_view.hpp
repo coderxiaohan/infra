@@ -23,7 +23,4 @@ std::string record_json(
 std::string artifact_json(
     const inferlab::kserve_llmd_plan::Plan& plan);
 
-std::string deployment_report(
-    const inferlab::kserve_llmd_plan::Plan& plan);
-
 }  // namespace inferlab_kserve_view

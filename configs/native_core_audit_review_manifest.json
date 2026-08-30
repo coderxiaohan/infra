@@ -6,8 +6,8 @@
   "claim_scope": "Explicit per-file static review ledger for InferLab native_core. Reviewed status records source inspection only and does not imply build, test, benchmark, native execution, product replay, CUDA timing, or target-machine validation.",
   "summary": {
     "review_batch_count": 189,
-    "reviewed_file_count": 728,
-    "validation_status": "not_run_after_latest_code_slimming_per_user_request"
+    "reviewed_file_count": 726,
+    "validation_status": "validated_after_stage_test_cleanup_2026_08_29_ctest_21_of_21_pytest_49_passed_4_skipped_android_build_testing_off"
   },
   "review_batches": [
     {
@@ -461,9 +461,9 @@
       "reviewed_file_count": 6
     },
     {
-      "batch_id": "advanced_serving_scheduler_first_slice_vector_add_2026_07_15",
-      "subsystem": "advanced_serving_scheduler_and_vector_reference",
-      "reviewed_file_count": 7
+      "batch_id": "advanced_serving_scheduler_first_slice_2026_07_15",
+      "subsystem": "advanced_serving_scheduler",
+      "reviewed_file_count": 5
     },
     {
       "batch_id": "advanced_serving_kv_offload_contract_2026_07_15",
@@ -5159,31 +5159,6 @@
       "artifact_contract_status": "bounded_evidence_query_extended_required_metric_owner",
       "issues_fixed": [
         "evidence_query_extended_metric_vocabulary_was_embedded_in_the_public_dispatcher"
-      ]
-    },
-    {
-      "file": "native_core/include/inferlab/vector_add.hpp",
-      "review_status": "reviewed",
-      "review_notes": "Reviewed the bounded CPU vector-add public contract, const-reference inputs, owning result, and namespace boundary.",
-      "remaining_risk": "Header compilation, ABI, allocation behavior, and runtime validation have not been run per user request.",
-      "claim_boundary_risk": "cpu_reference_vector_add_api_only_not_cuda_or_performance_evidence",
-      "path_redaction_status": "not a path consumer",
-      "checked_arithmetic_status": "declares no arithmetic",
-      "artifact_contract_status": "bounded_cpu_vector_add_public_contract",
-      "issues_fixed": []
-    },
-    {
-      "file": "native_core/src/vector_add.cpp",
-      "review_status": "reviewed_with_fix",
-      "review_notes": "Reviewed the complete CPU vector-add implementation and routed finite-input validation plus checked double-to-float output narrowing through checked_index.hpp.",
-      "remaining_risk": "Compilation, exception behavior, allocation limits, exact floating-point parity, and runtime validation have not been run per user request.",
-      "claim_boundary_risk": "cpu_reference_vector_add_only_not_cuda_timing_or_benchmark_evidence",
-      "path_redaction_status": "not a path consumer",
-      "checked_arithmetic_status": "rejects non-finite inputs and rejects non-finite or out-of-range float results",
-      "artifact_contract_status": "checked_cpu_vector_add_reference_implementation",
-      "issues_fixed": [
-        "non_finite_vector_inputs_were_accepted",
-        "float_addition_could_silently_emit_non_finite_output"
       ]
     },
     {

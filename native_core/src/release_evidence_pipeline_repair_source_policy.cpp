@@ -54,7 +54,7 @@ const std::vector<RepairSourceLocationRule>& repair_source_location_rules() {
          {"native_core/src/artifact_catalog_single_source_main.cpp",
           "native_core/src/evidence_query_source_projection.cpp",
           "native_core/src/release_evidence_pipeline_repair_evidence_query_producer.cpp",
-          "reports/101_evidence_query.md"}},
+          "results/raw/native_evidence_query_result.json"}},
         {{"catalog_flow_field_coverage_gap"},
          {"native_core/src/high_value_artifact_catalog.hpp",
           "native_core/src/catalog_derived_views.hpp",
@@ -65,7 +65,7 @@ const std::vector<RepairSourceLocationRule>& repair_source_location_rules() {
          {"native_core/src/artifact_catalog_single_source_model.cpp",
           "native_core/src/evidence_query_catalog_filter_view.cpp",
           "native_core/src/release_evidence_pipeline_repair_evidence_query_producer.cpp",
-          "reports/100_release_evidence_pipeline.md"}},
+          "results/raw/native_release_evidence_pipeline.json"}},
         {{"product_replay_semantic_linkage", "product_replay_family_gate"},
          {"native_core/src/product_replay_semantic_events_model.cpp",
           "native_core/src/product_replay_alignment_model.cpp",
@@ -74,7 +74,7 @@ const std::vector<RepairSourceLocationRule>& repair_source_location_rules() {
         {{"evidence_query_snapshot_diff_review"},
          {"native_core/src/evidence_query_snapshot_diff.hpp",
           "native_core/src/release_evidence_pipeline_repair_evidence_query_producer.cpp",
-          "reports/101_evidence_query.md"}},
+          "results/raw/native_evidence_query_result.json"}},
         {{"native_core_audit_backlog", "native_core_audit_review_coverage_gate",
           "native_core_audit_review_manifest", "native_core_audit_scope_blocked"},
          {"configs/native_core_audit_review_manifest.json",
@@ -101,7 +101,7 @@ std::vector<std::string> repair_path_source_locations_for(
                     "release_evidence_pipeline")
                     .artifact) {
     return {"native_core/src/release_evidence_pipeline_main.cpp",
-            "reports/100_release_evidence_pipeline.md"};
+            "results/raw/native_release_evidence_pipeline.json"};
   }
   return {"native_core/src/release_evidence_pipeline_main.cpp"};
 }

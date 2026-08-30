@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from bounded_process import run_bounded_process
-from artifact_json import try_write_json_file
+from artifact_json import artifact_status_exit_code, try_write_json_file
 from cli_validation import require_float_range, require_int_range
 from command_redaction import (
     artifact_command_content_values,
@@ -39,6 +39,13 @@ TIMING_RE = re.compile(
     r"(?P<tokens_per_second>[0-9.]+)\s*tokens per second\s*\))?",
     re.IGNORECASE,
 )
+SUMMARY_RATE_RE = re.compile(
+    r"\[\s*Prompt:\s*(?P<prompt>[0-9.]+)\s*t/s\s*\|\s*"
+    r"Generation:\s*(?P<generation>[0-9.]+)\s*t/s\s*\]",
+    re.IGNORECASE,
+)
+BENCH_RATE_RE = re.compile(r"(?P<rate>[0-9]+(?:\.[0-9]+)?)")
+BENCH_TEST_RE = re.compile(r"^(?P<kind>pp|tg)(?P<tokens>[0-9]+)?$", re.IGNORECASE)
 
 
 def artifact_command_parts(parts: List[str]) -> List[str]:
@@ -100,6 +107,7 @@ def run_command(command: List[str], timeout_seconds: float, cwd: Optional[Path] 
         "returncode": capture.returncode,
         "elapsed_ms": capture.elapsed_ms,
         "output_tail": artifact_output_tail(output, command, cwd, 40 if capture.timed_out else 80),
+        "_raw_output_for_parse": output,
     }
     if capture.status in {"ok", "nonzero_exit"}:
         return result
@@ -197,6 +205,38 @@ def parse_llama_timings(output: str) -> Dict[str, Any]:
             entry["tokens_per_second"] = float(match.group("tokens_per_second"))
         timings[label] = entry
     return timings
+
+
+def parse_llama_summary_rates(output: str) -> Dict[str, float]:
+    match = SUMMARY_RATE_RE.search(output)
+    if not match:
+        return {}
+    return {
+        "prompt_eval_tokens_per_s": float(match.group("prompt")),
+        "eval_tokens_per_s": float(match.group("generation")),
+    }
+
+
+def parse_llama_bench_rates(output: str) -> Dict[str, Any]:
+    rates: Dict[str, Any] = {}
+    for line in output.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|") or stripped.startswith("|---") or stripped.startswith("| model"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if len(cells) < 7:
+            continue
+        test = cells[5]
+        rate_cell = cells[6]
+        test_match = BENCH_TEST_RE.match(test)
+        rate_match = BENCH_RATE_RE.search(rate_cell)
+        if not test_match or not rate_match:
+            continue
+        key_prefix = "prompt_eval" if test_match.group("kind").lower() == "pp" else "eval"
+        rates[f"{key_prefix}_tokens_per_s"] = float(rate_match.group("rate"))
+        if test_match.group("tokens"):
+            rates[f"{key_prefix}_tokens"] = int(test_match.group("tokens"))
+    return rates
 
 
 def build_cli_command(args: argparse.Namespace, llama_cli: str, prompt: str, model_path: Path) -> List[str]:
@@ -328,10 +368,12 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
         else build_bench_command(args, str(llama_bench), model_path)
     )
     run = run_command(command, timeout_seconds=args.timeout_seconds, cwd=repo_root)
-    output = str(run.get("output_tail", ""))
+    output = str(run.pop("_raw_output_for_parse", run.get("output_tail", "")))
     timings = parse_llama_timings(output)
+    summary_rates = parse_llama_summary_rates(output) or parse_llama_bench_rates(output)
     has_key_timing = bool(timings.get("eval_time") or timings.get("total_time"))
-    if run.get("returncode") == 0 and has_key_timing:
+    has_key_metric = bool(has_key_timing or summary_rates)
+    if run.get("returncode") == 0 and has_key_metric:
         status = "ok"
     elif run.get("returncode") == 0:
         status = "partial_no_timing"
@@ -366,17 +408,22 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
         "command": artifact_command_parts(command),
         "run": run,
         "timings": timings,
+        "summary_rates": summary_rates,
         "generated_text": "",
         "generated_text_source": "not_extracted_from_mixed_llama_cpp_stdout",
-        "metric_status": "parsed_timing" if has_key_timing else "missing_timing",
+        "metric_status": "parsed_timing" if has_key_timing else "parsed_summary_rate" if summary_rates else "missing_timing",
         "summary": {
             "load_ms": timings.get("load_time", {}).get("ms"),
             "prompt_eval_ms": timings.get("prompt_eval_time", {}).get("ms"),
-            "prompt_eval_tokens": timings.get("prompt_eval_time", {}).get("tokens"),
-            "prompt_eval_tokens_per_s": timings.get("prompt_eval_time", {}).get("tokens_per_second"),
+            "prompt_eval_tokens": timings.get("prompt_eval_time", {}).get("tokens")
+            or summary_rates.get("prompt_eval_tokens"),
+            "prompt_eval_tokens_per_s": timings.get("prompt_eval_time", {}).get("tokens_per_second")
+            or summary_rates.get("prompt_eval_tokens_per_s"),
             "eval_ms": timings.get("eval_time", {}).get("ms"),
-            "eval_tokens": timings.get("eval_time", {}).get("tokens"),
-            "eval_tokens_per_s": timings.get("eval_time", {}).get("tokens_per_second"),
+            "eval_tokens": timings.get("eval_time", {}).get("tokens")
+            or summary_rates.get("eval_tokens"),
+            "eval_tokens_per_s": timings.get("eval_time", {}).get("tokens_per_second")
+            or summary_rates.get("eval_tokens_per_s"),
             "total_ms": timings.get("total_time", {}).get("ms"),
         },
     }
@@ -404,6 +451,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--extra-arg", action="append", default=[])
     parser.add_argument("--bench-extra-arg", action="append", default=[])
     parser.add_argument("--output", default="results/raw/llama_cpp_benchmark.json")
+    parser.add_argument(
+        "--allow-non-ok-status",
+        action="store_true",
+        help="Return zero after writing a non-ok diagnostic artifact.",
+    )
     return parser.parse_args()
 
 
@@ -430,7 +482,7 @@ def main() -> int:
         print(f"failed to write {path_label(output)}: {write_status.get('error')}")
         return 1
     emit_success(path_label(output), quiet=args.quiet)
-    return 0
+    return artifact_status_exit_code(payload, allow_non_ok=args.allow_non_ok_status)
 
 
 if __name__ == "__main__":

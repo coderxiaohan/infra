@@ -25,6 +25,20 @@ class KVCacheEstimateTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             estimate_kv_cache(config)
 
+    def test_int4_uses_packed_half_byte_storage(self):
+        common = dict(
+            batch_size=1,
+            sequence_length=7,
+            num_layers=3,
+            num_heads=5,
+            head_dim=9,
+        )
+        int8 = estimate_kv_cache(KVCacheConfig(**common, dtype="int8"))
+        int4 = estimate_kv_cache(KVCacheConfig(**common, dtype="int4"))
+
+        self.assertEqual(int4.bytes_per_token_per_layer * 2, int8.bytes_per_token_per_layer)
+        self.assertEqual(int4.total_bytes * 2, int8.total_bytes)
+
 
 class ShapeProbeTest(unittest.TestCase):
     def test_decode_grows_kv_length(self):

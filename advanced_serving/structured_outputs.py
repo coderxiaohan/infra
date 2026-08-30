@@ -18,7 +18,9 @@ from advanced_serving.common import (
     api_key_from_env,
     base_parser,
     command_record,
+    config_backend_map,
     config_object_list,
+    config_raw_string_value,
     config_string_value,
     post_json,
     post_json_ok,
@@ -30,7 +32,6 @@ from advanced_serving.common import (
     status_from_execution,
     utc_now,
     write_json,
-    write_report,
 )
 
 
@@ -45,30 +46,6 @@ DEFAULT_CONFIG = {
 }
 
 SUPPORTED_SCHEMA_KINDS = {"json_schema", "regex"}
-
-
-def _text_value(name: str, value: Any, allow_empty: bool = False) -> str:
-    if isinstance(value, bool) or not isinstance(value, str):
-        raise SystemExit(f"{name} must be a string, got {value!r}")
-    if not allow_empty and not value.strip():
-        raise SystemExit(f"{name} must be a non-empty string")
-    return value
-
-
-def _normalize_backends(config: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
-    raw = config.get("backends", DEFAULT_BACKENDS)
-    if not isinstance(raw, dict) or not raw:
-        raise SystemExit("config.backends must be a non-empty object")
-    backends: Dict[str, Dict[str, str]] = {}
-    for name, backend in raw.items():
-        backend_name = config_string_value("config.backends.<name>", name)
-        if not isinstance(backend, dict):
-            raise SystemExit(f"config.backends.{backend_name} must be an object")
-        backends[backend_name] = {
-            "base_url": config_string_value(f"config.backends.{backend_name}.base_url", backend.get("base_url", "")),
-            "model": config_string_value(f"config.backends.{backend_name}.model", backend.get("model", "model")),
-        }
-    return backends
 
 
 def _normalize_schemas(config: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -110,14 +87,16 @@ def _normalize_prompts(config: Dict[str, Any]) -> List[Dict[str, str]]:
         normalized.append(
             {
                 "id": prompt_id,
-                "prompt": _text_value(f"config.prompts[{index}].prompt", prompt.get("prompt", "")),
+                "prompt": config_raw_string_value(
+                    f"config.prompts[{index}].prompt", prompt.get("prompt", "")
+                ),
             }
         )
     return normalized
 
 
 def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    config["backends"] = _normalize_backends(config)
+    config["backends"] = config_backend_map(config, DEFAULT_BACKENDS)
     config["schemas"] = _normalize_schemas(config)
     config["prompts"] = _normalize_prompts(config)
     return config
@@ -184,14 +163,11 @@ def main() -> int:
     parser.add_argument("--api-key-env", default="", help="Environment variable containing an API key for endpoint probes.")
     parser.add_argument("--max-tokens", type=int, default=128)
     parser.add_argument("--output", default="results/raw/structured_outputs.json")
-    parser.add_argument("--report", default="reports/structured_outputs.md")
     args = parser.parse_args()
     require_int_range("--max-tokens", args.max_tokens, 1, 1_000_000)
     payload = build_payload(args)
     write_json(args.output, payload)
-    write_report(args.report, "Structured Outputs", payload, ((r["name"], r["backend"], r["schema"], r["status"]) for r in payload["records"]), ("Name", "Backend", "Schema", "Status"), payload["next_actions"])
     print(f"wrote {path_label(args.output)}")
-    print(f"wrote {path_label(args.report)}")
     return 0
 
 

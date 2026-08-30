@@ -20,10 +20,11 @@ void require(const bool condition, const std::string& message) {
 
 void require_close(const std::vector<float>& actual,
                    const std::vector<float>& expected,
-                   const std::string& message) {
+                   const std::string& message,
+                   const float tolerance = 1e-5F) {
   require(actual.size() == expected.size(), message + " size mismatch");
   for (std::size_t i = 0; i < actual.size(); ++i) {
-    require(std::fabs(actual[i] - expected[i]) < 1e-5F, message);
+    require(std::fabs(actual[i] - expected[i]) < tolerance, message);
   }
 }
 
@@ -95,6 +96,66 @@ void test_row_softmax_cuda_matches_cpu() {
           "block row softmax elapsed time invalid");
 }
 
+void test_cuda_kernels_cover_multiple_blocks_tiles_and_iterations() {
+  constexpr int kRows = 257;
+  constexpr int kCols = 513;
+  std::vector<float> matrix(static_cast<std::size_t>(kRows * kCols));
+  std::vector<float> vector(static_cast<std::size_t>(kCols));
+  for (int row = 0; row < kRows; ++row) {
+    for (int col = 0; col < kCols; ++col) {
+      matrix[static_cast<std::size_t>(row * kCols + col)] =
+          static_cast<float>((row + col) % 3 - 1) * 0.25F;
+    }
+  }
+  for (int col = 0; col < kCols; ++col) {
+    vector[static_cast<std::size_t>(col)] =
+        static_cast<float>((col % 2) * 2 - 1) * 0.5F;
+  }
+  const auto expected_matvec =
+      inferlab::matvec_cpu(matrix, kRows, kCols, vector);
+  require_close(inferlab::matvec_cuda_runtime(matrix, kRows, kCols, vector),
+                expected_matvec, "multi-block matvec CUDA mismatch");
+  require_close(
+      inferlab::matvec_shared_cuda_runtime(matrix, kRows, kCols, vector),
+      expected_matvec, "multi-iteration shared matvec CUDA mismatch");
+
+  constexpr int kM = 17;
+  constexpr int kK = 33;
+  constexpr int kN = 18;
+  std::vector<float> a(static_cast<std::size_t>(kM * kK));
+  std::vector<float> b(static_cast<std::size_t>(kK * kN));
+  for (std::size_t index = 0; index < a.size(); ++index) {
+    a[index] = static_cast<float>(static_cast<int>(index % 5) - 2) * 0.25F;
+  }
+  for (std::size_t index = 0; index < b.size(); ++index) {
+    b[index] = static_cast<float>(static_cast<int>(index % 7) - 3) * 0.125F;
+  }
+  const auto expected_matmul = inferlab::matmul_cpu(a, kM, kK, b, kN);
+  require_close(inferlab::matmul_cuda_runtime(a, kM, kK, b, kN),
+                expected_matmul, "multi-block matmul CUDA mismatch");
+  require_close(inferlab::matmul_tiled_cuda_runtime(a, kM, kK, b, kN),
+                expected_matmul, "multi-tile matmul CUDA mismatch");
+
+  constexpr int kSoftmaxRows = 129;
+  constexpr int kSoftmaxCols = 513;
+  std::vector<float> softmax_input(
+      static_cast<std::size_t>(kSoftmaxRows * kSoftmaxCols));
+  for (std::size_t index = 0; index < softmax_input.size(); ++index) {
+    softmax_input[index] =
+        static_cast<float>(static_cast<int>(index % 23) - 11) * 0.125F;
+  }
+  const auto expected_softmax =
+      inferlab::row_softmax_cpu(softmax_input, kSoftmaxRows, kSoftmaxCols);
+  require_close(
+      inferlab::row_softmax_cuda_runtime(softmax_input, kSoftmaxRows,
+                                         kSoftmaxCols),
+      expected_softmax, "multi-block row softmax CUDA mismatch");
+  require_close(
+      inferlab::row_softmax_block_cuda_runtime(softmax_input, kSoftmaxRows,
+                                               kSoftmaxCols),
+      expected_softmax, "multi-iteration block softmax CUDA mismatch");
+}
+
 }  // namespace
 
 int main() {
@@ -102,6 +163,7 @@ int main() {
     test_matvec_cuda_matches_cpu();
     test_matmul_cuda_matches_cpu();
     test_row_softmax_cuda_matches_cpu();
+    test_cuda_kernels_cover_multiple_blocks_tiles_and_iterations();
   } catch (const std::exception& error) {
     std::cerr << "matrix_ops_cuda_test failed: " << inferlab_cuda_test::redact_test_error(error.what()) << "\n";
     return EXIT_FAILURE;

@@ -1,0 +1,9 @@
+{
+  "experiment_id": "distilgpt2_edge_cloud",
+  "comparison": "results/showcase/distilgpt2_edge_cloud/20260828T103051Z/backend_comparison.json",
+  "manifest": "results/showcase/distilgpt2_edge_cloud/20260828T103051Z/run_manifest.json",
+  "run_directory": "results/showcase/distilgpt2_edge_cloud/20260828T103051Z",
+  "schema_version": 1,
+  "status": "passed",
+  "timestamp_utc": "2026-08-28T10:32:07.730116Z"
+}

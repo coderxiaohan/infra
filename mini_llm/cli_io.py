@@ -6,14 +6,15 @@ import math
 import numbers
 import sys
 from pathlib import Path
+from typing import Sequence
 
 try:
-    from scripts.command_redaction import redact_path_error, redacted_path_label
+    from scripts.text_output import write_text_file
 except ModuleNotFoundError:
     scripts_dir = Path(__file__).resolve().parents[1] / "scripts"
     if str(scripts_dir) not in sys.path:
         sys.path.insert(0, str(scripts_dir))
-    from command_redaction import redact_path_error, redacted_path_label  # type: ignore
+    from text_output import write_text_file  # type: ignore
 
 
 def require_int_range(name: str, value: int, minimum: int, maximum: int) -> int:
@@ -50,9 +51,13 @@ def require_non_negative_float(name: str, value: float) -> float:
     return require_float_range(name, value, 0.0, math.inf)
 
 
-def write_text_file(path: Path, text: str) -> None:
+def parse_prompt_token_ids(raw_tokens: Sequence[str]) -> list[int]:
+    if len(raw_tokens) == 1 and "," in raw_tokens[0]:
+        raw_tokens = [piece for piece in raw_tokens[0].split(",") if piece]
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(text, encoding="utf-8")
-    except OSError as exc:
-        raise SystemExit(f"failed to write {redacted_path_label(path.as_posix())}: {redact_path_error(exc, path)}") from exc
+        tokens = [int(token) for token in raw_tokens]
+    except ValueError as exc:
+        raise ValueError("prompt token ids must be integers") from exc
+    if not tokens:
+        raise ValueError("prompt must contain at least one token id")
+    return tokens

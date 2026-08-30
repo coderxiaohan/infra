@@ -54,8 +54,7 @@ inline std::string profile_command_prefix(const ProductProfileSpec& spec) {
 inline std::string profile_command_base(const ProductProfileSpec& spec) {
   return profile_command_prefix(spec) +
          " --repo-root . --config " + profile_config_path(spec) +
-         " --output " + profile_output_path(spec) + " --report " +
-         spec.report;
+         " --output " + profile_output_path(spec);
 }
 
 inline std::string profile_dry_run_command(const ProductProfileSpec& spec) {
@@ -110,8 +109,8 @@ inline void validate_product_profile_registry(
            artifact.find("..") == std::string::npos;
   };
   const auto valid_report = [](const std::string& report) {
-    return report.rfind("reports/", 0) == 0 && report.size() > 11U &&
-           report.compare(report.size() - 3U, 3U, ".md") == 0 &&
+    return report.rfind("results/raw/", 0) == 0 && report.size() > 17U &&
+           report.compare(report.size() - 5U, 5U, ".json") == 0 &&
            report.find("..") == std::string::npos &&
            report.find('\\') == std::string::npos;
   };
@@ -157,63 +156,63 @@ inline void validate_product_profile_registry(
 inline const std::vector<ProductProfileSpec>& product_profiles() {
   static const std::vector<ProductProfileSpec> products = {
       {"vllm", "vLLM", "serving_engine",
-       "reports/49_product_vllm_profile.md",
+       "results/raw/product_vllm_capability_profile.json",
        "product_vllm_capability_profile.json",
        "product_vllm_capability_profile",
        ProductProfileScope::default_required},
       {"sglang", "SGLang", "serving_engine",
-       "reports/50_product_sglang_profile.md",
+       "results/raw/product_sglang_capability_profile.json",
        "product_sglang_capability_profile.json",
        "product_sglang_capability_profile",
        ProductProfileScope::default_required},
       {"kv_offload", "LMCache / Ray KV Offload / Mooncake",
        "kv_cache_system",
-       "reports/51_product_kv_offload_profile.md",
+       "results/raw/product_lmcache_kv_offload_profile.json",
        "product_lmcache_kv_offload_profile.json",
        "product_kv_offload_profile",
        ProductProfileScope::optional_on_demand},
       {"mooncake", "Mooncake", "kv_cache_system",
-       "reports/51_product_kv_offload_profile.md",
+       "results/raw/product_mooncake_kv_profile.json",
        "product_mooncake_kv_profile.json",
        "product_mooncake_kv_profile",
        ProductProfileScope::optional_on_demand},
       {"tensorrtllm", "TensorRT-LLM / Triton", "runtime_backend",
-       "reports/52_product_runtime_backend_profile.md",
+       "results/raw/product_tensorrtllm_runtime_profile.json",
        "product_tensorrtllm_runtime_profile.json",
        "product_tensorrtllm_runtime_profile",
        ProductProfileScope::default_required},
       {"lmdeploy", "LMDeploy", "runtime_backend",
-       "reports/52_product_runtime_backend_profile.md",
+       "results/raw/product_lmdeploy_runtime_profile.json",
        "product_lmdeploy_runtime_profile.json",
        "product_lmdeploy_runtime_profile",
        ProductProfileScope::optional_on_demand},
       {"flashinfer", "FlashInfer", "kernel_library",
-       "reports/53_product_kernel_library_profile.md",
+       "results/raw/product_flashinfer_kernel_profile.json",
        "product_flashinfer_kernel_profile.json",
        "product_flashinfer_kernel_profile",
        ProductProfileScope::optional_on_demand},
       {"ktransformers", "KTransformers", "hybrid_runtime",
-       "reports/53_product_kernel_library_profile.md",
+       "results/raw/product_ktransformers_hybrid_profile.json",
        "product_ktransformers_hybrid_profile.json",
        "product_ktransformers_hybrid_profile",
        ProductProfileScope::optional_on_demand},
       {"dynamo", "NVIDIA Dynamo", "cloud_control_plane",
-       "reports/54_product_cloud_control_plane_profile.md",
+       "results/raw/product_dynamo_serving_profile.json",
        "product_dynamo_serving_profile.json",
        "product_dynamo_serving_profile",
        ProductProfileScope::optional_on_demand},
       {"kserve_llmd", "KServe / llm-d", "cloud_control_plane",
-       "reports/54_product_cloud_control_plane_profile.md",
+       "results/raw/product_kserve_llmd_profile.json",
        "product_kserve_llmd_profile.json",
        "product_kserve_llmd_profile",
        ProductProfileScope::optional_on_demand},
       {"ray_serve", "Ray Serve LLM", "cloud_control_plane",
-       "reports/54_product_cloud_control_plane_profile.md",
+       "results/raw/product_ray_serve_profile.json",
        "product_ray_serve_profile.json",
        "product_ray_serve_profile",
        ProductProfileScope::optional_on_demand},
       {"tgi", "Hugging Face TGI", "serving_engine",
-       "reports/52_product_runtime_backend_profile.md",
+       "results/raw/product_tgi_profile.json",
        "product_tgi_profile.json",
        "product_tgi_profile",
        ProductProfileScope::optional_on_demand},

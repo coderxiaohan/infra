@@ -25,7 +25,7 @@ namespace {
 namespace fs = std::filesystem;
 
 constexpr std::size_t kExpectedMatureProductDispatchTargetCount = 19U;
-constexpr std::size_t kExpectedDeepDiveWiringRegistryTargetCount = 10U;
+constexpr std::size_t kExpectedDeepDiveWiringRegistryTargetCount = 7U;
 
 const std::vector<std::string>& common_metric_owning_sections() {
   static const std::vector<std::string> sections = {

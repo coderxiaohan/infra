@@ -47,11 +47,6 @@ runs:
     results: results/raw
     output: results/raw/native_probe_run.json
 
-  - name: final_report_refresh
-    backend: final_report
-    report_output: reports/final_report.md
-    output: results/raw/final_report_index.json
-
   - name: quality_eval_refresh
     script: scripts/evaluate_backend_quality.py
     backend: quality
@@ -105,8 +100,7 @@ runs:
     binary: build/inferlab_kserve_llm_d_plan
     backend: native_advanced_serving
     output: results/raw/kserve_llm_d_plan.json
-    report: reports/kserve_llm_d_plan.md
-    command: ./build/inferlab_kserve_llm_d_plan --repo-root . --output results/raw/kserve_llm_d_plan.json --report reports/kserve_llm_d_plan.md
+    command: ./build/inferlab_kserve_llm_d_plan --repo-root . --output results/raw/kserve_llm_d_plan.json
 
   - name: native_advanced_kv_router_refresh
     binary: build/inferlab_advanced_kv_router
@@ -475,7 +469,6 @@ runs:
     backend: native_edge_runtime
     config: configs/edge_runtime_matrix.example.json
     output: results/raw/native_edge_runtime_matrix.json
-    report: reports/112_edge_runtime_matrix.md
     command: ./build/inferlab_edge_runtime_matrix --repo-root . --config configs/edge_runtime_matrix.example.json --mode plan --output results/raw/native_edge_runtime_matrix.json --format json
     target_machine_execute_command: ./build-edge-linux-aarch64/inferlab_edge_runtime_matrix --repo-root . --config configs/edge_runtime_matrix.example.json --mode execute --output results/raw/native_edge_runtime_matrix.json --format json
 
@@ -484,7 +477,6 @@ runs:
     backend: native_edge_cloud_routing
     config: configs/edge_cloud_routing.example.json
     output: results/raw/native_edge_cloud_routing.json
-    report: reports/113_edge_cloud_routing.md
     command: ./build/inferlab_edge_cloud_routing --repo-root . --config configs/edge_cloud_routing.example.json --mode plan --output results/raw/native_edge_cloud_routing.json --format json
     target_machine_execute_command: ./build-edge-cloud/inferlab_edge_cloud_routing --repo-root . --config configs/edge_cloud_routing.example.json --mode execute --output results/raw/native_edge_cloud_routing.json --format json
 
@@ -494,9 +486,9 @@ runs:
     backend: product_profile
     config: configs/product_profiles/vllm.example.yaml
     output: results/raw/product_vllm_capability_profile.json
-    report: reports/49_product_vllm_profile.md
-    command: python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --output results/raw/product_vllm_capability_profile.json --report reports/49_product_vllm_profile.md --dry-run
-    replay_command: python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --output results/raw/product_vllm_capability_profile.json --report reports/49_product_vllm_profile.md --replay --evidence-dir profiling/vllm
+    report: results/raw/product_vllm_capability_profile.json
+    command: python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --output results/raw/product_vllm_capability_profile.json --dry-run
+    replay_command: python3 -m scripts.product_profiles.profile_vllm --repo-root . --config configs/product_profiles/vllm.example.yaml --output results/raw/product_vllm_capability_profile.json --replay --evidence-dir profiling/vllm
 
   - name: product_sglang_capability_profile
     script: scripts/product_profiles/profile_sglang.py
@@ -504,9 +496,9 @@ runs:
     backend: product_profile
     config: configs/product_profiles/sglang.example.yaml
     output: results/raw/product_sglang_capability_profile.json
-    report: reports/50_product_sglang_profile.md
-    command: python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --output results/raw/product_sglang_capability_profile.json --report reports/50_product_sglang_profile.md --dry-run
-    replay_command: python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --output results/raw/product_sglang_capability_profile.json --report reports/50_product_sglang_profile.md --replay --evidence-dir profiling/sglang
+    report: results/raw/product_sglang_capability_profile.json
+    command: python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --output results/raw/product_sglang_capability_profile.json --dry-run
+    replay_command: python3 -m scripts.product_profiles.profile_sglang --repo-root . --config configs/product_profiles/sglang.example.yaml --output results/raw/product_sglang_capability_profile.json --replay --evidence-dir profiling/sglang
 
   - name: product_tensorrtllm_runtime_profile
     script: scripts/product_profiles/profile_tensorrtllm.py
@@ -514,6 +506,6 @@ runs:
     backend: product_profile
     config: configs/product_profiles/tensorrtllm.example.yaml
     output: results/raw/product_tensorrtllm_runtime_profile.json
-    report: reports/52_product_runtime_backend_profile.md
-    command: python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --output results/raw/product_tensorrtllm_runtime_profile.json --report reports/52_product_runtime_backend_profile.md --dry-run
-    replay_command: python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --output results/raw/product_tensorrtllm_runtime_profile.json --report reports/52_product_runtime_backend_profile.md --replay --evidence-dir profiling/tensorrtllm
+    report: results/raw/product_tensorrtllm_runtime_profile.json
+    command: python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --output results/raw/product_tensorrtllm_runtime_profile.json --dry-run
+    replay_command: python3 -m scripts.product_profiles.profile_tensorrtllm --repo-root . --config configs/product_profiles/tensorrtllm.example.yaml --output results/raw/product_tensorrtllm_runtime_profile.json --replay --evidence-dir profiling/tensorrtllm

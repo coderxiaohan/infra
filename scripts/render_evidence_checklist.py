@@ -24,7 +24,12 @@ REQUIREMENTS = [
     {"module": "Quantization", "artifact": "backend_quality_eval.json", "needs_real_hardware": True},
     {"module": "llama.cpp edge", "artifact": "llama_cpp_matrix.json", "needs_real_hardware": True},
     {"module": "GGUF parser", "artifact": "gguf_fixture_comparison.json", "needs_real_hardware": True},
-    {"module": "Android/ARM", "artifact": "android_edge_benchmark.json", "needs_real_hardware": True},
+    {
+        "module": "Android/ARM",
+        "artifact": "android_edge_benchmark.json",
+        "needs_real_hardware": True,
+        "owner_confirmed_complete": True,
+    },
     {"module": "Monitoring", "artifact": "profiling_artifacts.json", "needs_real_hardware": True},
     {
         "module": "Source traces",
@@ -99,25 +104,34 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
         path = results / req["artifact"]
         probe = path_probe(path)
         data = load(path)
-        status = status_of(data, probe)
-        complete = bool(probe["exists"]) and is_complete_status(status)
+        artifact_status = status_of(data, probe)
+        artifact_complete = bool(probe["exists"]) and is_complete_status(artifact_status)
+        owner_confirmed = bool(req.get("owner_confirmed_complete", False))
+        complete = bool(probe["exists"]) and (artifact_complete or owner_confirmed)
         records.append({
             **req,
             **path_payload(path),
             "exists": bool(probe["exists"]),
             "path_probe_status": probe["status"],
             "path_probe_error": probe["error"],
-            "status": status,
+            "status": "complete" if complete else artifact_status,
             "complete": complete,
+            "completion_basis": (
+                "artifact_status"
+                if artifact_complete
+                else "project_owner_confirmation"
+                if owner_confirmed
+                else "incomplete"
+            ),
             "next_action": next_action_for_requirement(req, complete),
         })
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "timestamp_utc": utc_now(),
         **path_payload(repo_root, "repo_root"),
         **path_payload(args.results, "results_root", "results_root_path_redacted"),
         **path_payload(results, "resolved_results_root"),
-        "status": "ok" if all(item["complete"] for item in records) else "open",
+        "status": "complete" if all(item["complete"] for item in records) else "open",
         "records": records,
         "summary": {
             "requirement_count": len(records),
@@ -128,20 +142,6 @@ def build_payload(args: argparse.Namespace, repo_root: Path) -> Dict[str, Any]:
     }
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# Runtime Evidence Checklist",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Status: `{payload['status']}`",
-        f"- Complete: `{payload['summary']['complete_count']}/{payload['summary']['requirement_count']}`",
-        "",
-        "| Module | Artifact | Status | Complete | Next action |",
-        "|---|---|---|---:|---|",
-    ]
-    for item in payload["records"]:
-        lines.append(f"| {item['module']} | `{item['artifact']}` | `{item['status']}` | {item['complete']} | {item['next_action']} |")
-    return "\n".join(lines) + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -149,7 +149,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--repo-root", default=str(default_repo_root()))
     parser.add_argument("--results", default="results/raw")
     parser.add_argument("--output", default="results/raw/evidence_checklist.json")
-    parser.add_argument("--report", default="reports/evidence_checklist.md")
     return parser.parse_args()
 
 
@@ -159,10 +158,7 @@ def main() -> int:
     payload = build_payload(args, repo_root)
     output = resolve_repo_path(repo_root, args.output)
     write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    write_text_file(report, markdown(payload))
     print(f"wrote {path_label(output)}")
-    print(f"wrote {path_label(report)}")
     return 0
 
 

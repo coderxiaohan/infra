@@ -10,12 +10,12 @@ from time_utils import utc_now_precise as now_utc
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
-from artifact_json import load_json_dict
+from artifact_json import artifact_status_exit_code, load_json_dict
 from bounded_process import run_bounded_process
 from cli_validation import require_float_range
 from command_redaction import (
+    artifact_output_tail,
     artifact_path_payload as path_payload,
-    redact_artifact_output,
     redact_path_error,
     redacted_path_label as path_label,
 )
@@ -50,13 +50,6 @@ def load_json(path: Path) -> Dict[str, Any]:
         path,
         missing={"status": "missing", **path_payload(path)},
     ) or {}
-
-
-def artifact_output_tail(text: str, command: Sequence[str], max_lines: int) -> str:
-    return redact_artifact_output(
-        "\n".join(str(text).splitlines()[-max_lines:]),
-        paths=command,
-    )
 
 
 def artifact_problem(payload: Dict[str, Any]) -> Optional[str]:
@@ -139,7 +132,7 @@ def run_probe(probe_exe: Path, fixture: Path, output: Path, timeout_seconds: flo
         "capture_status": capture.status,
         "output_limit_exceeded": capture.output_limit_exceeded,
         "captured_output_bytes": capture.stdout_bytes,
-        "output_tail": artifact_output_tail(captured_output, command, 20),
+        "output_tail": artifact_output_tail(captured_output, command, None, 20),
     }
     if capture.status not in {"ok", "nonzero_exit"}:
         result["error_type"] = {
@@ -349,10 +342,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", default="results/raw/gguf_fixture_comparison.json")
     parser.add_argument("--timeout-seconds", type=float, default=60.0)
     parser.add_argument("--fields", default=",".join(DEFAULT_COMPARE_FIELDS))
+    parser.add_argument(
+        "--allow-non-ok-status",
+        action="store_true",
+        help="Return zero after writing a non-ok diagnostic artifact.",
+    )
     return parser.parse_args()
 
 
-def main() -> None:
+def main() -> int:
     args = parse_args()
     require_float_range("--timeout-seconds", args.timeout_seconds, 0.001, 86_400.0)
     repo_root = resolved_repo_root(args.repo_root)
@@ -360,7 +358,8 @@ def main() -> None:
     output = resolve_repo_path(repo_root, args.output)
     write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
     print(path_label(output))
+    return artifact_status_exit_code(payload, allow_non_ok=args.allow_non_ok_status)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

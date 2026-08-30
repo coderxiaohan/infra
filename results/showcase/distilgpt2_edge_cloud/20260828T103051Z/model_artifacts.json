@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "llama_cpp_gguf": {
+      "bytes": 167292032,
+      "files": 1,
+      "kind": "file",
+      "name": "distilgpt2-f16.gguf",
+      "sha256": "c2714a823e581c419bb4a7d18ebfb5162c87e9e5bfb1bcf91600a9c66c6d9981",
+      "status": "ok"
+    },
+    "trtllm_engine": {
+      "bytes": 170236335,
+      "files": 7,
+      "kind": "directory_manifest",
+      "name": "trtllm_distilgpt2_dynamic_engine",
+      "sha256": "626c0b8ba89f5288cd19c85d9f1ffd733d174fbda351faca0bc689bf753672d7",
+      "status": "ok"
+    },
+    "vllm_huggingface": {
+      "bytes": 330512683,
+      "files": 7,
+      "kind": "directory_manifest",
+      "name": "distilgpt2_clean_hf",
+      "sha256": "60f07f4aad6bccc2d74cddf9badbeeaf905ac6e635c547a1a7e7284190c759d9",
+      "status": "ok"
+    }
+  },
+  "format_note": "The backends use the same DistilGPT2 model family in backend-native packaging; hashes are expected to differ across GGUF, Hugging Face, and TensorRT engine formats.",
+  "model_family": "distilgpt2",
+  "schema_version": 1,
+  "timestamp_utc": "2026-08-28T10:31:00.696766Z"
+}

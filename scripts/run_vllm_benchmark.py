@@ -8,7 +8,6 @@ import hashlib
 import importlib.util
 import json
 import os
-import re
 import shutil
 import sys
 import time
@@ -21,8 +20,12 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from bounded_http import BoundedHttpBody, read_bounded_http_body
 from bounded_process import run_bounded_process
-from artifact_json import try_write_json_file
-from cli_validation import require_float_range, require_int_range
+from artifact_json import artifact_status_exit_code, try_write_json_file
+from cli_validation import (
+    normalize_env_var_name,
+    require_float_range,
+    require_int_range,
+)
 from command_redaction import (
     artifact_path_fields as path_payload,
     artifact_path_or_value as artifact_model_value,
@@ -38,7 +41,6 @@ from repo_paths import default_repo_root, resolve_repo_path, resolved_repo_root
 from path_status import safe_exists as safe_path_exists
 from quiet_cli_output import add_quiet_success_argument, emit_success
 
-ENV_VAR_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 DIAGNOSTIC_OUTPUT_LIMIT_BYTES = 64 * 1024
 HTTP_RESPONSE_LIMIT_BYTES = 16 * 1024 * 1024
 MAX_USAGE_TOKEN_COUNT = 1_000_000_000
@@ -550,6 +552,11 @@ def parse_args() -> argparse.Namespace:
     add_quiet_success_argument(parser)
     parser.add_argument("--repo-root", default=str(default_repo_root()))
     parser.add_argument("--output", default="results/raw/vllm_serving_benchmark.json")
+    parser.add_argument(
+        "--allow-non-ok-status",
+        action="store_true",
+        help="Return zero after writing a non-ok diagnostic artifact.",
+    )
     parser.add_argument("--prompt-file", default="configs/eval_prompts.jsonl")
     parser.add_argument("--max-prompts", type=int, default=3)
     parser.add_argument("--model", default="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
@@ -575,15 +582,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def normalize_env_var_name(label: str, value: str) -> str:
-    name = value.strip()
-    if not name:
-        return ""
-    if not ENV_VAR_NAME_RE.fullmatch(name):
-        raise SystemExit(f"{label} must be an environment variable name, not a secret value")
-    return name
-
-
 def validate_args(args: argparse.Namespace) -> None:
     require_int_range("--max-prompts", args.max_prompts, 0, 100000)
     require_int_range("--max-tokens", args.max_tokens, 1, 1000000)
@@ -605,7 +603,7 @@ def main() -> int:
         print(f"failed to write {path_label(output)}: {write_status.get('error')}")
         return 1
     emit_success(path_label(output), quiet=args.quiet)
-    return 0
+    return artifact_status_exit_code(payload, allow_non_ok=args.allow_non_ok_status)
 
 
 if __name__ == "__main__":

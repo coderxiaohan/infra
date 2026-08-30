@@ -137,9 +137,11 @@ class RMSNorm(TorchModule):
         self.weight = nn.Parameter(torch.ones(hidden_size))
 
     def forward(self, hidden_states: Tensor) -> Tensor:
-        variance = hidden_states.pow(2).mean(dim=-1, keepdim=True)
-        normed = hidden_states * torch.rsqrt(variance + self.eps)
-        return normed * self.weight
+        input_dtype = hidden_states.dtype
+        float_states = hidden_states.float()
+        variance = float_states.pow(2).mean(dim=-1, keepdim=True)
+        normed = float_states * torch.rsqrt(variance + self.eps)
+        return (normed * self.weight.float()).to(dtype=input_dtype)
 
 
 def apply_rope(x: Tensor, positions: Tensor, theta: float = 10000.0) -> Tensor:

@@ -1,8 +1,8 @@
 {
+  "report_sections": ["results/raw/product_tensorrtllm_runtime_profile.json"],
   "product": "tensorrtllm",
   "endpoint": "http://127.0.0.1:8000",
   "metrics_url": "http://127.0.0.1:8000/metrics",
-  "report_sections": ["reports/52_product_runtime_backend_profile.md"],
   "paths": {
     "engine_dir": "/models/trtllm_engine",
     "triton_model_repository": "/models/triton_repo"

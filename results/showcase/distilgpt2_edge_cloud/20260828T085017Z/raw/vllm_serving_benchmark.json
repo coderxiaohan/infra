@@ -1,0 +1,106 @@
+{
+  "base_url": "http://127.0.0.1:18000",
+  "completion_text_policy": {
+    "completion_hash": "sha256",
+    "completion_preview_chars": 0,
+    "completion_preview_policy": "content_hash_only",
+    "full_completion_text_policy": "content_hash_only",
+    "include_completion_text": false
+  },
+  "endpoint": "/v1/completions",
+  "environment": {
+    "gpu_available": true,
+    "nvidia_smi": {
+      "capture_status": "ok",
+      "captured_output_bytes": 49,
+      "output": "NVIDIA GeForce RTX 4070 SUPER, 12282 MiB, 591.86",
+      "output_limit_exceeded": false,
+      "returncode": 0
+    },
+    "python": "3.12.3",
+    "tools": {
+      "nvidia_smi": "path_c5e1a7f8480fa214",
+      "nvidia_smi_path_redacted": true
+    },
+    "torch_cuda": {
+      "available": true,
+      "cuda_version": "13.0",
+      "device_count": 1,
+      "torch_version": "2.13.0+cu130"
+    },
+    "vllm": {
+      "available": true
+    }
+  },
+  "mode": "external_openai_compatible_endpoint",
+  "model": "inferlab-distilgpt2",
+  "model_path_redacted": false,
+  "preflight": {
+    "can_benchmark_external_endpoint": true,
+    "can_run_local_vllm": true,
+    "reasons": []
+  },
+  "prompt_count": 1,
+  "prompt_source": {
+    "fallback": null,
+    "path": "path_147f1e05f3de0cbf.jsonl",
+    "path_redacted": true,
+    "status": "ok"
+  },
+  "recommended_local_launch_command": [
+    "python3",
+    "-m",
+    "vllm.entrypoints.openai.api_server",
+    "--model",
+    "inferlab-distilgpt2",
+    "--host",
+    "0.0.0.0",
+    "--port",
+    "18000"
+  ],
+  "repo_root": "path_e4b9a6eb8d7718ba",
+  "repo_root_redacted": true,
+  "request_kind": "completion",
+  "requests": [
+    {
+      "category": "edge_cloud_showcase",
+      "completion_chars": 8,
+      "completion_sha256": "79488488398f5f5aed236dd6e9f914599370d04dfe70fda61b8c83bf739b1088",
+      "completion_text_artifact_policy": "content_hash_only",
+      "completion_tokens": 8,
+      "elapsed_ms": 507.4595309997676,
+      "has_completion_text": true,
+      "has_usage": true,
+      "http_ok": true,
+      "index": 0,
+      "ms_per_completion_token": 63.43244137497095,
+      "ok": true,
+      "prompt_chars": 33,
+      "prompt_id": "kv_cache_short_explain",
+      "prompt_tokens": 9,
+      "response_body_bytes": 530,
+      "response_body_complete": true,
+      "response_body_limit_bytes": 16777216,
+      "response_body_status": "ok",
+      "response_valid": true,
+      "status_code": 200
+    }
+  ],
+  "schema_version": 1,
+  "status": "ok",
+  "summary": {
+    "avg_latency_ms": 507.4595309997676,
+    "completed_requests": 1,
+    "completion_token_throughput_per_s": 15.753579702200282,
+    "failed_requests": 0,
+    "max_latency_ms": 507.4595309997676,
+    "median_latency_ms": 507.4595309997676,
+    "min_latency_ms": 507.4595309997676,
+    "p90_latency_ms": 507.4595309997676,
+    "request_count": 1,
+    "request_throughput_per_s": 1.9691974627750353,
+    "total_completion_tokens": 8,
+    "total_elapsed_ms": 507.8210889987531
+  },
+  "timestamp_utc": "2026-08-28T08:50:58.207032+00:00"
+}

@@ -18,6 +18,7 @@ from advanced_serving.common import (
     artifact_safe_value,
     base_parser,
     command_record,
+    config_backend_map,
     config_int_list,
     config_string_list,
     config_string_value,
@@ -29,7 +30,6 @@ from advanced_serving.common import (
     status_from_execution,
     utc_now,
     write_json,
-    write_report,
 )
 
 
@@ -90,25 +90,7 @@ def build_payload(args) -> Dict[str, Any]:
 
 
 def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    raw_backends = config.get("backends", DEFAULT_BACKENDS)
-    if not isinstance(raw_backends, dict) or not raw_backends:
-        raise SystemExit("config.backends must be a non-empty object")
-    backends: Dict[str, Dict[str, str]] = {}
-    for name, backend in raw_backends.items():
-        backend_name = config_string_value("config.backends.<name>", name)
-        if not isinstance(backend, dict):
-            raise SystemExit(f"config.backends.{backend_name} must be an object")
-        backends[backend_name] = {
-            "base_url": config_string_value(
-                f"config.backends.{backend_name}.base_url",
-                backend.get("base_url", ""),
-            ),
-            "model": config_string_value(
-                f"config.backends.{backend_name}.model",
-                backend.get("model", "model"),
-            ),
-        }
-    config["backends"] = backends
+    config["backends"] = config_backend_map(config, DEFAULT_BACKENDS)
     config["dataset"] = config_string_value("config.dataset", config.get("dataset", DEFAULT_CONFIG["dataset"]))
     config["tasks"] = config_string_list(config, "tasks", KNOWN_TASKS)
     config["top_k"] = config_int_list(config, "top_k", 1, 1_000_000)
@@ -120,13 +102,10 @@ def main() -> int:
     parser.add_argument("--config", default="configs/pooling_benchmark.example.json")
     parser.add_argument("--api-key-env", default="", help="Environment variable containing an API key for endpoint probes.")
     parser.add_argument("--output", default="results/raw/pooling_benchmark.json")
-    parser.add_argument("--report", default="reports/pooling_benchmark.md")
     args = parser.parse_args()
     payload = build_payload(args)
     write_json(args.output, payload)
-    write_report(args.report, "Pooling/Rerank Benchmark", payload, ((r["backend"], r["task"], r.get("top_k") or "", r["id"], r["status"]) for r in payload["records"]), ("Backend", "Task", "Top K", "ID", "Status"), payload["next_actions"])
     print(f"wrote {path_label(args.output)}")
-    print(f"wrote {path_label(args.report)}")
     return 0
 
 

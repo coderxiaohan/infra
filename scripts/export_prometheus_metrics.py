@@ -431,567 +431,171 @@ def export_artifact_catalog_metrics(data: Optional[Dict[str, Any]]) -> List[str]
     return lines
 
 
+def _summary_metric_pairs(
+    summary: Dict[str, Any],
+    names: Iterable[str],
+) -> List[Tuple[str, Any]]:
+    return [(name, summary.get(name)) for name in names]
+
+
 def evidence_query_operation_and_repair_metric_pairs(
     summary: Dict[str, Any],
 ) -> List[Tuple[str, Any]]:
-    return [
-        ("query_result_count", summary.get("query_result_count")),
-        ("blocked_result_count", summary.get("blocked_result_count")),
-        ("query_operation_selector_present", summary.get("query_operation_selector_present")),
-        ("query_operation_target_present", summary.get("query_operation_target_present")),
+    return _summary_metric_pairs(
+        summary,
         (
+            "query_result_count",
+            "blocked_result_count",
+            "query_operation_selector_present",
+            "query_operation_target_present",
             "query_operation_snapshot_inputs_required",
-            summary.get("query_operation_snapshot_inputs_required"),
-        ),
-        (
             "query_operation_snapshot_inputs_configured",
-            summary.get("query_operation_snapshot_inputs_configured"),
-        ),
-        (
             "query_operation_selected_result_present",
-            summary.get("query_operation_selected_result_present"),
-        ),
-        (
             "query_operation_selected_result_input_ready",
-            summary.get("query_operation_selected_result_input_ready"),
-        ),
-        (
             "query_operation_selected_result_payload_count",
-            summary.get("query_operation_selected_result_payload_count"),
-        ),
-        (
             "query_operation_show_artifact_candidate_count",
-            summary.get("query_operation_show_artifact_candidate_count"),
-        ),
-        (
             "query_operation_show_artifact_candidate_truncated",
-            summary.get("query_operation_show_artifact_candidate_truncated"),
-        ),
-        (
             "query_operation_show_artifact_exact_match",
-            summary.get("query_operation_show_artifact_exact_match"),
-        ),
-        (
             "query_operation_show_artifact_selector_ambiguous",
-            summary.get("query_operation_show_artifact_selector_ambiguous"),
-        ),
-        (
             "query_operation_payload_selector_focus_present",
-            summary.get("query_operation_payload_selector_focus_present"),
-        ),
-        (
             "query_operation_payload_selector_focus_match_count",
-            summary.get("query_operation_payload_selector_focus_match_count"),
-        ),
-        (
             "query_operation_payload_selector_focus_ambiguous",
-            summary.get("query_operation_payload_selector_focus_ambiguous"),
-        ),
-        (
             "query_operation_payload_selector_focus_source_location_gap_count",
-            summary.get("query_operation_payload_selector_focus_source_location_gap_count"),
-        ),
-        (
             "query_operation_selector_match_count",
-            summary.get("query_operation_selector_match_count"),
-        ),
-        (
             "query_operation_selector_ambiguous",
-            summary.get("query_operation_selector_ambiguous"),
-        ),
-        (
             "query_operation_selector_repair_card_count",
-            summary.get("query_operation_selector_repair_card_count"),
-        ),
-        (
             "query_operation_selector_repair_card_emitted_count",
-            summary.get("query_operation_selector_repair_card_emitted_count"),
-        ),
-        (
             "query_operation_selector_repair_card_truncated",
-            summary.get("query_operation_selector_repair_card_truncated"),
-        ),
-        (
             "query_operation_selector_repair_card_embedded_limit",
-            summary.get("query_operation_selector_repair_card_embedded_limit"),
-        ),
-        (
             "query_operation_selector_repair_card_full_export_count",
-            summary.get("query_operation_selector_repair_card_full_export_count"),
-        ),
-        (
             "query_operation_selector_repair_card_external_export_configured",
-            summary.get("query_operation_selector_repair_card_external_export_configured"),
-        ),
-        (
             "query_operation_selector_repair_card_external_export_written",
-            summary.get("query_operation_selector_repair_card_external_export_written"),
-        ),
-        (
             "query_operation_selector_repair_card_current_repo_count",
-            summary.get("query_operation_selector_repair_card_current_repo_count"),
-        ),
-        (
             "query_operation_selector_repair_card_current_server_count",
-            summary.get("query_operation_selector_repair_card_current_server_count"),
-        ),
-        (
             "query_operation_selector_repair_card_target_machine_count",
-            summary.get("query_operation_selector_repair_card_target_machine_count"),
-        ),
-        (
             "query_operation_selector_repair_card_target_product_count",
-            summary.get("query_operation_selector_repair_card_target_product_count"),
-        ),
-        (
             "query_operation_selector_repair_card_source_location_gap_card_count",
-            summary.get(
-                "query_operation_selector_repair_card_source_location_gap_card_count"
-            ),
-        ),
-        (
             "query_operation_selector_repair_card_external_file_required",
-            summary.get("query_operation_selector_repair_card_external_file_required"),
-        ),
-        (
             "query_operation_selector_source_location_count",
-            summary.get("query_operation_selector_source_location_count"),
-        ),
-        (
             "query_operation_selector_source_location_gap_count",
-            summary.get("query_operation_selector_source_location_gap_count"),
-        ),
-        (
             "query_operation_selector_current_repo_action_count",
-            summary.get("query_operation_selector_current_repo_action_count"),
-        ),
-        (
             "query_operation_selector_current_server_action_count",
-            summary.get("query_operation_selector_current_server_action_count"),
-        ),
-        (
             "query_operation_selector_target_machine_action_count",
-            summary.get("query_operation_selector_target_machine_action_count"),
-        ),
-        (
             "query_operation_selector_target_product_action_count",
-            summary.get("query_operation_selector_target_product_action_count"),
-        ),
-        (
             "query_operation_selector_action_plan_present",
-            summary.get("query_operation_selector_action_plan_present"),
-        ),
-        (
             "query_operation_selector_action_plan_step_count",
-            summary.get("query_operation_selector_action_plan_step_count"),
-        ),
-        (
             "query_operation_selector_action_plan_current_repo_step_count",
-            summary.get("query_operation_selector_action_plan_current_repo_step_count"),
-        ),
-        (
             "query_operation_selector_action_plan_target_or_validation_step_count",
-            summary.get("query_operation_selector_action_plan_target_or_validation_step_count"),
-        ),
-        (
             "query_operation_selector_action_plan_source_location_gap_count",
-            summary.get("query_operation_selector_action_plan_source_location_gap_count"),
-        ),
-        (
             "query_operation_selector_action_plan_readiness_blocker_count",
-            summary.get("query_operation_selector_action_plan_readiness_blocker_count"),
-        ),
-        (
             "operation_catalog_supported_count",
-            summary.get("operation_catalog_supported_count"),
-        ),
-        (
             "operation_catalog_read_only_count",
-            summary.get("operation_catalog_read_only_count"),
-        ),
-        (
             "operation_catalog_snapshot_required_count",
-            summary.get("operation_catalog_snapshot_required_count"),
-        ),
-        (
             "operation_catalog_selector_recommended_count",
-            summary.get("operation_catalog_selector_recommended_count"),
-        ),
-        (
             "operation_catalog_target_required_count",
-            summary.get("operation_catalog_target_required_count"),
-        ),
-        ("query_ux_repair_card_count", summary.get("query_ux_repair_card_count")),
-        ("query_ux_repair_card_group_count", summary.get("query_ux_repair_card_group_count")),
-        (
+            "query_ux_repair_card_count",
+            "query_ux_repair_card_group_count",
             "query_ux_repair_card_group_card_count",
-            summary.get("query_ux_repair_card_group_card_count"),
-        ),
-        (
             "query_ux_repair_card_group_current_repo_count",
-            summary.get("query_ux_repair_card_group_current_repo_count"),
-        ),
-        (
             "query_ux_repair_card_group_current_server_count",
-            summary.get("query_ux_repair_card_group_current_server_count"),
-        ),
-        (
             "query_ux_repair_card_group_target_machine_count",
-            summary.get("query_ux_repair_card_group_target_machine_count"),
-        ),
-        (
             "query_ux_repair_card_group_target_product_count",
-            summary.get("query_ux_repair_card_group_target_product_count"),
-        ),
-        (
             "query_ux_repair_card_group_source_location_gap_count",
-            summary.get("query_ux_repair_card_group_source_location_gap_count"),
-        ),
-        (
             "query_ux_repair_group_summary_present",
-            summary.get("query_ux_repair_group_summary_present"),
-        ),
-        (
             "query_ux_repair_group_exact_wiring_location_count",
-            summary.get("query_ux_repair_group_exact_wiring_location_count"),
-        ),
-        (
             "query_ux_repair_group_affected_claim_count",
-            summary.get("query_ux_repair_group_affected_claim_count"),
-        ),
-        (
             "query_ux_repair_narrative_present",
-            summary.get("query_ux_repair_narrative_present"),
-        ),
-        (
             "query_ux_repair_narrative_step_count",
-            summary.get("query_ux_repair_narrative_step_count"),
-        ),
-        (
             "query_ux_repair_narrative_current_repo_action_count",
-            summary.get("query_ux_repair_narrative_current_repo_action_count"),
-        ),
-        (
             "query_ux_repair_narrative_target_or_validation_action_count",
-            summary.get(
-                "query_ux_repair_narrative_target_or_validation_action_count"
-            ),
-        ),
-        (
             "query_ux_repair_narrative_source_location_gap_count",
-            summary.get("query_ux_repair_narrative_source_location_gap_count"),
-        ),
-        (
             "query_ux_repair_narrative_readiness_blocker_count",
-            summary.get("query_ux_repair_narrative_readiness_blocker_count"),
-        ),
-        (
             "query_ux_repair_narrative_affected_claim_count",
-            summary.get("query_ux_repair_narrative_affected_claim_count"),
-        ),
-        (
             "query_ux_repair_narrative_exact_wiring_location_count",
-            summary.get("query_ux_repair_narrative_exact_wiring_location_count"),
-        ),
-        (
             "query_ux_repair_group_primary_action_present",
-            summary.get("query_ux_repair_group_primary_action_present"),
-        ),
-        (
             "query_ux_repair_group_primary_source_location_present",
-            summary.get("query_ux_repair_group_primary_source_location_present"),
-        ),
-        (
             "query_ux_repair_group_navigation_step_count",
-            summary.get("query_ux_repair_group_navigation_step_count"),
-        ),
-        (
             "query_ux_repair_group_navigation_current_repo_step_count",
-            summary.get("query_ux_repair_group_navigation_current_repo_step_count"),
-        ),
-        (
             "query_ux_repair_group_navigation_target_or_validation_step_count",
-            summary.get(
-                "query_ux_repair_group_navigation_target_or_validation_step_count"
-            ),
         ),
-    ]
+    )
 
 
 def evidence_query_navigation_metric_pairs(
     summary: Dict[str, Any],
 ) -> List[Tuple[str, Any]]:
-    return [
+    return _summary_metric_pairs(
+        summary,
         (
             "query_ux_source_location_worklist_item_count",
-            summary.get("query_ux_source_location_worklist_item_count"),
-        ),
-        (
             "query_ux_source_location_worklist_current_repo_item_count",
-            summary.get("query_ux_source_location_worklist_current_repo_item_count"),
-        ),
-        (
             "query_ux_source_location_worklist_target_or_validation_item_count",
-            summary.get(
-                "query_ux_source_location_worklist_target_or_validation_item_count"
-            ),
-        ),
-        (
             "query_ux_source_location_worklist_gap_count",
-            summary.get("query_ux_source_location_worklist_gap_count"),
-        ),
-        (
             "query_ux_source_location_worklist_focus_present",
-            summary.get("query_ux_source_location_worklist_focus_present"),
-        ),
-        (
             "query_ux_source_location_worklist_focus_first_item_present",
-            summary.get("query_ux_source_location_worklist_focus_first_item_present"),
-        ),
-        (
             "query_ux_source_location_worklist_focus_first_gap_present",
-            summary.get("query_ux_source_location_worklist_focus_first_gap_present"),
-        ),
-        (
             "query_ux_source_location_worklist_focus_first_item_current_repo_action_required",
-            summary.get(
-                "query_ux_source_location_worklist_focus_first_item_current_repo_action_required"
-            ),
-        ),
-        (
             "query_ux_source_location_worklist_focus_first_item_target_or_validation_action_required",
-            summary.get(
-                "query_ux_source_location_worklist_focus_first_item_target_or_validation_action_required"
-            ),
-        ),
-        (
             "query_ux_source_location_category_count",
-            summary.get("query_ux_source_location_category_count"),
-        ),
-        (
             "query_ux_source_location_active_category_count",
-            summary.get("query_ux_source_location_active_category_count"),
-        ),
-        (
             "query_ux_source_location_exact_category_count",
-            summary.get("query_ux_source_location_exact_category_count"),
-        ),
-        (
             "query_ux_source_location_gap_category_count",
-            summary.get("query_ux_source_location_gap_category_count"),
-        ),
-        (
             "query_ux_source_location_current_repo_gap_category_count",
-            summary.get("query_ux_source_location_current_repo_gap_category_count"),
-        ),
-        (
             "query_ux_source_location_target_or_validation_gap_category_count",
-            summary.get(
-                "query_ux_source_location_target_or_validation_gap_category_count"
-            ),
-        ),
-        (
             "query_ux_source_location_gap_repair_card_count",
-            summary.get("query_ux_source_location_gap_repair_card_count"),
-        ),
-        (
             "query_ux_source_location_category_exactness_percent",
-            summary.get("query_ux_source_location_category_exactness_percent"),
-        ),
-        (
             "query_ux_repair_card_path_rank_count",
-            summary.get("query_ux_repair_card_path_rank_count"),
-        ),
-        (
             "query_ux_repair_card_path_current_repo_rank_count",
-            summary.get("query_ux_repair_card_path_current_repo_rank_count"),
-        ),
-        (
             "query_ux_repair_card_path_target_or_validation_rank_count",
-            summary.get("query_ux_repair_card_path_target_or_validation_rank_count"),
-        ),
-        (
             "query_ux_repair_card_path_source_location_gap_count",
-            summary.get("query_ux_repair_card_path_source_location_gap_count"),
-        ),
-        (
             "query_ux_repair_card_rank_readiness_link_count",
-            summary.get("query_ux_repair_card_rank_readiness_link_count"),
-        ),
-        (
             "query_ux_repair_card_rank_readiness_current_repo_link_count",
-            summary.get(
-                "query_ux_repair_card_rank_readiness_current_repo_link_count"
-            ),
-        ),
-        (
             "query_ux_repair_card_rank_readiness_target_or_validation_link_count",
-            summary.get(
-                "query_ux_repair_card_rank_readiness_target_or_validation_link_count"
-            ),
-        ),
-        (
             "query_ux_repair_card_rank_readiness_report_ready_link_count",
-            summary.get(
-                "query_ux_repair_card_rank_readiness_report_ready_link_count"
-            ),
-        ),
-        (
             "query_ux_repair_card_rank_readiness_replay_ready_link_count",
-            summary.get(
-                "query_ux_repair_card_rank_readiness_replay_ready_link_count"
-            ),
-        ),
-        (
             "query_ux_repair_card_rank_readiness_execute_ready_link_count",
-            summary.get(
-                "query_ux_repair_card_rank_readiness_execute_ready_link_count"
-            ),
-        ),
-        (
             "query_ux_repair_card_source_exactness_card_count",
-            summary.get("query_ux_repair_card_source_exactness_card_count"),
-        ),
-        (
             "query_ux_repair_card_source_exactness_exact_card_count",
-            summary.get("query_ux_repair_card_source_exactness_exact_card_count"),
-        ),
-        (
             "query_ux_repair_card_source_exactness_gap_card_count",
-            summary.get("query_ux_repair_card_source_exactness_gap_card_count"),
-        ),
-        (
             "query_ux_repair_card_source_exactness_current_repo_gap_count",
-            summary.get("query_ux_repair_card_source_exactness_current_repo_gap_count"),
-        ),
-        (
             "query_ux_repair_card_source_exactness_target_or_validation_gap_count",
-            summary.get(
-                "query_ux_repair_card_source_exactness_target_or_validation_gap_count"
-            ),
-        ),
-        (
             "query_ux_repair_card_source_exactness_percent",
-            summary.get("query_ux_repair_card_source_exactness_percent"),
-        ),
-        (
             "query_ux_explain_tree_node_count",
-            summary.get("query_ux_explain_tree_node_count"),
-        ),
-        (
             "query_ux_explain_tree_source_exact_node_count",
-            summary.get("query_ux_explain_tree_source_exact_node_count"),
-        ),
-        (
             "query_ux_explain_tree_source_gap_node_count",
-            summary.get("query_ux_explain_tree_source_gap_node_count"),
-        ),
-        (
             "query_ux_explain_tree_current_repo_source_gap_count",
-            summary.get("query_ux_explain_tree_current_repo_source_gap_count"),
-        ),
-        (
             "query_ux_explain_tree_target_or_validation_source_gap_count",
-            summary.get(
-                "query_ux_explain_tree_target_or_validation_source_gap_count"
-            ),
-        ),
-        (
             "query_ux_explain_tree_source_exactness_percent",
-            summary.get("query_ux_explain_tree_source_exactness_percent"),
-        ),
-        (
             "query_ux_blocker_drilldown_record_count",
-            summary.get("query_ux_blocker_drilldown_record_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_category_count",
-            summary.get("query_ux_blocker_drilldown_category_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_source_location_gap_count",
-            summary.get("query_ux_blocker_drilldown_source_location_gap_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_affected_claim_count",
-            summary.get("query_ux_blocker_drilldown_affected_claim_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_exact_wiring_location_count",
-            summary.get("query_ux_blocker_drilldown_exact_wiring_location_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_current_repo_action_count",
-            summary.get("query_ux_blocker_drilldown_current_repo_action_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_current_server_action_count",
-            summary.get("query_ux_blocker_drilldown_current_server_action_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_target_machine_action_count",
-            summary.get("query_ux_blocker_drilldown_target_machine_action_count"),
-        ),
-        (
             "query_ux_blocker_drilldown_target_product_action_count",
-            summary.get("query_ux_blocker_drilldown_target_product_action_count"),
-        ),
-        ("query_ux_blocker_category_count", summary.get("query_ux_blocker_category_count")),
-        ("query_ux_exact_wiring_location_count", summary.get("query_ux_exact_wiring_location_count")),
-        ("query_ux_report_ready_blocker_count", summary.get("query_ux_report_ready_blocker_count")),
-        ("query_ux_replay_ready_blocker_count", summary.get("query_ux_replay_ready_blocker_count")),
-        ("query_ux_execute_ready_blocker_count", summary.get("query_ux_execute_ready_blocker_count")),
-        (
+            "query_ux_blocker_category_count",
+            "query_ux_exact_wiring_location_count",
+            "query_ux_report_ready_blocker_count",
+            "query_ux_replay_ready_blocker_count",
+            "query_ux_execute_ready_blocker_count",
             "query_ux_readiness_path_blocking_repair_card_count",
-            summary.get("query_ux_readiness_path_blocking_repair_card_count"),
-        ),
-        (
             "query_ux_readiness_path_step_count",
-            summary.get("query_ux_readiness_path_step_count"),
-        ),
-        (
             "query_ux_readiness_path_current_repo_step_count",
-            summary.get("query_ux_readiness_path_current_repo_step_count"),
-        ),
-        (
             "query_ux_readiness_path_target_or_validation_step_count",
-            summary.get("query_ux_readiness_path_target_or_validation_step_count"),
-        ),
-        (
             "query_ux_readiness_path_source_location_gap_count",
-            summary.get("query_ux_readiness_path_source_location_gap_count"),
-        ),
-        (
             "query_ux_readiness_path_catalog_flow_discrepancy_count",
-            summary.get("query_ux_readiness_path_catalog_flow_discrepancy_count"),
-        ),
-        (
             "query_ux_readiness_path_fallback_removal_blocked_count",
-            summary.get("query_ux_readiness_path_fallback_removal_blocked_count"),
-        ),
-        (
             "query_ux_readiness_path_field_coverage_gap_count",
-            summary.get("query_ux_readiness_path_field_coverage_gap_count"),
-        ),
-        (
             "query_ux_readiness_path_current_repo_actionable",
-            summary.get("query_ux_readiness_path_current_repo_actionable"),
-        ),
-        (
             "query_ux_readiness_path_validation_or_target_required",
-            summary.get("query_ux_readiness_path_validation_or_target_required"),
-        ),
-        (
             "query_ux_readiness_path_source_location_metadata_required",
-            summary.get("query_ux_readiness_path_source_location_metadata_required"),
-        ),
-        (
             "query_ux_readiness_path_next_action_present",
-            summary.get("query_ux_readiness_path_next_action_present"),
+            "catalog_flow_input_gap_count",
+            "catalog_flow_missing_surface_count",
         ),
-        ("catalog_flow_input_gap_count", summary.get("catalog_flow_input_gap_count")),
-        ("catalog_flow_missing_surface_count", summary.get("catalog_flow_missing_surface_count")),
-    ]
+    )
 
 
 def evidence_query_catalog_native_snapshot_metric_pairs(
@@ -1035,10 +639,7 @@ def evidence_query_catalog_native_snapshot_metric_pairs(
         "native_core_audit_audit_review_coverage_blocks_full_audit_closure",
         "native_core_audit_filter_read_issue_count",
     )
-    return [
-        (name, summary.get(name))
-        for name in (*catalog_fields, *native_audit_fields)
-    ]
+    return _summary_metric_pairs(summary, (*catalog_fields, *native_audit_fields))
 
 
 def export_evidence_query_metrics(data: Optional[Dict[str, Any]]) -> List[str]:

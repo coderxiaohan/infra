@@ -7,20 +7,13 @@ import json
 from pathlib import Path
 from typing import Sequence
 
-from .cli_io import require_float_range, require_int_range, write_text_file
+from .cli_io import (
+    parse_prompt_token_ids,
+    require_float_range,
+    require_int_range,
+    write_text_file,
+)
 from .transformer import MiniTransformerConfig, run_generation_trace
-
-
-def _parse_prompt(raw_tokens: Sequence[str]) -> list[int]:
-    if len(raw_tokens) == 1 and "," in raw_tokens[0]:
-        raw_tokens = [piece for piece in raw_tokens[0].split(",") if piece]
-    try:
-        tokens = [int(token) for token in raw_tokens]
-    except ValueError as exc:
-        raise ValueError("prompt token ids must be integers") from exc
-    if not tokens:
-        raise ValueError("prompt must contain at least one token id")
-    return tokens
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -59,7 +52,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         trace = run_generation_trace(
             config,
-            _parse_prompt(args.prompt),
+            parse_prompt_token_ids(args.prompt),
             max_new_tokens=require_int_range("--max-new-tokens", args.max_new_tokens, 0, 10_000_000),
             seed=args.seed,
             use_cache=not args.no_cache,

@@ -3,8 +3,8 @@
 
 This planner is deliberately non-invasive: it does not build images, start
 containers, pull models, or contact registries. It records local tool
-availability and writes an env file plus a Markdown runbook for a later machine
-that has Docker, NVIDIA Container Toolkit, model access, and monitoring.
+availability and writes a JSON plan plus an env file for a later machine that
+has Docker, NVIDIA Container Toolkit, model access, and monitoring.
 """
 
 from __future__ import annotations
@@ -195,8 +195,6 @@ def build_commands(args: argparse.Namespace) -> Dict[str, List[str]]:
                     "--results",
                     "results/raw",
                     "--output",
-                    "results/tables/benchmark_summary.md",
-                    "--json-output",
                     "results/raw/benchmark_summary.json",
                 ]
             ),
@@ -234,7 +232,7 @@ def build_plan(args: argparse.Namespace, repo_root: Path, runtime_env: Dict[str,
             "sensitive_keys": sensitive_keys,
             **path_payload(args.env_output, "runtime_env_file", "runtime_env_file_path_redacted"),
             "env_file_sensitive_values": "included" if args.write_sensitive_env else "omitted_as_comments",
-            "claim_boundary": "JSON and Markdown plans are review artifacts and must not expose credentials; generated env files omit sensitive values unless --write-sensitive-env is explicitly used on a private target machine.",
+            "claim_boundary": "JSON plans are review artifacts and must not expose credentials; generated env files omit sensitive values unless --write-sensitive-env is explicitly used on a private target machine.",
         },
         "commands": build_commands(args),
         "notes": [
@@ -242,7 +240,7 @@ def build_plan(args: argparse.Namespace, repo_root: Path, runtime_env: Dict[str,
             "Use the dev image on CPU-only machines for editing and native builds.",
             "Use the vLLM service profile only on a GPU machine with NVIDIA Container Toolkit.",
             "Generate inferlab_metrics.prom before starting the observability stack if no benchmark pipeline has run yet.",
-            "Sensitive environment values are redacted from JSON/report artifacts and omitted from generated env files by default.",
+            "Sensitive environment values are redacted from JSON artifacts and omitted from generated env files by default.",
         ],
     }
 
@@ -258,48 +256,6 @@ def env_text(env: Dict[str, str], *, include_sensitive: bool = False) -> str:
     return "\n".join(lines) + "\n"
 
 
-def markdown_plan(plan: Dict[str, Any]) -> str:
-    lines = [
-        "# InferLab Runtime Deployment Plan",
-        "",
-        f"- Generated: `{plan['timestamp_utc']}`",
-        f"- Profile: `{plan['profile']}`",
-        f"- Host: `{plan['host']['platform']}` / `{plan['host']['machine']}`",
-        "",
-        "## Preflight",
-        "",
-        "| Item | Value | Ready |",
-        "|---|---|---:|",
-    ]
-    preflight = plan["preflight"]
-    rows = [
-        ("docker", preflight["docker"].get("path"), preflight["docker"].get("available")),
-        ("nvidia-smi", preflight["nvidia_smi"].get("path"), preflight["nvidia_smi"].get("available")),
-        ("model root", preflight["model_root"].get("path"), preflight["model_root"].get("exists")),
-        ("textfile dir", preflight["textfile_dir"].get("path"), preflight["textfile_dir"].get("exists")),
-        (
-            "inferlab compose",
-            preflight["compose_files"]["inferlab"].get("path"),
-            preflight["compose_files"]["inferlab"].get("exists"),
-        ),
-        (
-            "observability compose",
-            preflight["compose_files"]["observability"].get("path"),
-            preflight["compose_files"]["observability"].get("exists"),
-        ),
-    ]
-    for item, value, ready in rows:
-        lines.append(f"| {item} | `{value or ''}` | `{bool(ready)}` |")
-
-    for section, commands in plan["commands"].items():
-        lines.extend(["", f"## {section.title()} Commands", "", "```bash"])
-        lines.extend(commands)
-        lines.append("```")
-
-    lines.extend(["", "## Notes", ""])
-    for note in plan["notes"]:
-        lines.append(f"- {note}")
-    return "\n".join(lines) + "\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -325,8 +281,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--grafana-admin-user", default="admin")
     parser.add_argument("--grafana-admin-password", default=os.environ.get("GRAFANA_ADMIN_PASSWORD", ""))
     parser.add_argument("--write-sensitive-env", action="store_true", help="Write sensitive values to --env-output. Use only on a private target machine.")
-    parser.add_argument("--output", default="reports/runtime_deploy_plan.md")
-    parser.add_argument("--json-output", default="results/raw/runtime_deploy_plan.json")
+    parser.add_argument("--output", default="results/raw/runtime_deploy_plan.json")
     parser.add_argument("--env-output", default="deploy/inferlab.runtime.env")
     return parser.parse_args()
 
@@ -351,12 +306,9 @@ def main() -> int:
     runtime_env = build_env(args)
     plan = build_plan(args, repo_root, runtime_env)
     output = resolve_repo_path(repo_root, args.output)
-    json_output = resolve_repo_path(repo_root, args.json_output)
-    write_text_file(output, markdown_plan(plan))
-    write_text_file(json_output, json.dumps(plan, indent=2, sort_keys=True) + "\n")
+    write_text_file(output, json.dumps(plan, indent=2, sort_keys=True) + "\n")
     write_text_file(env_output, env_text(runtime_env, include_sensitive=args.write_sensitive_env))
     print(f"wrote {redacted_path_label(output.as_posix())}")
-    print(f"wrote {redacted_path_label(json_output.as_posix())}")
     print(f"wrote {redacted_path_label(env_output.as_posix())}")
     return 0
 

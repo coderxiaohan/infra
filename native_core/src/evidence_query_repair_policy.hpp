@@ -44,17 +44,17 @@ inline std::vector<std::string> wiring_locations_for_category(
   if (category == "claim_scope_missing") {
     return {"native_core/src/high_value_artifact_catalog.hpp",
             "native_core/src/claim_scope_contract_main.cpp",
-            "reports/59_claim_scope_contract.md"};
+            "results/raw/native_claim_scope_contract.json"};
   }
   if (category == "summary_missing") {
     return {"scripts/summarize_benchmarks.py",
             "native_core/src/high_value_artifact_catalog.hpp",
-            "reports/README.md"};
+            "README.md"};
   }
   if (category == "report_wiring_missing") {
     return {"scripts/summarize_benchmarks.py",
             "scripts/export_prometheus_metrics.py",
-            "scripts/render_final_report.py", "reports/README.md"};
+            "scripts/summarize_benchmarks.py", "README.md"};
   }
   if (category == "freshness_stale") {
     return {"native_core/src/runtime_evidence_freshness_gate_main.cpp",
@@ -67,7 +67,7 @@ inline std::vector<std::string> wiring_locations_for_category(
   if (category == "replay_missing") {
     return {"native_core/src/product_replay_semantic_events_main.cpp",
             "native_core/src/product_replay_semantic_linkage_projection.cpp",
-            "reports/74_product_replay_semantic_events.md"};
+            "results/raw/product_replay_semantic_events.json"};
   }
   if (category == "execute_missing") {
     return {"native_core/src/kernel_microbench_harness_model.cpp",

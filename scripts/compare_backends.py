@@ -15,7 +15,10 @@ from time_utils import utc_now
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from artifact_json import load_json_dict_or_empty as load_json
+from artifact_json import (
+    load_json_dict_or_empty as load_json,
+    load_json_object_list,
+)
 from command_redaction import artifact_path_payload as path_payload, redacted_path_label as path_label
 from repo_paths import default_repo_root, resolve_repo_path, resolved_repo_root
 from text_output import write_text_file
@@ -36,12 +39,6 @@ def number(value: Any) -> Optional[float]:
     if isinstance(value, (int, float)):
         return float(value)
     return None
-
-
-def cost_records(path: Path) -> List[Dict[str, Any]]:
-    payload = load_json(path)
-    records = payload.get("records", []) if isinstance(payload, dict) else []
-    return [item for item in records if isinstance(item, dict)]
 
 
 def cost_for(records: List[Dict[str, Any]], backend: str) -> Dict[str, Any]:
@@ -160,14 +157,16 @@ def build_trtllm(results: Path, quality: Dict[str, Any], profiling: Dict[str, An
             "tensorrt_available": get(data, ("environment", "modules", "tensorrt", "available")),
         },
         "latency": {
+            "latency_ms": summary.get("latency_ms") or metrics.get("latency_ms"),
             "avg_latency_ms": summary.get("avg_latency_ms") or metrics.get("avg_latency_ms"),
             "p50_latency_ms": summary.get("p50_latency_ms") or metrics.get("p50_latency_ms"),
             "p90_latency_ms": summary.get("p90_latency_ms") or metrics.get("p90_latency_ms"),
             "p99_latency_ms": summary.get("p99_latency_ms") or metrics.get("p99_latency_ms"),
         },
         "throughput": {
-            "tokens_per_s": summary.get("tokens_per_s") or metrics.get("tokens_per_s"),
-            "requests_per_s": summary.get("requests_per_s") or metrics.get("requests_per_s"),
+            "token_throughput_per_s": summary.get("token_throughput_per_s") or metrics.get("token_throughput_per_s"),
+            "request_throughput_per_s": summary.get("request_throughput_per_s") or metrics.get("request_throughput_per_s"),
+            "throughput_per_s": summary.get("throughput_per_s") or metrics.get("throughput_per_s"),
         },
         "quality": quality_for(quality, "trtllm"),
         "profiling": profiling_for(profiling, "trtllm"),
@@ -278,35 +277,6 @@ def recommendation(records: List[Dict[str, Any]]) -> List[str]:
     return notes
 
 
-def markdown(payload: Dict[str, Any]) -> str:
-    lines = [
-        "# Backend Comparison",
-        "",
-        f"- Generated: `{payload['timestamp_utc']}`",
-        f"- Results root: `{payload['results_root']}`",
-        "",
-        "## Summary Table",
-        "",
-        "| Backend | Role | Status | Readiness | Latency evidence | Throughput evidence | Quality full text | Redacted preview | Profiling files | Cost |",
-        "|---|---|---|---:|---|---|---:|---:|---:|---:|",
-    ]
-    for item in payload["backends"]:
-        latency = ", ".join(f"{k}={v}" for k, v in item.get("latency", {}).items() if v is not None) or "_missing_"
-        throughput = ", ".join(f"{k}={v}" for k, v in item.get("throughput", {}).items() if v is not None) or "_missing_"
-        quality = item.get("quality", {})
-        profiling = item.get("profiling", {})
-        cost = item.get("cost", {})
-        lines.append(
-            f"| {item['backend']} | {item['runtime_role']} | `{item['status']}` | {item['readiness_score']} | {latency} | {throughput} | {quality_full_text_count(quality)} | {quality_redacted_preview_count(quality)} | {profiling.get('files', 0)} | {cost.get('total_cost', '')} |"
-        )
-    lines.extend(["", "## Recommendations", ""])
-    for note in payload["recommendations"]:
-        lines.append(f"- {note}")
-    lines.extend(["", "## Evidence Map", "", "| Backend | Evidence |", "|---|---|"])
-    for item in payload["backends"]:
-        lines.append(f"| {item['backend']} | " + ", ".join(f"`{name}`" for name in item.get("evidence", [])) + " |")
-    lines.extend(["", "## Notes", "", "- This report compares available artifacts only; missing runtime data is not inferred.", "- Re-run this script after collecting vLLM, TensorRT-LLM, llama.cpp, quality, profiling, and cost artifacts.", "- Use this table for engineering trade-off discussion, not as a benchmark claim unless all referenced artifacts were collected under controlled conditions."])
-    return "\n".join(lines) + "\n"
 
 
 def main() -> None:
@@ -315,7 +285,6 @@ def main() -> None:
     parser.add_argument("--results", default="results/raw")
     parser.add_argument("--cost-records", default="configs/cost_records.json")
     parser.add_argument("--output", default="results/raw/backend_comparison.json")
-    parser.add_argument("--report", default="reports/backend_comparison.md")
     args = parser.parse_args()
 
     repo_root = resolved_repo_root(args.repo_root)
@@ -323,7 +292,7 @@ def main() -> None:
     quality = load_json(results / "backend_quality_eval.json")
     profiling = load_json(results / "profiling_artifacts.json")
     cost_records_path = resolve_repo_path(repo_root, args.cost_records)
-    costs = cost_records(cost_records_path)
+    costs = load_json_object_list(cost_records_path, "records")
     records = [
         build_vllm(results, quality, profiling, costs),
         build_trtllm(results, quality, profiling, costs),
@@ -345,10 +314,7 @@ def main() -> None:
     }
     output = resolve_repo_path(repo_root, args.output)
     write_text_file(output, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    report = resolve_repo_path(repo_root, args.report)
-    write_text_file(report, markdown(payload))
     print(f"wrote {path_label(output)}")
-    print(f"wrote {path_label(report)}")
 
 
 if __name__ == "__main__":

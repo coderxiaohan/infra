@@ -31,10 +31,6 @@ int main(int argc, char** argv) {
   try {
     const char* program_name = inferlab_plan::cli_program_name(
         argc, argv, "inferlab_evidence_query");
-    const bool selector_export_wrapper =
-        inferlab_evidence_query_cli::
-            is_selector_repair_card_compatibility_invocation(
-                program_name);
     const auto& cli_options = inferlab_evidence_query_cli::option_spec();
     if (inferlab_plan::handle_cli_help(argc, argv, program_name, cli_options)) {
       return 0;
@@ -80,9 +76,6 @@ int main(int argc, char** argv) {
     if (target.empty() && !positional_command.target.empty()) {
       target = positional_command.target;
     }
-    inferlab_evidence_query_cli::
-        apply_selector_repair_card_compatibility_contract(
-            selector_export_wrapper, operation, selector);
     if (operation == "path" && target.empty()) {
       target = "report_ready";
     }
@@ -118,16 +111,11 @@ int main(int argc, char** argv) {
       throw std::invalid_argument("unsupported --format value: " + format +
                                   "; expected json or text");
     }
-    const fs::path output_arg = option_value(
-        "--output",
-        inferlab_evidence_query_cli::primary_output_default(
-            selector_export_wrapper));
+    const fs::path output_arg = option_value("--output", "");
     const fs::path output =
         inferlab_plan::resolve_optional_repo_relative_path(repo_root, output_arg);
-    const fs::path selector_repair_card_output_arg = option_value(
-        "--selector-repair-card-output",
-        inferlab_evidence_query_cli::selector_repair_card_output_default(
-            selector_export_wrapper));
+    const fs::path selector_repair_card_output_arg =
+        option_value("--selector-repair-card-output", "");
     const fs::path selector_repair_card_output =
         inferlab_plan::resolve_optional_repo_relative_path(
             repo_root, selector_repair_card_output_arg);

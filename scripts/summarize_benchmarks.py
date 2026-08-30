@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summarize InferLab benchmark/probe JSON files into Markdown and JSON."""
+"""Summarize InferLab benchmark/probe JSON files into one JSON artifact."""
 
 from __future__ import annotations
 
@@ -13,10 +13,15 @@ from artifact_catalog_glue import (
     resolve_catalog_sources,
     source_title_from_name,
 )
-from artifact_json import load_json_dict as load_json
+from artifact_json import (
+    artifact_status_exit_code,
+    is_non_success_artifact_status,
+    load_json_dict as load_json,
+)
 from command_redaction import artifact_path_payload as path_payload, redact_path_error
 from evidence_projection import (
     CATALOG_FLOW_GOVERNANCE_SUMMARY_FIELDS,
+    DomainFieldSpec,
     NATIVE_CORE_AUDIT_CORE_FIELDS,
     artifact_evidence_projection,
     default_repo_root,
@@ -27,11 +32,24 @@ from evidence_projection import (
     summary_domain_metric_pairs,
 )
 from json_projection import get_path
-from markdown_output import escape_markdown_cell as escape_cell
 from text_output import write_text_file
 
 
 Metric = Tuple[str, Any]
+
+
+class SourcePayloads(dict):
+    def __missing__(self, key: str) -> None:
+        return None
+
+
+def _summary_metric_items(
+    data: Dict[str, Any], *field_names: str
+) -> List[Metric]:
+    return summary_domain_metric_pairs(
+        data,
+        tuple(DomainFieldSpec(field_name) for field_name in field_names),
+    )
 
 
 EXPECTED_SOURCES = compose_catalog_extensions()
@@ -112,10 +130,16 @@ def build_section(
         section_metrics.append(
             {"name": "evidence_confidence", "value": evidence["confidence"]}
         )
+    artifact_status = data.get("status")
+    section_status = (
+        str(artifact_status)
+        if is_non_success_artifact_status(artifact_status)
+        else "ok"
+    )
     return {
         "title": title,
         "source": source,
-        "status": "ok",
+        "status": section_status,
         "evidence": evidence,
         "metrics": section_metrics,
     }
@@ -2489,339 +2513,91 @@ def evidence_governance_core_repair_metric_items(
 def evidence_governance_root_cause_product_metric_items(
     data: Dict[str, Any],
 ) -> List[Metric]:
-    return [
-            (
-                "root_cause_catalog_flow_fallback_removal_shortest_path_repair_path_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_shortest_path_repair_path_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_shortest_path_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_shortest_path_repair_path_source_location_gap_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_root_cause_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_root_cause_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_present",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_present")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_decision",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_decision")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_removal_allowed",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_removal_allowed")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_blocker_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_blocker_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_blocking_surface_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_blocking_surface_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_fallback_surface_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_fallback_surface_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_parity_refresh_required_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_parity_refresh_required_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_current_repo_action_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_current_repo_action_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_target_machine_action_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_target_machine_action_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_source_location_gap_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_blocking_surface_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_blocking_surface_source_location_gap_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_blocks_removal",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_blocks_removal")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_repair_path_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_repair_path_count")),
-            ),
-            (
-                "root_cause_catalog_flow_fallback_removal_parity_gate_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_catalog_flow_fallback_removal_parity_gate_repair_path_source_location_gap_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_root_cause_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_root_cause_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_status",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_status")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_blocker_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_blocker_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_pending_event_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_pending_event_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_pending_rule_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_pending_rule_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_blocked_correlation_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_blocked_correlation_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_target_or_validation_action_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_target_or_validation_action_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_first_blocker",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_first_blocker")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_next_action",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_next_action")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_blocks_release",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_blocks_release")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_root_cause_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_root_cause_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_status",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_status")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_blocker_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_blocker_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_semantic_linkage_blocker_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_semantic_linkage_blocker_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_replay_or_execute_missing_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_replay_or_execute_missing_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_target_or_validation_action_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_target_or_validation_action_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_target_product_replay_action_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_target_product_replay_action_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_target_gpu_execute_action_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_target_gpu_execute_action_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_typed_environment_split_present",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_typed_environment_split_present")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_source_artifact_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_source_artifact_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_first_source_artifact",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_first_source_artifact")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_next_action",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_next_action")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_blocks_release",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_blocks_release")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_repair_path_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_repair_path_count")),
-            ),
-            (
-                "root_cause_product_replay_family_gate_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_product_replay_family_gate_repair_path_source_location_gap_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_gate_root_cause_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_gate_root_cause_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_manifest_root_cause_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_manifest_root_cause_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_manifest_invalid_override_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_manifest_invalid_override_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_manifest_unmatched_override_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_manifest_unmatched_override_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_manifest_repair_path_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_manifest_repair_path_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_state",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_state")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_open_file_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_open_file_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_high_priority_open_file_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_high_priority_open_file_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_source_location_gap_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_primary_blocker",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_primary_blocker")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_first_open_file",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_first_open_file")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_blocks_full_audit_closure",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_blocks_full_audit_closure")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_repair_path_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_repair_path_count")),
-            ),
-            (
-                "root_cause_native_core_audit_review_coverage_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_review_coverage_repair_path_source_location_gap_count")),
-            ),
-            (
-                "product_replay_semantic_linkage_repair_path_count",
-                get_path(data, ("summary", "product_replay_semantic_linkage_repair_path_count")),
-            ),
-            (
-                "product_replay_semantic_linkage_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "product_replay_semantic_linkage_repair_path_source_location_gap_count")),
-            ),
-            (
-                "evidence_query_product_replay_semantic_linkage_repair_path_count",
-                get_path(data, ("summary", "evidence_query_product_replay_semantic_linkage_repair_path_count")),
-            ),
-            (
-                "evidence_query_product_replay_semantic_linkage_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "evidence_query_product_replay_semantic_linkage_repair_path_source_location_gap_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_repair_path_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_repair_path_count")),
-            ),
-            (
-                "root_cause_product_replay_semantic_linkage_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "root_cause_product_replay_semantic_linkage_repair_path_source_location_gap_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_repair_path_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_repair_path_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_repair_path_source_location_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_repair_path_source_location_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_repair_path_source_location_gap_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_repair_path_evidence_counter_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_repair_path_evidence_counter_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_added_deep_path_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_added_deep_path_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_removed_deep_path_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_removed_deep_path_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_changed_deep_value_count",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_changed_deep_value_count")),
-            ),
-            (
-                "evidence_query_snapshot_diff_deep_semantic_truncated",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_deep_semantic_truncated")),
-            ),
-            (
-                "evidence_query_snapshot_diff_deep_semantic_decision",
-                get_path(data, ("summary", "evidence_query_snapshot_diff_deep_semantic_decision")),
-            ),
-            (
-                "evidence_query_snapshot_to_release_link_count",
-                get_path(data, ("summary", "evidence_query_snapshot_to_release_link_count")),
-            ),
-            (
-                "evidence_query_snapshot_to_release_blocker_count",
-                get_path(data, ("summary", "evidence_query_snapshot_to_release_blocker_count")),
-            ),
-            (
-                "evidence_query_snapshot_to_release_group_plan_step",
-                get_path(data, ("summary", "evidence_query_snapshot_to_release_group_plan_step")),
-            ),
-            (
-                "evidence_query_snapshot_to_release_current_repo_action_count",
-                get_path(
-                    data,
-                    ("summary", "evidence_query_snapshot_to_release_current_repo_action_count"),
-                ),
-            ),
-            (
-                "blocker_repair_card_link_count",
-                get_path(data, ("summary", "blocker_repair_card_link_count")),
-            ),
-            (
-                "blocker_repair_card_linked_count",
-                get_path(data, ("summary", "blocker_repair_card_linked_count")),
-            ),
-            (
-                "blocker_repair_card_unmatched_release_path_count",
-                get_path(data, ("summary", "blocker_repair_card_unmatched_release_path_count")),
-            ),
-            (
-                "blocker_repair_card_unmatched_root_cause_count",
-                get_path(data, ("summary", "blocker_repair_card_unmatched_root_cause_count")),
-            ),
-            (
-                "blocker_repair_card_current_repo_action_count",
-                get_path(data, ("summary", "blocker_repair_card_current_repo_action_count")),
-            ),
-            (
-                "blocker_repair_card_target_or_validation_action_count",
-                get_path(data, ("summary", "blocker_repair_card_target_or_validation_action_count")),
-            ),
-            (
-                "blocker_repair_card_link_status",
-                get_path(data, ("summary", "blocker_repair_card_link_status")),
-            ),
-    ]
+    return _summary_metric_items(
+        data,
+        "root_cause_catalog_flow_fallback_removal_shortest_path_repair_path_count",
+        "root_cause_catalog_flow_fallback_removal_shortest_path_repair_path_source_location_gap_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_root_cause_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_present",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_decision",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_removal_allowed",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_blocker_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_blocking_surface_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_fallback_surface_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_parity_refresh_required_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_current_repo_action_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_target_machine_action_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_source_location_gap_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_blocking_surface_source_location_gap_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_blocks_removal",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_repair_path_count",
+        "root_cause_catalog_flow_fallback_removal_parity_gate_repair_path_source_location_gap_count",
+        "root_cause_product_replay_semantic_linkage_root_cause_count",
+        "root_cause_product_replay_semantic_linkage_status",
+        "root_cause_product_replay_semantic_linkage_blocker_count",
+        "root_cause_product_replay_semantic_linkage_pending_event_count",
+        "root_cause_product_replay_semantic_linkage_pending_rule_count",
+        "root_cause_product_replay_semantic_linkage_blocked_correlation_count",
+        "root_cause_product_replay_semantic_linkage_target_or_validation_action_count",
+        "root_cause_product_replay_semantic_linkage_first_blocker",
+        "root_cause_product_replay_semantic_linkage_next_action",
+        "root_cause_product_replay_semantic_linkage_blocks_release",
+        "root_cause_product_replay_family_gate_root_cause_count",
+        "root_cause_product_replay_family_gate_status",
+        "root_cause_product_replay_family_gate_blocker_count",
+        "root_cause_product_replay_family_gate_semantic_linkage_blocker_count",
+        "root_cause_product_replay_family_gate_replay_or_execute_missing_count",
+        "root_cause_product_replay_family_gate_target_or_validation_action_count",
+        "root_cause_product_replay_family_gate_target_product_replay_action_count",
+        "root_cause_product_replay_family_gate_target_gpu_execute_action_count",
+        "root_cause_product_replay_family_gate_typed_environment_split_present",
+        "root_cause_product_replay_family_gate_source_artifact_count",
+        "root_cause_product_replay_family_gate_first_source_artifact",
+        "root_cause_product_replay_family_gate_next_action",
+        "root_cause_product_replay_family_gate_blocks_release",
+        "root_cause_product_replay_family_gate_repair_path_count",
+        "root_cause_product_replay_family_gate_repair_path_source_location_gap_count",
+        "root_cause_native_core_audit_review_coverage_gate_root_cause_count",
+        "root_cause_native_core_audit_review_manifest_root_cause_count",
+        "root_cause_native_core_audit_review_manifest_invalid_override_count",
+        "root_cause_native_core_audit_review_manifest_unmatched_override_count",
+        "root_cause_native_core_audit_review_manifest_repair_path_count",
+        "root_cause_native_core_audit_review_coverage_state",
+        "root_cause_native_core_audit_review_coverage_open_file_count",
+        "root_cause_native_core_audit_review_coverage_high_priority_open_file_count",
+        "root_cause_native_core_audit_review_coverage_source_location_gap_count",
+        "root_cause_native_core_audit_review_coverage_primary_blocker",
+        "root_cause_native_core_audit_review_coverage_first_open_file",
+        "root_cause_native_core_audit_review_coverage_blocks_full_audit_closure",
+        "root_cause_native_core_audit_review_coverage_repair_path_count",
+        "root_cause_native_core_audit_review_coverage_repair_path_source_location_gap_count",
+        "product_replay_semantic_linkage_repair_path_count",
+        "product_replay_semantic_linkage_repair_path_source_location_gap_count",
+        "evidence_query_product_replay_semantic_linkage_repair_path_count",
+        "evidence_query_product_replay_semantic_linkage_repair_path_source_location_gap_count",
+        "root_cause_product_replay_semantic_linkage_repair_path_count",
+        "root_cause_product_replay_semantic_linkage_repair_path_source_location_gap_count",
+        "evidence_query_snapshot_diff_repair_path_count",
+        "evidence_query_snapshot_diff_repair_path_source_location_count",
+        "evidence_query_snapshot_diff_repair_path_source_location_gap_count",
+        "evidence_query_snapshot_diff_repair_path_evidence_counter_count",
+        "evidence_query_snapshot_diff_added_deep_path_count",
+        "evidence_query_snapshot_diff_removed_deep_path_count",
+        "evidence_query_snapshot_diff_changed_deep_value_count",
+        "evidence_query_snapshot_diff_deep_semantic_truncated",
+        "evidence_query_snapshot_diff_deep_semantic_decision",
+        "evidence_query_snapshot_to_release_link_count",
+        "evidence_query_snapshot_to_release_blocker_count",
+        "evidence_query_snapshot_to_release_group_plan_step",
+        "evidence_query_snapshot_to_release_current_repo_action_count",
+        "blocker_repair_card_link_count",
+        "blocker_repair_card_linked_count",
+        "blocker_repair_card_unmatched_release_path_count",
+        "blocker_repair_card_unmatched_root_cause_count",
+        "blocker_repair_card_current_repo_action_count",
+        "blocker_repair_card_target_or_validation_action_count",
+        "blocker_repair_card_link_status",
+    )
 
 
 def evidence_governance_query_repair_metric_items(
@@ -6110,175 +5886,114 @@ def evidence_governance_handoff_metric_items(
     data: Dict[str, Any],
 ) -> List[Metric]:
     return [
-            ("repair_card_count", get_path(data, ("summary", "repair_card_count"))),
-            ("root_cause_repair_card_count", get_path(data, ("summary", "root_cause_repair_card_count"))),
-            ("root_cause_current_repo_repair_card_count", get_path(data, ("summary", "root_cause_current_repo_repair_card_count"))),
-            ("root_cause_target_product_replay_repair_card_count", get_path(data, ("summary", "root_cause_target_product_replay_repair_card_count"))),
-            ("root_cause_target_gpu_execute_repair_card_count", get_path(data, ("summary", "root_cause_target_gpu_execute_repair_card_count"))),
-            ("root_cause_target_machine_repair_card_count", get_path(data, ("summary", "root_cause_target_machine_repair_card_count"))),
-            ("root_cause_repair_environment_split_status", get_path(data, ("summary", "root_cause_repair_environment_split_status"))),
-            ("root_cause_repair_environment_split_schema_gap", get_path(data, ("summary", "root_cause_repair_environment_split_schema_gap"))),
-            ("root_cause_repair_environment_legacy_fallback_used", get_path(data, ("summary", "root_cause_repair_environment_legacy_fallback_used"))),
-            ("root_cause_flow_check_repair_card_count", get_path(data, ("summary", "root_cause_flow_check_repair_card_count"))),
-            (
-                "root_cause_native_core_audit_root_cause_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_root_cause_count")),
+        *_summary_metric_items(
+            data,
+            "repair_card_count",
+            "root_cause_repair_card_count",
+            "root_cause_current_repo_repair_card_count",
+            "root_cause_target_product_replay_repair_card_count",
+            "root_cause_target_gpu_execute_repair_card_count",
+            "root_cause_target_machine_repair_card_count",
+            "root_cause_repair_environment_split_status",
+            "root_cause_repair_environment_split_schema_gap",
+            "root_cause_repair_environment_legacy_fallback_used",
+            "root_cause_flow_check_repair_card_count",
+            "root_cause_native_core_audit_root_cause_count",
+            "root_cause_native_core_audit_backlog_root_cause_count",
+            "root_cause_native_core_audit_scope_root_cause_count",
+            "root_cause_native_core_audit_blocker_count",
+            "root_cause_native_core_audit_source_unreadable_count",
+        ),
+        (
+            "root_cause_native_core_audit_high_priority_review_item_count",
+            get_path(data, ("summary", "native_core_audit_high_priority_review_item_count")),
+        ),
+        (
+            "root_cause_native_core_audit_top_review_priority",
+            get_path(data, ("summary", "native_core_audit_top_review_priority")),
+        ),
+        *_summary_metric_items(
+            data,
+            "root_cause_source_location_review_present",
+            "root_cause_source_location_card_count",
+            "root_cause_first_card_source_location_count",
+        ),
+        (
+            "root_cause_first_source_location",
+            get_path(data, ("root_cause_repair_review", "first_source_location")),
+        ),
+        *_summary_metric_items(
+            data,
+            "evidence_query_repair_path_review_present",
+            "evidence_query_repair_path_count",
+            "evidence_query_first_action_present",
+            "evidence_query_repair_path_source_gap_count",
+            "evidence_query_repair_path_source_location_count",
+            "evidence_query_repair_path_source_location_gap_count",
+            "native_core_audit_backlog_action_source_count",
+            "native_core_audit_backlog_source_location_gap_count",
+            "native_core_audit_scope_action_source_count",
+            "native_core_audit_scope_source_location_gap_count",
+            "native_core_audit_review_coverage_action_source_count",
+        ),
+        (
+            "action_source_review_decision",
+            get_path(data, ("action_source_review", "review_decision")),
+        ),
+        *_summary_metric_items(
+            data,
+            "snapshot_diff_review_present",
+            "snapshot_baseline_present",
+            "snapshot_baseline_gap_count",
+            "snapshot_entry_count",
+            "snapshot_added_artifact_count",
+            "snapshot_missing_artifact_count",
+            "snapshot_changed_artifact_count",
+            "snapshot_unchanged_artifact_count",
+            "snapshot_action_required_count",
+            "snapshot_review_decision",
+            "review_bundle_decision",
+        ),
+        (
+            "evidence_query_first_target",
+            get_path(data, ("evidence_query_repair_path_review", "first_target")),
+        ),
+        (
+            "evidence_query_first_state",
+            get_path(data, ("evidence_query_repair_path_review", "first_state")),
+        ),
+        (
+            "evidence_query_first_action",
+            short_text(
+                get_path(data, ("evidence_query_repair_path_review", "first_action"))
             ),
-            (
-                "root_cause_native_core_audit_backlog_root_cause_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_backlog_root_cause_count")),
-            ),
-            (
-                "root_cause_native_core_audit_scope_root_cause_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_scope_root_cause_count")),
-            ),
-            (
-                "root_cause_native_core_audit_blocker_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_blocker_count")),
-            ),
-            (
-                "root_cause_native_core_audit_source_unreadable_count",
-                get_path(data, ("summary", "root_cause_native_core_audit_source_unreadable_count")),
-            ),
-            (
-                "root_cause_native_core_audit_high_priority_review_item_count",
-                get_path(data, ("summary", "native_core_audit_high_priority_review_item_count")),
-            ),
-            (
-                "root_cause_native_core_audit_top_review_priority",
-                get_path(data, ("summary", "native_core_audit_top_review_priority")),
-            ),
-            ("root_cause_source_location_review_present", get_path(data, ("summary", "root_cause_source_location_review_present"))),
-            ("root_cause_source_location_card_count", get_path(data, ("summary", "root_cause_source_location_card_count"))),
-            ("root_cause_first_card_source_location_count", get_path(data, ("summary", "root_cause_first_card_source_location_count"))),
-            ("root_cause_first_source_location", get_path(data, ("root_cause_repair_review", "first_source_location"))),
-            ("evidence_query_repair_path_review_present", get_path(data, ("summary", "evidence_query_repair_path_review_present"))),
-            ("evidence_query_repair_path_count", get_path(data, ("summary", "evidence_query_repair_path_count"))),
-            ("evidence_query_first_action_present", get_path(data, ("summary", "evidence_query_first_action_present"))),
-            ("evidence_query_repair_path_source_gap_count", get_path(data, ("summary", "evidence_query_repair_path_source_gap_count"))),
-            (
-                "evidence_query_repair_path_source_location_count",
-                get_path(data, ("summary", "evidence_query_repair_path_source_location_count")),
-            ),
-            (
-                "evidence_query_repair_path_source_location_gap_count",
-                get_path(data, ("summary", "evidence_query_repair_path_source_location_gap_count")),
-            ),
-            (
-                "native_core_audit_backlog_action_source_count",
-                get_path(data, ("summary", "native_core_audit_backlog_action_source_count")),
-            ),
-            (
-                "native_core_audit_backlog_source_location_gap_count",
-                get_path(data, ("summary", "native_core_audit_backlog_source_location_gap_count")),
-            ),
-            (
-                "native_core_audit_scope_action_source_count",
-                get_path(data, ("summary", "native_core_audit_scope_action_source_count")),
-            ),
-            (
-                "native_core_audit_scope_source_location_gap_count",
-                get_path(data, ("summary", "native_core_audit_scope_source_location_gap_count")),
-            ),
-            (
-                "native_core_audit_review_coverage_action_source_count",
-                get_path(data, ("summary", "native_core_audit_review_coverage_action_source_count")),
-            ),
-            (
-                "action_source_review_decision",
-                get_path(data, ("action_source_review", "review_decision")),
-            ),
-            (
-                "snapshot_diff_review_present",
-                get_path(data, ("summary", "snapshot_diff_review_present")),
-            ),
-            (
-                "snapshot_baseline_present",
-                get_path(data, ("summary", "snapshot_baseline_present")),
-            ),
-            (
-                "snapshot_baseline_gap_count",
-                get_path(data, ("summary", "snapshot_baseline_gap_count")),
-            ),
-            (
-                "snapshot_entry_count",
-                get_path(data, ("summary", "snapshot_entry_count")),
-            ),
-            (
-                "snapshot_added_artifact_count",
-                get_path(data, ("summary", "snapshot_added_artifact_count")),
-            ),
-            (
-                "snapshot_missing_artifact_count",
-                get_path(data, ("summary", "snapshot_missing_artifact_count")),
-            ),
-            (
-                "snapshot_changed_artifact_count",
-                get_path(data, ("summary", "snapshot_changed_artifact_count")),
-            ),
-            (
-                "snapshot_unchanged_artifact_count",
-                get_path(data, ("summary", "snapshot_unchanged_artifact_count")),
-            ),
-            (
-                "snapshot_action_required_count",
-                get_path(data, ("summary", "snapshot_action_required_count")),
-            ),
-            (
-                "snapshot_review_decision",
-                get_path(data, ("summary", "snapshot_review_decision")),
-            ),
-            (
-                "review_bundle_decision",
-                get_path(data, ("summary", "review_bundle_decision")),
-            ),
-            (
-                "evidence_query_first_target",
-                get_path(data, ("evidence_query_repair_path_review", "first_target")),
-            ),
-            (
-                "evidence_query_first_state",
-                get_path(data, ("evidence_query_repair_path_review", "first_state")),
-            ),
-            (
-                "evidence_query_first_action",
-                short_text(get_path(data, ("evidence_query_repair_path_review", "first_action"))),
-            ),
-            (
-                "evidence_query_review_decision",
-                get_path(data, ("evidence_query_repair_path_review", "review_decision")),
-            ),
-            ("not_run_count", get_path(data, ("summary", "not_run_count"))),
-            ("not_run_item_count", get_path(data, ("summary", "not_run_item_count"))),
-            ("handoff_checklist_count", get_path(data, ("summary", "handoff_checklist_count"))),
-            ("current_repo_handoff_count", get_path(data, ("summary", "current_repo_handoff_count"))),
-            ("target_machine_handoff_count", get_path(data, ("summary", "target_machine_handoff_count"))),
-            ("required_handoff_count", get_path(data, ("summary", "required_handoff_count"))),
-            ("not_run_handoff_count", get_path(data, ("summary", "not_run_handoff_count"))),
-            ("review_decision", get_path(data, ("summary", "review_decision"))),
-            ("managed_artifact_count", get_path(data, ("summary", "managed_artifact_count"))),
-            ("artifact_ready_count", get_path(data, ("summary", "artifact_ready_count"))),
-            ("artifact_with_gap_count", get_path(data, ("summary", "artifact_with_gap_count"))),
-            ("required_flow_step_count", get_path(data, ("summary", "required_flow_step_count"))),
-            ("passed_flow_step_count", get_path(data, ("summary", "passed_flow_step_count"))),
-            ("missing_flow_step_count", get_path(data, ("summary", "missing_flow_step_count"))),
-            (
-                "source_control_handoff_required_count",
-                get_path(data, ("summary", "source_control_handoff_required_count")),
-            ),
-            (
-                "source_control_handoff_ready_count",
-                get_path(data, ("summary", "source_control_handoff_ready_count")),
-            ),
-            (
-                "source_control_handoff_blocker_count",
-                get_path(data, ("summary", "source_control_handoff_blocker_count")),
-            ),
-            (
-                "source_control_handoff_status",
-                get_path(data, ("summary", "source_control_handoff_status")),
-            ),
-            ("flow_check_decision", get_path(data, ("summary", "flow_check_decision"))),
+        ),
+        (
+            "evidence_query_review_decision",
+            get_path(data, ("evidence_query_repair_path_review", "review_decision")),
+        ),
+        *_summary_metric_items(
+            data,
+            "not_run_count",
+            "not_run_item_count",
+            "handoff_checklist_count",
+            "current_repo_handoff_count",
+            "target_machine_handoff_count",
+            "required_handoff_count",
+            "not_run_handoff_count",
+            "review_decision",
+            "managed_artifact_count",
+            "artifact_ready_count",
+            "artifact_with_gap_count",
+            "required_flow_step_count",
+            "passed_flow_step_count",
+            "missing_flow_step_count",
+            "source_control_handoff_required_count",
+            "source_control_handoff_ready_count",
+            "source_control_handoff_blocker_count",
+            "source_control_handoff_status",
+            "flow_check_decision",
+        ),
     ]
 
 
@@ -6309,7 +6024,9 @@ def evidence_governance_section(title: str, source: str, data: Optional[Dict[str
 def build_summary(results_root: Path) -> Dict[str, Any]:
     catalog_resolution = resolve_catalog_sources(results_root, EXPECTED_SOURCES)
     source_names = catalog_resolution.names
-    sources = {name: load_json(results_root / name) for name in source_names}
+    sources = SourcePayloads(
+        {name: load_json(results_root / name) for name in source_names}
+    )
     sections = [
         system_section(sources["system_info.json"]),
         cuda_section(sources["cuda_environment.json"]),
@@ -6352,7 +6069,6 @@ def build_summary(results_root: Path) -> Dict[str, Any]:
         runtime_closure_section("Source Trace Verification", "source_trace_verification.json", sources["source_trace_verification.json"]),
         runtime_closure_section("Evidence Checklist", "evidence_checklist.json", sources["evidence_checklist.json"]),
         advanced_serving_section("Structured Outputs", "structured_outputs.json", sources["structured_outputs.json"]),
-        advanced_serving_section("Disaggregated Serving", "disaggregated_serving.json", sources["disaggregated_serving.json"]),
         advanced_serving_section("Pooling Benchmark", "pooling_benchmark.json", sources["pooling_benchmark.json"]),
         advanced_serving_section("Kserve Llm D Plan", "kserve_llm_d_plan.json", sources["kserve_llm_d_plan.json"]),
         advanced_serving_section("Native Advanced Kv Router", "native_advanced_kv_router.json", sources["native_advanced_kv_router.json"]),
@@ -6442,8 +6158,14 @@ def build_summary(results_root: Path) -> Dict[str, Any]:
         section["source"] for section in sections if section["status"] == "ok"
     ]
     discovered_source_files, source_file_scan = source_files_with_status(results_root)
+    summary_status = (
+        "ok"
+        if not unavailable_sources and source_file_scan.get("status") == "ok"
+        else "incomplete"
+    )
     return {
         "schema_version": 1,
+        "status": summary_status,
         **path_payload(results_root, "results_root", "results_root_path_redacted"),
         "source_files": discovered_source_files,
         "overview": {
@@ -6464,96 +6186,33 @@ def build_summary(results_root: Path) -> Dict[str, Any]:
     }
 
 
-def to_markdown(summary: Dict[str, Any]) -> str:
-    overview = summary["overview"]
-    catalog_resolution = overview.get("catalog_source_resolution", {})
-    lines = [
-        "# Benchmark Summary",
-        "",
-        "| field | value |",
-        "|---|---:|",
-        f"| expected sources | {overview['expected_sources']} |",
-        f"| available sources | {overview['available_sources']} |",
-        f"| missing source files | {len(overview.get('missing_source_files', overview.get('missing_sources', [])))} |",
-        f"| invalid sources | {len(overview.get('invalid_sources', []))} |",
-        f"| unreadable sources | {len(overview.get('unreadable_sources', []))} |",
-        f"| catalog source status | {catalog_resolution.get('status', 'unknown')} |",
-        f"| catalog source policy | {catalog_resolution.get('source_policy', 'unknown')} |",
-        f"| catalog extra sources | {catalog_resolution.get('extra_catalog_count', 0)} |",
-        f"| catalog extension-only sources | {catalog_resolution.get('extension_only_count', 0)} |",
-        f"| catalog shared sources | {catalog_resolution.get('shared_count', 0)} |",
-    ]
-    catalog_error = catalog_resolution.get("catalog_error")
-    if catalog_error:
-        lines.append(f"| catalog source error | {escape_cell(catalog_error)} |")
-    lines.extend(
-        [
-            "",
-            "## Metrics",
-            "",
-            "| area | source | status | metric | value |",
-            "|---|---|---|---|---:|",
-        ]
-    )
-    for section in summary["sections"]:
-        for metric in section["metrics"]:
-            lines.append(
-                "| "
-                + " | ".join(
-                    [
-                        escape_cell(section["title"]),
-                        f"`{escape_cell(section['source'])}`",
-                        escape_cell(section["status"]),
-                        escape_cell(metric["name"]),
-                        escape_cell(metric["value"]),
-                    ]
-                )
-                + " |"
-            )
-    missing = overview.get("missing_source_files", overview.get("missing_sources", []))
-    if missing:
-        lines.extend(["", "## Missing Source Files", ""])
-        lines.extend(f"- `{name}`" for name in missing)
-    invalid = overview.get("invalid_sources", [])
-    if invalid:
-        lines.extend(["", "## Invalid Sources", ""])
-        lines.extend(f"- `{name}`" for name in invalid)
-    unreadable = overview.get("unreadable_sources", [])
-    if unreadable:
-        lines.extend(["", "## Unreadable Sources", ""])
-        lines.extend(f"- `{name}`" for name in unreadable)
-    return "\n".join(lines) + "\n"
-
-
-def write_summary(summary: Dict[str, Any], markdown_output: Path, json_output: Optional[Path]) -> None:
-    write_text_file(markdown_output, to_markdown(summary))
-    if json_output is not None:
-        write_text_file(json_output, json.dumps(summary, indent=2, sort_keys=True) + "\n")
+def write_summary(summary: Dict[str, Any], output: Path) -> None:
+    write_text_file(output, json.dumps(summary, indent=2, sort_keys=True) + "\n")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=str(default_repo_root()))
     parser.add_argument("--results", default="results/raw")
-    parser.add_argument("--output", default="results/tables/benchmark_summary.md")
-    parser.add_argument("--json-output", default="results/raw/benchmark_summary.json")
+    parser.add_argument("--output", default="results/raw/benchmark_summary.json")
+    parser.add_argument(
+        "--allow-non-ok-status",
+        action="store_true",
+        help="Return zero after writing an incomplete diagnostic summary.",
+    )
     return parser.parse_args()
 
 
-def main() -> None:
+def main() -> int:
     args = parse_args()
     repo_root = Path(args.repo_root).resolve()
     results_root = resolve_repo_path(repo_root, args.results)
     output = resolve_repo_path(repo_root, args.output)
-    json_output = (
-        resolve_repo_path(repo_root, args.json_output) if args.json_output else None
-    )
     summary = build_summary(results_root)
-    write_summary(summary, output, json_output)
+    write_summary(summary, output)
     print(path_label(output))
-    if json_output is not None:
-        print(path_label(json_output))
+    return artifact_status_exit_code(summary, allow_non_ok=args.allow_non_ok_status)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

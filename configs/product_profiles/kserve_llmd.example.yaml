@@ -1,4 +1,5 @@
 {
+  "report_sections": ["results/raw/product_kserve_llmd_profile.json"],
   "product": "kserve_llmd",
   "namespace": "inferlab",
   "manifest_template": "deploy/kserve_llm_d.product.example.yaml",
@@ -8,7 +9,6 @@
     "MODEL_NAME": "inferlab-model",
     "GPU_COUNT": "1"
   },
-  "report_sections": ["reports/54_product_cloud_control_plane_profile.md"],
   "planned_commands": {
     "dry_run": "python3 -m scripts.product_profiles.profile_kserve_llmd --repo-root . --config configs/product_profiles/kserve_llmd.example.yaml --dry-run",
     "execute": "python3 -m scripts.product_profiles.profile_kserve_llmd --repo-root . --config configs/product_profiles/kserve_llmd.example.yaml --execute --namespace inferlab",

@@ -285,8 +285,6 @@ InventoryRecord inspect_product(
             "config_product_binding");
   add_check(record, record.config_report_binding_present,
             "config_report_binding");
-  add_check(record, record.report.regular_file, "report");
-  add_check(record, record.report.readable, "report_readable");
   add_check(record, record.common_registry.product_present,
             "common_registry_product");
   add_check(record, record.common_registry.display_name_matches,
@@ -309,20 +307,6 @@ InventoryRecord inspect_product(
             "benchmark_matrix_scope");
   add_check(record, record.summary_scope_matches,
             "benchmark_summary_scope");
-  add_check(record, record.prometheus_scope_matches,
-            "prometheus_scope");
-  add_check(record, record.final_report_result_scope_matches,
-            "final_report_result_scope");
-  if (record.default_wiring_expected) {
-    add_check(record, record.final_report.report_present,
-              "final_report_report");
-  }
-  add_check(record, record.final_report.code_wiring_present,
-            "final_report_code_wiring");
-  add_check(record, record.report_artifact_reference_present,
-            "report_artifact_reference");
-  add_check(record, record.report_boundary_present,
-            "report_product_boundary");
 
   const int missing_count = inferlab::internal::checked_int_from_size(
       record.missing_surfaces.size(),
@@ -430,7 +414,7 @@ const ArtifactSpec& artifact_spec() {
       "native_product_integration_inventory",
       "inferlab_product_integration_inventory",
       "native_product_integration_inventory.json",
-      "reports/58_product_integration_inventory.md",
+      "results/raw/native_product_integration_inventory.json",
       "native_product_integration_inventory_refresh",
       "./build/inferlab_product_integration_inventory --repo-root . --output results/raw/native_product_integration_inventory.json",
       "Static repository-wiring audit for mature-product profile adapters, configs, registry entries, matrix rows, report chapters and report/export consumers only; it does not execute products, profile runners, replay, benchmarks, or GPU workloads."};
@@ -489,7 +473,7 @@ InventoryPlan build_inventory(const fs::path& repo_root) {
           "prometheus",
           repo_root / "scripts" / "export_prometheus_metrics.py"),
       inferlab_artifact::read_text_source(
-          "final_report", repo_root / "scripts" / "render_final_report.py")};
+          "final_report", repo_root / "scripts" / "summarize_benchmarks.py")};
 
   const std::string& common_text =
       inferlab_artifact::require_unique_text_source_by_id(

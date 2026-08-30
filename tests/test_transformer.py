@@ -9,6 +9,7 @@ except ModuleNotFoundError:  # pragma: no cover - optional dependency.
 
 from mini_llm.transformer import (
     MiniTransformerConfig,
+    RMSNorm,
     build_model,
     generate_greedy,
 )
@@ -55,6 +56,16 @@ class MiniTransformerTest(unittest.TestCase):
         self.assertEqual(len(generated), 6)
         self.assertEqual(len(cache), 2)
         self.assertEqual(cache[0].sequence_length, 6)
+
+    def test_rmsnorm_accumulates_low_precision_inputs_in_float32(self) -> None:
+        norm = RMSNorm(2).half()
+        hidden = torch.tensor([[60000.0, -60000.0]], dtype=torch.float16)
+
+        output = norm(hidden)
+
+        self.assertEqual(output.dtype, torch.float16)
+        self.assertTrue(torch.isfinite(output).all().item())
+        self.assertTrue(torch.allclose(output.float(), torch.tensor([[1.0, -1.0]]), atol=2e-3))
 
 
 if __name__ == "__main__":

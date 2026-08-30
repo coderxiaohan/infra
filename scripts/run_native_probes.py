@@ -6,22 +6,25 @@ from __future__ import annotations
 import argparse
 import json
 import math
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Sequence
 
 try:
+    from scripts.artifact_json import try_write_json_file as write_json
     from scripts.bounded_process import run_bounded_process
-    from scripts.command_redaction import artifact_path_fields, artifact_path_payload, redact_artifact_output, redact_path_error, redacted_path_label as path_label
+    from scripts.command_redaction import artifact_output_tail, artifact_path_payload, redact_path_error, redacted_path_label as path_label
     from scripts.generate_gguf_fixture import write_fixture
     from scripts.path_status import safe_exists, safe_is_file, safe_mtime_ns
     from scripts.repo_paths import default_repo_root
+    from scripts.time_utils import utc_now_precise
 except ModuleNotFoundError:
+    from artifact_json import try_write_json_file as write_json
     from bounded_process import run_bounded_process
-    from command_redaction import artifact_path_fields, artifact_path_payload, redact_artifact_output, redact_path_error, redacted_path_label as path_label
+    from command_redaction import artifact_output_tail, artifact_path_payload, redact_path_error, redacted_path_label as path_label
     from generate_gguf_fixture import write_fixture
     from path_status import safe_exists, safe_is_file, safe_mtime_ns
     from repo_paths import default_repo_root
+    from time_utils import utc_now_precise
 
 
 PROBES = (
@@ -65,13 +68,6 @@ def probe_timeout_is_valid(value: object) -> bool:
         and isinstance(value, (int, float))
         and MINIMUM_PROBE_TIMEOUT_SECONDS <= value <= MAXIMUM_PROBE_TIMEOUT_SECONDS
         and math.isfinite(value)
-    )
-
-
-def artifact_output_tail(text: object, command: Sequence[str], max_lines: int) -> str:
-    return redact_artifact_output(
-        "\n".join(str(text).splitlines()[-max_lines:]),
-        paths=command,
     )
 
 
@@ -197,7 +193,7 @@ def run_probe(
             "reason": "native probe timed out",
             "returncode": None,
             "elapsed_ms": capture.elapsed_ms,
-            "output_tail": artifact_output_tail(output_text, command, 12),
+            "output_tail": artifact_output_tail(output_text, command, None, 12),
             **timeout_metadata,
         }
     if capture.status not in {"ok", "nonzero_exit"}:
@@ -211,7 +207,7 @@ def run_probe(
             ),
             "returncode": None,
             "elapsed_ms": capture.elapsed_ms,
-            "output_tail": artifact_output_tail(output_text, command, 12),
+            "output_tail": artifact_output_tail(output_text, command, None, 12),
             "error": capture.error or capture.status,
             **timeout_metadata,
         }
@@ -237,7 +233,7 @@ def run_probe(
         result["status"] = "failed"
     result["artifact_status"] = output_status
     if output_text.strip():
-        result["output_tail"] = artifact_output_tail(output_text.strip(), command, 12)
+        result["output_tail"] = artifact_output_tail(output_text.strip(), command, None, 12)
     return result
 
 
@@ -305,7 +301,7 @@ def run_all(
     )
     return {
         "schema_version": 1,
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "timestamp_utc": utc_now_precise(),
         **artifact_path_payload(build_dir, "build_dir"),
         **artifact_path_payload(repo_root, "repo_root"),
         **artifact_path_payload(results_dir, "results_dir"),
@@ -333,15 +329,6 @@ def run_all(
         },
         "probes": runs,
     }
-
-
-def write_json(path: Path, payload: Dict[str, object]) -> Dict[str, object]:
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    except OSError as exc:
-        return {"status": "write_failed", **artifact_path_fields(path.as_posix()), "error": redact_path_error(exc, path)}
-    return {"status": "ok", **artifact_path_fields(path.as_posix())}
 
 
 def parse_args() -> argparse.Namespace:

@@ -87,12 +87,49 @@ void test_cuda_gather_handles_empty_request() {
           "empty paged KV gather should report zero elapsed time");
 }
 
+void test_cuda_gather_matches_cpu_for_unaligned_shared_prefix() {
+  const inferlab::PagedKVShape shape{3, 17, 4};
+  inferlab::RequestBlocks blocks;
+  blocks.request_id = 9;
+  blocks.token_count = 10;
+  blocks.shared_prefix_tokens = 3;
+  blocks.private_token_count = 7;
+  blocks.private_block_start = 2;
+  blocks.block_table = {5, 1, 4, 0};
+
+  const auto physical_cache = build_physical_cache(6, shape);
+  const auto expected =
+      inferlab::gather_paged_kv_cache(physical_cache, blocks, shape);
+  const auto actual = inferlab::gather_paged_kv_cache_cuda_runtime(
+      physical_cache, blocks, shape);
+
+  require_close(actual, expected);
+}
+
+void test_cuda_gather_rejects_any_negative_block_id() {
+  const inferlab::PagedKVShape shape{1, 2, 4};
+  inferlab::RequestBlocks blocks;
+  blocks.token_count = 5;
+  blocks.block_table = {2, -1};
+
+  bool threw = false;
+  try {
+    (void)inferlab::gather_paged_kv_cache_cuda_runtime(
+        build_physical_cache(3, shape), blocks, shape);
+  } catch (const std::invalid_argument&) {
+    threw = true;
+  }
+  require(threw, "CUDA paged KV gather accepted a negative block id");
+}
+
 }  // namespace
 
 int main() {
   try {
     test_cuda_gather_matches_cpu_for_fragmented_blocks();
     test_cuda_gather_handles_empty_request();
+    test_cuda_gather_matches_cpu_for_unaligned_shared_prefix();
+    test_cuda_gather_rejects_any_negative_block_id();
   } catch (const std::exception& error) {
     std::cerr << "paged_kv_cuda_test failed: " << inferlab_cuda_test::redact_test_error(error.what()) << "\n";
     return EXIT_FAILURE;

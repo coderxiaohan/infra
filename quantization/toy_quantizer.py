@@ -4,10 +4,8 @@
 from __future__ import annotations
 
 import argparse
-import json
 import math
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
 
@@ -16,12 +14,9 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from artifact_json import path_label, write_json_file as write_json_artifact_file
-
-
-def require_int_range(name: str, value: int, minimum: int, maximum: int) -> None:
-    if isinstance(value, bool) or value < minimum or value > maximum:
-        raise SystemExit(f"{name} must be an integer in [{minimum}, {maximum}], got {value!r}")
+from artifact_json import path_label, write_json_file
+from cli_validation import require_int_range
+from time_utils import utc_now_precise
 
 
 def parse_values(text: str) -> list[float]:
@@ -42,10 +37,6 @@ def parse_values(text: str) -> list[float]:
     return values
 
 
-def write_json_file(path: Path, payload: dict) -> None:
-    write_json_artifact_file(path, payload)
-
-
 def chunks(values: list[float], size: int):
     for start in range(0, len(values), size):
         yield start, values[start:start + size]
@@ -63,9 +54,11 @@ def quantize_group(group: list[float], bits: int, symmetric: bool) -> dict:
         dq = [x * scale for x in q]
     else:
         qmin, qmax = 0, (1 << bits) - 1
-        mn, mx = min(group), max(group)
+        # Include zero in the representable range so clamping the zero point
+        # cannot shift an all-positive or all-negative group out of range.
+        mn, mx = min(0.0, min(group)), max(0.0, max(group))
         scale = (mx - mn) / max(1, qmax - qmin) or 1.0
-        zero_point = round(qmin - mn / scale)
+        zero_point = max(qmin, min(qmax, round(qmin - mn / scale)))
         q = [max(qmin, min(qmax, round(v / scale + zero_point))) for v in group]
         dq = [(x - zero_point) * scale for x in q]
     errors = [abs(a - b) for a, b in zip(group, dq)]
@@ -87,7 +80,7 @@ def run(values: list[float], bits: int, group_size: int, symmetric: bool) -> dic
     errors = [abs(a - b) for a, b in zip(values, restored)]
     return {
         "run_id": "toy_quantizer",
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": utc_now_precise(),
         "backend": "python-reference",
         "model": "synthetic-weight-vector",
         "precision": f"int{bits}",

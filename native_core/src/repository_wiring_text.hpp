@@ -308,21 +308,6 @@ inline CMakeTargetSourceMatch cmake_target_source_match(
     }
   }
 
-  for (const auto& body : detail::cmake_call_bodies(
-           document, "inferlab_add_shared_dispatch_group")) {
-    const auto tokens = detail::cmake_tokens(body);
-    if (!detail::named_argument_matches(tokens, "CANONICAL_TARGET", target)) {
-      continue;
-    }
-    match.target_declaration_count = inferlab::internal::checked_add_size(
-        match.target_declaration_count, 1U,
-        "shared-dispatch CMake target declaration match count");
-    if (detail::contains_token(tokens, source)) {
-      match.source_match_count = inferlab::internal::checked_add_size(
-          match.source_match_count, 1U,
-          "shared-dispatch CMake target source match count");
-    }
-  }
   return match;
 }
 

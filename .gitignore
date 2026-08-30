@@ -7,6 +7,7 @@ InferLab/build-*/
 InferLab/deploy/*.env
 InferLab/configs/cost_records.json
 .venv/
+.venv-llama-convert/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -24,6 +25,7 @@ compile_commands.json
 .claude/settings.local.json
 .vscode/*.log
 CMakeUserPresets.json
+/models/
 results/raw/*
 results/figures/*
 results/tables/*

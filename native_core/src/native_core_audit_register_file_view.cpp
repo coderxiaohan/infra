@@ -1,5 +1,6 @@
 #include "native_core_audit_register_file_view.hpp"
 
+#include "native_core_audit_register_file_policy.hpp"
 #include "native_core_audit_register_view_utils.hpp"
 #include "plan_json_utils.hpp"
 
