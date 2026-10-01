@@ -26,6 +26,7 @@ compile_commands.json
 .vscode/*.log
 CMakeUserPresets.json
 /models/
+/tmp/
 results/raw/*
 results/figures/*
 results/tables/*
@@ -38,3 +39,4 @@ InferLab/results/tables/*
 !InferLab/results/raw/.gitkeep
 !InferLab/results/figures/.gitkeep
 !InferLab/results/tables/.gitkeep
+/model.cache

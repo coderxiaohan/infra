@@ -1,0 +1,46 @@
+{
+  "artifact_type": "native_quantization_sweep",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU group-size sweep only; not a production quantization policy recommendation, CUDA benchmark, or product runtime performance result.",
+  "config": {
+    "cols": 16,
+    "fp32_bytes": 256,
+    "rows": 4
+  },
+  "int4_group_sweep": [
+    {
+      "group_size": 2,
+      "max_abs_error": 0.059524,
+      "mean_abs_error": 0.012649,
+      "scale_count": 32,
+      "storage_bytes": 160,
+      "storage_ratio_vs_fp32": 0.625000
+    },
+    {
+      "group_size": 4,
+      "max_abs_error": 0.059524,
+      "mean_abs_error": 0.019531,
+      "scale_count": 16,
+      "storage_bytes": 96,
+      "storage_ratio_vs_fp32": 0.375000
+    },
+    {
+      "group_size": 8,
+      "max_abs_error": 0.071429,
+      "mean_abs_error": 0.024368,
+      "scale_count": 8,
+      "storage_bytes": 64,
+      "storage_ratio_vs_fp32": 0.250000
+    },
+    {
+      "group_size": 16,
+      "max_abs_error": 0.071429,
+      "mean_abs_error": 0.035156,
+      "scale_count": 4,
+      "storage_bytes": 48,
+      "storage_ratio_vs_fp32": 0.187500
+    }
+  ]
+}

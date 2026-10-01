@@ -1,9 +1,9 @@
 {
+  "comparison": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/backend_comparison.json",
   "experiment_id": "distilgpt2_edge_cloud",
-  "comparison": "results/showcase/distilgpt2_edge_cloud/20260828T103051Z/backend_comparison.json",
-  "manifest": "results/showcase/distilgpt2_edge_cloud/20260828T103051Z/run_manifest.json",
-  "run_directory": "results/showcase/distilgpt2_edge_cloud/20260828T103051Z",
+  "manifest": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/run_manifest.json",
+  "run_directory": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z",
   "schema_version": 1,
   "status": "passed",
-  "timestamp_utc": "2026-08-28T10:32:07.730116Z"
+  "timestamp_utc": "2026-09-09T15:16:17.284464Z"
 }

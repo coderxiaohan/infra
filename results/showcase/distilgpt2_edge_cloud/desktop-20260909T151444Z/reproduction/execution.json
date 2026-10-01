@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "scripts/run_edge_cloud_showcase.py",
+    "--config",
+    "/home/anonymous/Projects/infra/tmp/inferlab-showcase-setup.2wwq42qb/showcase.config.json",
+    "--run-id",
+    "desktop-20260909T151444Z",
+    "--execute"
+  ],
+  "run_directory": "/home/anonymous/Projects/infra/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z",
+  "leftover_containers_before_cleanup": [],
+  "exit_code": 0,
+  "manifest_status": "passed",
+  "all_stages_passed": true
+}

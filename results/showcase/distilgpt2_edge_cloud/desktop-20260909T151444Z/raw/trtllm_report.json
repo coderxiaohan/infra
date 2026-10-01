@@ -1,0 +1,92 @@
+{
+    "engine": {
+        "model": "distilgpt2",
+        "model_path": "None",
+        "engine_dir": "/home/anonymous/Projects/infra/tmp/inferlab-trtllm.dakte9sa/engine",
+        "revision": null,
+        "version": "1.2.1",
+        "backend": "TRT",
+        "dtype": "float16",
+        "kv_cache_dtype": null,
+        "quantization": null,
+        "max_input_length": 64,
+        "max_sequence_length": 96
+    },
+    "machine": {
+        "name": "NVIDIA GeForce RTX 4060 Ti",
+        "memory.total": 15.99560546875,
+        "clocks.mem": 9.001
+    },
+    "world_info": {
+        "tp_size": 1,
+        "pp_size": 1,
+        "ep_size": 1,
+        "world_size": 1,
+        "max_batch_size": 1,
+        "max_num_tokens": 64,
+        "scheduling_policy": "GUARANTEED_NO_EVICT",
+        "kv_cache_percentage": 0.3,
+        "issue_rate": 0.0
+    },
+    "request_info": {
+        "num_requests": 1,
+        "avg_num_concurrent_requests": 1.0,
+        "avg_input_length": 9.0,
+        "avg_output_length": 8.0
+    },
+    "performance": {
+        "total_latency_ms": 205.325528,
+        "avg_request_latency_ms": 205.325528,
+        "request_throughput_req_s": 4.870315005350918,
+        "system_output_throughput_tok_s": 38.96252004280734,
+        "system_total_throughput_tok_s": 82.7953550909656,
+        "output_throughput_per_user_tok_s": 38.96252004280734,
+        "output_throughput_per_gpu_tok_s": 38.96252004280734,
+        "request_latency_percentiles_ms": {
+            "p50": 205.325528,
+            "p90": 205.325528,
+            "p95": 205.325528,
+            "p99": 205.325528,
+            "minimum": 205.325528,
+            "maximum": 205.325528,
+            "average": 205.325528
+        }
+    },
+    "dataset": {
+        "isl_stats": {
+            "p50": 9.0,
+            "p90": 9.0,
+            "p95": 9.0,
+            "p99": 9.0,
+            "minimum": 9.0,
+            "maximum": 9.0,
+            "average": 9.0
+        },
+        "osl_stats": {
+            "p50": 8.0,
+            "p90": 8.0,
+            "p95": 8.0,
+            "p99": 8.0,
+            "minimum": 8.0,
+            "maximum": 8.0,
+            "average": 8.0
+        },
+        "seq_len_stats": {
+            "p50": 17.0,
+            "p90": 17.0,
+            "p95": 17.0,
+            "p99": 17.0,
+            "minimum": 17.0,
+            "maximum": 17.0,
+            "average": 17.0
+        },
+        "num_requests": 1,
+        "dataset_path": "/home/anonymous/Projects/infra/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_dataset.json",
+        "max_isl": 9,
+        "max_osl": 8,
+        "max_sequence_length": 17,
+        "avg_isl": 9,
+        "avg_osl": 8,
+        "avg_sequence_length": 17
+    }
+}

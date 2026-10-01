@@ -1,0 +1,130 @@
+#!/usr/bin/python3
+"""Run real tools in pinned Docker environments; never synthesize results."""
+import json
+import hashlib
+import math
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+import uuid
+
+ROOT = Path('/home/anonymous/Projects/infra')
+SETUP = Path(__file__).resolve().parent.parent
+VLLM = 'sha256:d2cf67b571b6d02d6ca48aeeb973836d8f5bb48e57a74457fce02939b14f4d83'
+TRT = 'nvcr.io/nvidia/tensorrt-llm/release@sha256:33cd085b772947bd22b7273886539331420404e5d2a4a039945241945ff927b9'
+LD = '/opt/nvidia/nvda_nixl/lib/x86_64-linux-gnu:/opt/nvidia/nvda_nixl/lib64:/usr/local/ucx/lib:/usr/local/tensorrt/lib:/usr/local/cuda/lib64:/usr/local/lib/python3.12/dist-packages/torch/lib:/usr/local/lib/python3.12/dist-packages/torch_tensorrt/lib:/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64'
+
+
+def docker(*args, timeout=15):
+    return subprocess.run(['docker', *args], text=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, timeout=timeout)
+
+
+def main():
+    tool = Path(sys.argv[0]).name
+    args = sys.argv[1:]
+    if tool == 'vllm-python' and args and Path(args[0]).name == 'run_vllm_benchmark.py':
+        os.execv('/usr/bin/python3', ['/usr/bin/python3', *args])
+    server = tool == 'vllm-python' and args[:2] == ['-m', 'vllm.entrypoints.openai.api_server']
+    trt = tool == 'trtllm-bench'
+    name = 'inferlab-showcase-' + ('vllm' if server else 'trt' if trt else 'inputs') + '-' + uuid.uuid4().hex[:8]
+    cmd = ['docker', 'run', '--rm', '--name', name, '--init', '--sig-proxy=false',
+           '--label', 'com.inferlab.component=showcase-temporary',
+           '--label', 'com.inferlab.setup=' + SETUP.name,
+           '--user', '1000:1000', '--workdir', str(ROOT),
+           '--mount', f'type=bind,source={ROOT},target={ROOT}',
+           '--mount', f'type=bind,source={ROOT}/models,target={ROOT}/models,readonly',
+           '--mount', f'type=bind,source={SETUP}/scratch,target=/inferlab-tmp']
+    env = {'HOME': str(SETUP / 'home'), 'XDG_CACHE_HOME': str(SETUP / 'cache'),
+           'TMPDIR': '/inferlab-tmp', 'HF_HUB_OFFLINE': '1',
+           'TRANSFORMERS_OFFLINE': '1', 'PYTHONDONTWRITEBYTECODE': '1',
+           'NO_PROXY': '127.0.0.1,localhost', 'no_proxy': '127.0.0.1,localhost'}
+    if server:
+        host_idx = args.index('--host') + 1
+        port = args[args.index('--port') + 1]
+        args[host_idx] = '0.0.0.0'
+        cmd += ['--gpus', 'all', '--shm-size', '1g', '--publish', f'127.0.0.1:{port}:{port}']
+        env.update({'VLLM_USE_V2_MODEL_RUNNER': '0', 'VLLM_NO_USAGE_STATS': '1',
+                    'DO_NOT_TRACK': '1'})
+    elif trt:
+        cmd += ['--gpus', 'all', '--ipc=host', '--ulimit', 'memlock=-1', '--ulimit', 'stack=67108864']
+        env.update({'LD_LIBRARY_PATH': LD, 'OMPI_MCA_btl_tcp_if_include': 'eth0',
+                    'OMPI_MCA_oob_tcp_if_include': 'eth0'})
+        if 'throughput' in args:
+            args += ['--kv_cache_free_gpu_mem_fraction', '0.3', '--concurrency', '1']
+            if '--report_json' in args:
+                report = Path(args[args.index('--report_json') + 1])
+                args += ['--request_json', str(report.with_name('trtllm_request_details.raw'))]
+    else:
+        cmd += ['--network', 'none']
+    for key, value in env.items():
+        cmd += ['--env', f'{key}={value}']
+    cmd += ['--entrypoint', 'trtllm-bench' if trt else 'python3', TRT if trt else VLLM, *args]
+    record = {'container_name': name, 'server': server, 'tool': tool, 'command': cmd,
+              'started_at': time.time(), 'signals': []}
+    record_path = SETUP / 'logs' / (name + '.json')
+    process = None
+
+    def interrupted(signum, frame):
+        record['signals'].append(signal.Signals(signum).name)
+        # vLLM gets the orchestrator's graceful escalation. Bounded benchmark
+        # stages have only one second before SIGKILL, so kill those immediately.
+        forwarded = signal.Signals(signum).name if server else 'SIGKILL'
+        try:
+            docker('kill', '--signal', forwarded, name, timeout=0.7 if not server else 10)
+        except subprocess.TimeoutExpired:
+            pass
+
+    signal.signal(signal.SIGINT, interrupted)
+    signal.signal(signal.SIGTERM, interrupted)
+    code = 1
+    try:
+        process = subprocess.Popen(cmd, start_new_session=True)
+        record['docker_cli_pid'] = process.pid
+        record_path.write_text(json.dumps(record, indent=2) + '\n')
+        code = process.wait()
+        if code == 0 and trt and 'throughput' in args:
+            report = Path(args[args.index('--report_json') + 1])
+            payload = json.loads(report.read_text())
+            dataset = Path(args[args.index('--dataset') + 1])
+            inputs = [json.loads(line) for line in dataset.read_text().splitlines() if line.strip()]
+            expected = inputs[0]
+            info = payload['request_info']
+            perf = payload['performance']
+            if not (len(inputs) == 1 and info['num_requests'] == 1
+                    and info['avg_input_length'] == len(expected['input_ids'])
+                    and info['avg_output_length'] == expected['output_tokens']):
+                code = 3
+                raise ValueError('Official TensorRT report does not match the actual request dataset')
+            keys = ['system_output_throughput_tok_s', 'request_throughput_req_s', 'avg_request_latency_ms']
+            if not all(math.isfinite(perf[k]) and perf[k] > 0 for k in keys):
+                code = 3
+                raise ValueError('Official TensorRT performance metrics are invalid')
+            normalized = {'source': str(report), 'source_sha256': hashlib.sha256(report.read_bytes()).hexdigest(),
+                          'metric_semantics': 'output tokens only; input tokens excluded',
+                          **{k: perf[k] for k in keys}}
+            report.with_name('trtllm_metric_normalization.json').write_text(json.dumps(normalized, indent=2) + '\n')
+            print(f"Token throughput: {perf['system_output_throughput_tok_s']} tokens/s", file=sys.stderr)
+            print(f"Request throughput: {perf['request_throughput_req_s']} requests/s", file=sys.stderr)
+            print(f"Average latency: {perf['avg_request_latency_ms']} ms", file=sys.stderr)
+            print(f"p50 latency: {perf['request_latency_percentiles_ms']['p50']} ms", file=sys.stderr)
+        return code
+    finally:
+        inspect = docker('container', 'inspect', '--format', '{{.State.Running}}', name)
+        if inspect.returncode == 0:
+            if inspect.stdout.strip() == 'true':
+                docker('kill', name)
+            docker('rm', name)
+        record.update({'exit_code': code, 'finished_at': time.time(),
+                       'container_absent': docker('container', 'inspect', name).returncode != 0})
+        record_path.write_text(json.dumps(record, indent=2) + '\n')
+        if process is not None and process.poll() is None:
+            process.terminate()
+            process.wait(timeout=5)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

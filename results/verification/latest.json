@@ -1,61 +1,79 @@
 {
   "schema_version": 1,
-  "snapshot_date": "2026-08-30",
-  "verification_scope": "core_runtime_and_experiment_harness",
-  "snapshot_status": "verified_with_declared_boundaries",
+  "snapshot_date": "2026-09-09",
+  "timestamp_utc": "2026-09-09T15:51:59.971794+00:00",
+  "verification_scope": "selected_kv_shape_experiment_and_pinned_source_reference",
+  "snapshot_status": "completed_with_runtime_version_mismatch",
   "source": {
-    "base_git_commit": "81d15ca934a67ac076f38771408a78b22b272981",
+    "base_git_commit": "3035e66db63f972618f808d6da525bb1f1aa0b70",
     "worktree_state": "dirty",
-    "note": "Validated against the current working tree. Commit the reviewed changes before treating this snapshot as an immutable release record."
+    "file_manifest": "tmp/inferlab-source-verification.w7kz_lhb/reference/inferlab-source-manifest.json"
   },
+  "artifact_root": "tmp/inferlab-source-verification.w7kz_lhb",
   "checks": [
     {
-      "name": "python_regression",
+      "name": "kv_shape_probe_small",
       "status": "passed",
-      "passed": 78,
-      "skipped": 5,
-      "total": 83,
-      "command": "python3 -m unittest discover -s tests -p test_*.py",
-      "verified_on": "2026-08-30"
+      "executed_entries": 1,
+      "source_artifact": "tmp/inferlab-source-verification.w7kz_lhb/matrix/results/experiment_matrix_run.json",
+      "verification": "tmp/inferlab-source-verification.w7kz_lhb/matrix/verification.json",
+      "model_inference_executed": false,
+      "gpu_performance_measured": false
     },
     {
-      "name": "cpp_cuda_ctest",
-      "status": "passed",
-      "passed": 22,
-      "total": 22,
-      "cpu_tests": 15,
-      "cuda_tests": 7,
-      "environment": {
-        "cuda": "13.1",
-        "gpu": "NVIDIA GeForce RTX 4070 SUPER"
-      },
-      "command_pattern": "ctest --test-dir <cuda-build-dir> --output-on-failure",
-      "verified_on": "2026-08-30"
-    },
-    {
-      "name": "edge_cloud_showcase",
-      "status": "passed",
-      "source_artifact": "results/showcase/latest.json",
-      "source_artifact_timestamp": "2026-08-28T10:32:07.730116Z",
-      "verified_on": "2026-08-28"
-    },
-    {
-      "name": "acceptance_checklist",
+      "name": "fixed_reference_source_traces",
       "status": "complete",
-      "completed": 12,
-      "total": 12,
-      "source_artifact": "results/raw/evidence_checklist.json",
-      "source_artifact_tracked": false,
-      "verified_on": "2026-08-29"
+      "repositories": 4,
+      "file_checks": 9,
+      "source_artifact": "tmp/inferlab-source-verification.w7kz_lhb/accepted/source_trace_verification.json",
+      "scope": "source_identity_and_text_location_only",
+      "reference_runtime_executed": false
+    },
+    {
+      "name": "existing_runtime_version_alignment",
+      "status": "mismatch",
+      "matched_repositories": 3,
+      "total_repositories": 4,
+      "expected_transformers_version": "5.15.1",
+      "vllm_runtime_transformers_version": "5.16.1",
+      "trt_runtime_transformers_version": "4.57.3",
+      "source_artifact_status": "planned",
+      "source_artifact": "tmp/inferlab-source-verification.w7kz_lhb/audit/source_trace.runtime-explicit-metadata.json",
+      "note": "The configured Transformers target is compared against the vLLM image. TRT carries a separate dependency stack."
+    },
+    {
+      "name": "strict_selected_artifact_validation",
+      "status": "passed",
+      "allow_flags_used": false,
+      "scope": [
+        "matrix/results",
+        "accepted"
+      ],
+      "mismatch_audit_rejected_by_strict_validator": true
+    },
+    {
+      "name": "prior_edge_cloud_showcase",
+      "status": "passed",
+      "rerun_in_this_task": false,
+      "source_artifact": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/run_manifest.json",
+      "verified_on": "2026-09-09"
     }
   ],
   "boundaries": {
-    "android_arm64": {
-      "acceptance_status": "complete",
-      "completion_basis": "project_owner_confirmation",
-      "current_device_performance_evidence": "not_claimed"
-    },
-    "optional_backends": "Profiles and preflight artifacts do not imply successful execution of every external runtime.",
-    "distribution_license": "missing"
+    "runtime_versions_all_pinned": false,
+    "reference_wheel": "Transformers 5.15.1 downloaded from PyPI and SHA256 verified; extracted for source inspection only.",
+    "source_snapshots": "Python files and original metadata copied from fixed Docker images; not full importable runtime environments.",
+    "not_rerun": [
+      "full_model_benchmarks",
+      "full_python_regression",
+      "full_cuda_ctest",
+      "all_82_matrix_entries",
+      "android_arm64",
+      "full_project_evidence_checklist"
+    ],
+    "prior_index": "tmp/inferlab-source-verification.w7kz_lhb/audit/verification-index.before.json",
+    "old_4070_super_and_12_of_12_claims_not_carried_forward": true,
+    "existing_runtime_environments_modified": false,
+    "results_raw_and_showcase_preserved": true
   }
 }

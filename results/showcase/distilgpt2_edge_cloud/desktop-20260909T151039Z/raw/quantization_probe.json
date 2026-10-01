@@ -1,0 +1,33 @@
+{
+  "artifact_type": "native_quantization_probe",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU quantization reference only; not a calibrated production quantizer, CUDA microkernel benchmark, or product runtime performance result.",
+  "config": {
+    "cols": 16,
+    "fp32_bytes": 256,
+    "group_size": 8,
+    "rows": 4
+  },
+  "quantization": {
+    "int8": {
+      "max_abs_error": 0.003937,
+      "mean_abs_error": 0.001784,
+      "scale_count": 8,
+      "storage_bytes": 96,
+      "storage_ratio_vs_fp32": 0.375000
+    },
+    "int4": {
+      "max_abs_error": 0.071429,
+      "mean_abs_error": 0.031696,
+      "scale_count": 8,
+      "storage_bytes": 64,
+      "storage_ratio_vs_fp32": 0.250000
+    }
+  },
+  "weight_only_matvec": {
+    "int4_fused_vs_materialized_max_abs_error": 0.000000,
+    "int4_fused_vs_materialized_mean_abs_error": 0.000000
+  }
+}

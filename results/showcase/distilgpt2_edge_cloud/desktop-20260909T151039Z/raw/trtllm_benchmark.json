@@ -1,0 +1,168 @@
+{
+  "command": [
+    "path_dc0de6003c962b51",
+    "-m",
+    "distilgpt2",
+    "--model_path",
+    "path_90d502034d8bbb7c",
+    "throughput",
+    "--engine_dir",
+    "path_9d0814f980cd5daf",
+    "--backend",
+    "tensorrt",
+    "--dataset",
+    "path_9f7e1bc2ec63ad4f.json",
+    "--num_requests",
+    "1",
+    "--warmup",
+    "0",
+    "--max_batch_size",
+    "1",
+    "--max_num_tokens",
+    "64",
+    "--report_json",
+    "path_2d0584fe3a8d71b7.json",
+    "--output_json",
+    "path_f11d2765290a09b0.json"
+  ],
+  "config": {
+    "batch_size": 1,
+    "extra_arg": [],
+    "input_tokens": 9,
+    "output_tokens": 8,
+    "timeout_seconds": 240,
+    "tokenizer": "",
+    "tokenizer_path_redacted": false
+  },
+  "engine_dir": "path_9d0814f980cd5daf",
+  "engine_dir_path_redacted": true,
+  "environment": {
+    "machine": "x86_64",
+    "modules": {
+      "mpi4py": {
+        "available": false,
+        "module": "mpi4py",
+        "version": null
+      },
+      "tensorrt": {
+        "available": false,
+        "module": "tensorrt",
+        "version": null
+      },
+      "tensorrt_llm": {
+        "available": false,
+        "module": "tensorrt_llm",
+        "version": null
+      }
+    },
+    "nvidia_smi": {
+      "available": true,
+      "gpus": [
+        {
+          "driver_version": "591.86",
+          "memory_total": "16380 MiB",
+          "name": "NVIDIA GeForce RTX 4060 Ti"
+        }
+      ],
+      "path": "path_c5e1a7f8480fa214",
+      "path_redacted": true,
+      "query": {
+        "capture_status": "ok",
+        "cwd": "",
+        "cwd_redacted": false,
+        "elapsed_ms": 31.746,
+        "output_limit_exceeded": false,
+        "returncode": 0,
+        "stderr_bytes": 0,
+        "stderr_tail": "",
+        "stdout_bytes": 46,
+        "stdout_tail": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 591.86",
+        "timed_out": false
+      }
+    },
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "tools": {
+      "nvidia_smi": {
+        "available": true,
+        "name": "nvidia-smi",
+        "path": "path_c5e1a7f8480fa214",
+        "path_probe_error": "",
+        "path_redacted": true,
+        "requested": "nvidia-smi"
+      },
+      "trtllm_bench": {
+        "available": true,
+        "name": "trtllm-bench",
+        "path": "path_dc0de6003c962b51",
+        "path_probe_error": "",
+        "path_redacted": true,
+        "requested": "path_dc0de6003c962b51"
+      },
+      "trtllm_build": {
+        "available": false,
+        "name": "trtllm-build",
+        "path": "missing",
+        "path_probe_error": "",
+        "path_redacted": false,
+        "requested": "trtllm-build"
+      },
+      "trtllm_serve": {
+        "available": false,
+        "name": "trtllm-serve",
+        "path": "missing",
+        "path_probe_error": "",
+        "path_redacted": false,
+        "requested": "trtllm-serve"
+      }
+    },
+    "torch": {
+      "available": false,
+      "cuda_available": false,
+      "version": null
+    }
+  },
+  "metrics": {},
+  "mode": "command",
+  "model": "distilgpt2",
+  "model_path_redacted": false,
+  "preflight": {
+    "can_run_command": true,
+    "can_run_trtllm_bench": false,
+    "engine_dir_exists": true,
+    "engine_probe_error": "",
+    "gpu_available": true,
+    "reasons": [
+      "Python module tensorrt_llm is not importable",
+      "Python module tensorrt is not importable"
+    ],
+    "tensorrt_available": false,
+    "tensorrt_llm_available": false
+  },
+  "repo_root": "path_537859c734dc0cbc",
+  "repo_root_redacted": true,
+  "requested_mode": "command",
+  "resolved_engine_dir": "path_9d0814f980cd5daf",
+  "resolved_engine_dir_redacted": true,
+  "run": {
+    "capture_status": "nonzero_exit",
+    "cwd": "path_537859c734dc0cbc",
+    "cwd_redacted": true,
+    "elapsed_ms": 40509.841,
+    "output_limit_exceeded": false,
+    "returncode": 1,
+    "stderr_bytes": 3362,
+    "stderr_tail": "/usr/local/lib/python3.12/dist-packages/torch/library.py:356: UserWarning: Warning only once for all operators,  other operators may also be overridden.\n  Overriding a previously registered kernel for the same operator and the same dispatch key\n  operator: flash_attn::_flash_attn_backward(Tensor dout, Tensor q, Tensor k, Tensor v, Tensor out, Tensor softmax_lse, Tensor(a6!)? dq, Tensor(a7!)? dk, Tensor(a8!)? dv, float dropout_p, float softmax_scale, bool causal, SymInt window_size_left, SymInt window_size_right, float softcap, Tensor? alibi_slopes, bool deterministic, Tensor? rng_state=None) -> Tensor\n    registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922\n  dispatch key: ADInplaceOrView\n  previous kernel: no debug info\n       new kernel: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922 (Triggered internally at /opt/pytorch/pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)\n  self.m.impl(\n/usr/local/lib/python3.12/dist-packages/modelopt/torch/__init__.py:36: UserWarning: transformers version 4.57.3 is incompatible with nvidia-modelopt and may cause issues. Please install recommended version with `pip install nvidia-modelopt[hf]` if working with HF models.\n  _warnings.warn(\nThe argument `trust_remote_code` is to be used with Auto classes. It has no effect here and is ignored.\n\u001b[33;20mrank 0 using MpiPoolSession to spawn MPI processes\n\u001b[0m/usr/local/lib/python3.12/dist-packages/torch/library.py:356: UserWarning: Warning only once for all operators,  other operators may also be overridden.\n  Overriding a previously registered kernel for the same operator and the same dispatch key\n  operator: flash_attn::_flash_attn_backward(Tensor dout, Tensor q, Tensor k, Tensor v, Tensor out, Tensor softmax_lse, Tensor(a6!)? dq, Tensor(a7!)? dk, Tensor(a8!)? dv, float dropout_p, float softmax_scale, bool causal, SymInt window_size_left, SymInt window_size_right, float softcap, Tensor? alibi_slopes, bool deterministic, Tensor? rng_state=None) -> Tensor\n    registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922\n  dispatch key: ADInplaceOrView\n  previous kernel: no debug info\n       new kernel: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922 (Triggered internally at /opt/pytorch/pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)\n  self.m.impl(\nMultiple distributions found for package optimum. Picked distribution: optimum\nMultiple distributions found for package modelopt. Picked distribution: nvidia-modelopt\n/usr/local/lib/python3.12/dist-packages/modelopt/torch/__init__.py:36: UserWarning: transformers version 4.57.3 is incompatible with nvidia-modelopt and may cause issues. Please install recommended version with `pip install nvidia-modelopt[hf]` if working with HF models.\n  _warnings.warn(\nException ignored in atexit callback: <bound method GenerationExecutorWorker.shutdown of <tensorrt_llm.executor.worker.GenerationExecutorWorker object at 0x7602b4adc620>>\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/worker.py\", line 99, in shutdown\n    if self.await_response_thread.is_alive():\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'GenerationExecutorWorker' object has no attribute 'await_response_thread'",
+    "stdout_bytes": 22347,
+    "stdout_tail": "[TensorRT-LLM][INFO] CacheTransceiver is disabled.\n[09/09/2026-15:11:36] [TRT-LLM] [W] Implicitly setting GPTConfig.speculative_model_dir = None\n[09/09/2026-15:11:36] [TRT-LLM] [W] Implicitly setting GPTConfig.speculative_config = None\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.dtype to float16.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.bert_attention_plugin to auto.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.gpt_attention_plugin to auto.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.gemm_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.gemm_swiglu_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.fp8_rowwise_gemm_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.qserve_gemm_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.identity_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.nccl_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.lora_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.dora_plugin to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.weight_only_groupwise_quant_matmul_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.weight_only_quant_matmul_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.smooth_quant_plugins to True.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.smooth_quant_gemm_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.layernorm_quantization_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.rmsnorm_quantization_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.quantize_per_token_plugin to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.quantize_tensor_plugin to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.moe_plugin to auto.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.mamba_conv1d_plugin to auto.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.low_latency_gemm_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.low_latency_gemm_swiglu_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.gemm_allreduce_plugin to None.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.context_fmha to True.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.bert_context_fmha_fp32_acc to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.paged_kv_cache to True.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.remove_input_padding to True.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.norm_quant_fusion to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.reduce_fusion to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.user_buffer to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.tokens_per_block to 32.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.use_paged_context_fmha to True.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.use_fp8_context_fmha to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.fuse_fp4_quant to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.multiple_profiles to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.paged_state to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.streamingllm to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.manage_weights to False.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.use_fused_mlp to True.\n[09/09/2026-15:11:36] [TRT-LLM] [I] Set PluginConfig.pp_reduce_scatter to False.\n[09/09/2026-15:11:36] [TRT-LLM] [E] Failed to initialize executor on rank 0: ipc path \"path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff\" is longer than 107 characters (sizeof(sockaddr_un.sun_path)). zmq.IPC_PATH_MAX_LEN constant can be used to check addr length (if it is defined). (addr='ipc://path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff')\n[09/09/2026-15:11:36] [TRT-LLM] [E] Traceback (most recent call last):\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/worker.py\", line 281, in worker_main\n    worker: GenerationExecutorWorker = worker_cls(\n                                       ^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/worker.py\", line 69, in __init__\n    self.start_rpc_server()  # Reuse from RpcWorkerMixin\n    ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/rpc_worker_mixin.py\", line 47, in start_rpc_server\n    self.rpc_server.bind(self.rpc_addr)\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/rpc/rpc_server.py\", line 108, in bind\n    self._client_socket = ZeroMqQueue(address=(address, self._hmac_key),\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/ipc.py\", line 88, in __init__\n    self.socket.bind(\n  File \"/usr/local/lib/python3.12/dist-packages/zmq/sugar/socket.py\", line 320, in bind\n    super().bind(addr)\n  File \"zmq/backend/cython/_zmq.py\", line 1002, in zmq.backend.cython._zmq.Socket.bind\n    raise ZMQError(msg=msg)\n    ^^^^^^^^^^^\nzmq.error.ZMQError: ipc path \"path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff\" is longer than 107 characters (sizeof(sockaddr_un.sun_path)). zmq.IPC_PATH_MAX_LEN constant can be used to check addr length (if it is defined). (addr='ipc://path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff')\n\n[09/09/2026-15:11:36] [TRT-LLM] [I] get signal from executor worker\n[09/09/2026-15:11:36] [TRT-LLM] [E] Executor worker initialization error: Traceback (most recent call last):\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/worker.py\", line 281, in worker_main\n    worker: GenerationExecutorWorker = worker_cls(\n                                       ^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/worker.py\", line 69, in __init__\n    self.start_rpc_server()  # Reuse from RpcWorkerMixin\n    ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/rpc_worker_mixin.py\", line 47, in start_rpc_server\n    self.rpc_server.bind(self.rpc_addr)\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/rpc/rpc_server.py\", line 108, in bind\n    self._client_socket = ZeroMqQueue(address=(address, self._hmac_key),\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/ipc.py\", line 88, in __init__\n    self.socket.bind(\n  File \"/usr/local/lib/python3.12/dist-packages/zmq/sugar/socket.py\", line 320, in bind\n    super().bind(addr)\n  File \"zmq/backend/cython/_zmq.py\", line 1002, in zmq.backend.cython._zmq.Socket.bind\n    raise ZMQError(msg=msg)\n    ^^^^^^^^^^^\nzmq.error.ZMQError: ipc path \"path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff\" is longer than 107 characters (sizeof(sockaddr_un.sun_path)). zmq.IPC_PATH_MAX_LEN constant can be used to check addr length (if it is defined). (addr='ipc://path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff')\n\n[09/09/2026-15:11:36] [TRT-LLM] [E] Error during benchmarking:\nzmq.error.ZMQError: ipc path \"path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff\" is longer than 107 characters (sizeof(sockaddr_un.sun_path)). zmq.IPC_PATH_MAX_LEN constant can be used to check addr length (if it is defined). (addr='ipc://path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/rpc_test_15de8304-2592-4684-9abc-9548c63054ff')\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/bench/benchmark/throughput.py\", line 417, in throughput_command\n    llm = get_llm(runtime_config, kwargs)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/bench/benchmark/__init__.py\", line 122, in get_llm\n    llm = llm_cls(**kwargs)\n          ^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/llmapi/llm.py\", line 899, in __init__\n    super().__init__(model, tokenizer, tokenizer_mode, skip_tokenizer_init,\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/llmapi/llm.py\", line 236, in __init__\n    self._build_model()\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/llmapi/llm.py\", line 1046, in _build_model\n    self._executor = self._executor_cls.create(\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/executor.py\", line 546, in create\n    return GenerationExecutor._create_ipc_executor(\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/executor.py\", line 417, in _create_ipc_executor\n    return GenerationExecutorProxy(\n           ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/proxy.py\", line 111, in __init__\n    self._start_executor_workers(worker_kwargs)\n  File \"/usr/local/lib/python3.12/dist-packages/tensorrt_llm/executor/proxy.py\", line 268, in _start_executor_workers\n    raise RuntimeError(\nRuntimeError: Executor worker returned error\n\n[TensorRT-LLM][INFO] Refreshed the MPI local session",
+    "timed_out": false
+  },
+  "schema_version": 1,
+  "status": "failed",
+  "summary": {
+    "elapsed_ms": 40509.841,
+    "metric_status": "missing_metrics",
+    "returncode": 1
+  },
+  "timestamp_utc": "2026-09-09T15:11:38Z"
+}

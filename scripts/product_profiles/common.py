@@ -1693,7 +1693,7 @@ def build_payload(product_key: str, args: argparse.Namespace) -> Dict[str, Any]:
         ),
         "requires_target_environment": execute,
         "requires_external_product_core": True,
-        "inferlab_role": "adapter/profile/config/artifact/contract; product core remains external",
+        "inferlab_role": "adapter/profile/config/artifact/report/contract; product core remains external",
         "notes": [
             "dry-run artifacts are plans only",
             "execute artifacts are collected by probing a target environment",
@@ -1726,7 +1726,7 @@ def build_payload(product_key: str, args: argparse.Namespace) -> Dict[str, Any]:
             "resolved_artifact": metric_path_label(getattr(args, "output_path", resolve_repo_path(repo_root, args.output)).as_posix()),
             "paths_redacted": True,
             "adapter_type": "external_product_profile",
-            "boundary": "adapter/profile/config/artifact only; product core remains external",
+            "boundary": "adapter/profile/config/artifact/report only; product core remains external",
         },
         "config_load": config_status,
         "environment_preflight": preflight,

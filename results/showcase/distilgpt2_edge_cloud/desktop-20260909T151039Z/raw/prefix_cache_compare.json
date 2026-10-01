@@ -1,0 +1,65 @@
+{
+  "artifact_type": "native_prefix_cache_compare",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU Paged KV prefix-sharing accounting over a synthetic workload only; not product prefix-cache hit rate, latency, throughput, GPU traffic, or benchmark evidence.",
+  "config": {
+    "block_size_tokens": 8,
+    "bytes_per_token": 128,
+    "num_blocks": 12
+  },
+  "fixture_limits": {
+    "max_paged_kv_probe_blocks": 1048576
+  },
+  "no_prefix_cache": {
+    "active_requests": 4,
+    "free_blocks": 0,
+    "reserved_bytes": 12288,
+    "total_blocks": 12,
+    "total_tokens": 96,
+    "used_blocks": 12,
+    "used_bytes": 12288,
+    "utilization": 1.000000
+  },
+  "reference_simulation_only": true,
+  "savings": {
+    "reserved_bytes_delta": 6144,
+    "reserved_bytes_ratio": 0.500000
+  },
+  "shared_prefix": {
+    "active_requests": 4,
+    "free_blocks": 6,
+    "reserved_bytes": 6144,
+    "total_blocks": 12,
+    "total_tokens": 48,
+    "used_blocks": 6,
+    "used_bytes": 6144,
+    "utilization": 1.000000
+  },
+  "traffic_profile": {
+    "block_size_tokens": 8,
+    "bytes_per_token": 128,
+    "decode_attention_kv_read_bytes_per_step": 12288,
+    "decode_attention_shared_prefix_read_bytes_per_step": 8192,
+    "no_prefix_physical_tokens": 96,
+    "no_prefix_prefill_write_bytes": 12288,
+    "no_prefix_request_block_table_entries": 12,
+    "no_prefix_reserved_bytes": 12288,
+    "num_requests": 4,
+    "physical_tokens_saved": 48,
+    "prefix_blocks": 2,
+    "prefix_tokens": 16,
+    "prefix_write_bytes_saved": 6144,
+    "reserved_bytes_saved": 6144,
+    "shared_prefix_entry_block_table_entries": 2,
+    "shared_prefix_physical_tokens": 48,
+    "shared_prefix_prefill_write_bytes": 6144,
+    "shared_prefix_reserved_bytes": 6144,
+    "shared_request_block_table_entries": 12,
+    "shared_reserved_ratio": 0.500000,
+    "suffix_blocks_per_request": 1,
+    "suffix_tokens_per_request": 8,
+    "total_tokens_per_request": 24
+  }
+}

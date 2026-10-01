@@ -1,0 +1,27 @@
+{
+  "artifact_type": "native_decoder_probe",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU decoder-block reference only; not a production fused decoder, GPU kernel benchmark, or product runtime performance result.",
+  "decoder_block": {
+    "attention_only_checksum": -3.253877,
+    "attention_score_elements": 64,
+    "ffn_checksum": 13.900684,
+    "ffn_elements": 64,
+    "ffn_intermediate_size": 16,
+    "fixture_element_cap": 33554432,
+    "fixture_input_elements": 64,
+    "fixture_total_elements": 1888,
+    "fixture_weight_elements": 1824,
+    "head_dim": 4,
+    "hidden_size": 16,
+    "input_elements": 64,
+    "num_heads": 4,
+    "output_abs_sum": 63.543544,
+    "output_checksum": 8.146806,
+    "output_elements": 64,
+    "projected_elements": 64,
+    "seq_len": 4
+  }
+}

@@ -1,0 +1,181 @@
+{
+  "command": [
+    "path_dc0de6003c962b51",
+    "-m",
+    "distilgpt2",
+    "--model_path",
+    "path_90d502034d8bbb7c",
+    "throughput",
+    "--engine_dir",
+    "path_9d0814f980cd5daf",
+    "--backend",
+    "tensorrt",
+    "--dataset",
+    "path_bc7a973357a59b30.json",
+    "--num_requests",
+    "1",
+    "--warmup",
+    "0",
+    "--max_batch_size",
+    "1",
+    "--max_num_tokens",
+    "64",
+    "--report_json",
+    "path_2edf7d7b15936bd5.json",
+    "--output_json",
+    "path_44a4c0188aec7325.json"
+  ],
+  "config": {
+    "batch_size": 1,
+    "extra_arg": [],
+    "input_tokens": 9,
+    "output_tokens": 8,
+    "timeout_seconds": 240,
+    "tokenizer": "",
+    "tokenizer_path_redacted": false
+  },
+  "engine_dir": "path_9d0814f980cd5daf",
+  "engine_dir_path_redacted": true,
+  "environment": {
+    "machine": "x86_64",
+    "modules": {
+      "mpi4py": {
+        "available": false,
+        "module": "mpi4py",
+        "version": null
+      },
+      "tensorrt": {
+        "available": false,
+        "module": "tensorrt",
+        "version": null
+      },
+      "tensorrt_llm": {
+        "available": false,
+        "module": "tensorrt_llm",
+        "version": null
+      }
+    },
+    "nvidia_smi": {
+      "available": true,
+      "gpus": [
+        {
+          "driver_version": "591.86",
+          "memory_total": "16380 MiB",
+          "name": "NVIDIA GeForce RTX 4060 Ti"
+        }
+      ],
+      "path": "path_c5e1a7f8480fa214",
+      "path_redacted": true,
+      "query": {
+        "capture_status": "ok",
+        "cwd": "",
+        "cwd_redacted": false,
+        "elapsed_ms": 31.788,
+        "output_limit_exceeded": false,
+        "returncode": 0,
+        "stderr_bytes": 0,
+        "stderr_tail": "",
+        "stdout_bytes": 46,
+        "stdout_tail": "NVIDIA GeForce RTX 4060 Ti, 16380 MiB, 591.86",
+        "timed_out": false
+      }
+    },
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+    "python": "3.14.4",
+    "tools": {
+      "nvidia_smi": {
+        "available": true,
+        "name": "nvidia-smi",
+        "path": "path_c5e1a7f8480fa214",
+        "path_probe_error": "",
+        "path_redacted": true,
+        "requested": "nvidia-smi"
+      },
+      "trtllm_bench": {
+        "available": true,
+        "name": "trtllm-bench",
+        "path": "path_dc0de6003c962b51",
+        "path_probe_error": "",
+        "path_redacted": true,
+        "requested": "path_dc0de6003c962b51"
+      },
+      "trtllm_build": {
+        "available": false,
+        "name": "trtllm-build",
+        "path": "missing",
+        "path_probe_error": "",
+        "path_redacted": false,
+        "requested": "trtllm-build"
+      },
+      "trtllm_serve": {
+        "available": false,
+        "name": "trtllm-serve",
+        "path": "missing",
+        "path_probe_error": "",
+        "path_redacted": false,
+        "requested": "trtllm-serve"
+      }
+    },
+    "torch": {
+      "available": false,
+      "cuda_available": false,
+      "version": null
+    }
+  },
+  "metrics": {
+    "avg_latency_ms": 205.325528,
+    "latency_ms": 205.3255,
+    "p50_latency_ms": 205.325528,
+    "request_throughput_per_s": 4.870315,
+    "throughput_per_s": 38.9625,
+    "token_throughput_per_s": 38.96252
+  },
+  "mode": "command",
+  "model": "distilgpt2",
+  "model_path_redacted": false,
+  "preflight": {
+    "can_run_command": true,
+    "can_run_trtllm_bench": false,
+    "engine_dir_exists": true,
+    "engine_probe_error": "",
+    "gpu_available": true,
+    "reasons": [
+      "Python module tensorrt_llm is not importable",
+      "Python module tensorrt is not importable"
+    ],
+    "tensorrt_available": false,
+    "tensorrt_llm_available": false
+  },
+  "repo_root": "path_537859c734dc0cbc",
+  "repo_root_redacted": true,
+  "requested_mode": "command",
+  "resolved_engine_dir": "path_9d0814f980cd5daf",
+  "resolved_engine_dir_redacted": true,
+  "run": {
+    "capture_status": "ok",
+    "cwd": "path_537859c734dc0cbc",
+    "cwd_redacted": true,
+    "elapsed_ms": 20742.579,
+    "output_limit_exceeded": false,
+    "returncode": 0,
+    "stderr_bytes": 3739,
+    "stderr_tail": "/usr/local/lib/python3.12/dist-packages/torch/library.py:356: UserWarning: Warning only once for all operators,  other operators may also be overridden.\n  Overriding a previously registered kernel for the same operator and the same dispatch key\n  operator: flash_attn::_flash_attn_backward(Tensor dout, Tensor q, Tensor k, Tensor v, Tensor out, Tensor softmax_lse, Tensor(a6!)? dq, Tensor(a7!)? dk, Tensor(a8!)? dv, float dropout_p, float softmax_scale, bool causal, SymInt window_size_left, SymInt window_size_right, float softcap, Tensor? alibi_slopes, bool deterministic, Tensor? rng_state=None) -> Tensor\n    registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922\n  dispatch key: ADInplaceOrView\n  previous kernel: no debug info\n       new kernel: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922 (Triggered internally at /opt/pytorch/pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)\n  self.m.impl(\n/usr/local/lib/python3.12/dist-packages/modelopt/torch/__init__.py:36: UserWarning: transformers version 4.57.3 is incompatible with nvidia-modelopt and may cause issues. Please install recommended version with `pip install nvidia-modelopt[hf]` if working with HF models.\n  _warnings.warn(\nThe argument `trust_remote_code` is to be used with Auto classes. It has no effect here and is ignored.\n\u001b[33;20mrank 0 using MpiPoolSession to spawn MPI processes\n\u001b[0m/usr/local/lib/python3.12/dist-packages/torch/library.py:356: UserWarning: Warning only once for all operators,  other operators may also be overridden.\n  Overriding a previously registered kernel for the same operator and the same dispatch key\n  operator: flash_attn::_flash_attn_backward(Tensor dout, Tensor q, Tensor k, Tensor v, Tensor out, Tensor softmax_lse, Tensor(a6!)? dq, Tensor(a7!)? dk, Tensor(a8!)? dv, float dropout_p, float softmax_scale, bool causal, SymInt window_size_left, SymInt window_size_right, float softcap, Tensor? alibi_slopes, bool deterministic, Tensor? rng_state=None) -> Tensor\n    registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922\n  dispatch key: ADInplaceOrView\n  previous kernel: no debug info\n       new kernel: registered at /usr/local/lib/python3.12/dist-packages/torch/_library/custom_ops.py:922 (Triggered internally at /opt/pytorch/pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)\n  self.m.impl(\nMultiple distributions found for package optimum. Picked distribution: optimum\nMultiple distributions found for package modelopt. Picked distribution: nvidia-modelopt\n/usr/local/lib/python3.12/dist-packages/modelopt/torch/__init__.py:36: UserWarning: transformers version 4.57.3 is incompatible with nvidia-modelopt and may cause issues. Please install recommended version with `pip install nvidia-modelopt[hf]` if working with HF models.\n  _warnings.warn(\n\nBenchmarking:   0%|          | 0/1 [00:00<?, ?it/s]\nBenchmarking: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00,  4.86it/s]\nBenchmarking: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:00<00:00,  4.85it/s]\n/usr/local/lib/python3.12/dist-packages/pydantic/main.py:464: UserWarning: Pydantic serializer warnings:\n  PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='generation_time', input_value=205325528.0, input_type=float])\n  PydanticSerializationUnexpectedValue(Expected `int` - serialized value may not be as expected [field_name='time_to_first_token', input_value=0.0, input_type=float])\n  return self.__pydantic_serializer__.to_python(\nToken throughput: 38.96252004280734 tokens/s\nRequest throughput: 4.870315005350918 requests/s\nAverage latency: 205.325528 ms\np50 latency: 205.325528 ms",
+    "stdout_bytes": 21454,
+    "stdout_tail": "[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.low_latency_gemm_swiglu_plugin to None.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.gemm_allreduce_plugin to None.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.context_fmha to True.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.bert_context_fmha_fp32_acc to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.paged_kv_cache to True.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.remove_input_padding to True.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.norm_quant_fusion to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.reduce_fusion to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.user_buffer to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.tokens_per_block to 32.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.use_paged_context_fmha to True.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.use_fp8_context_fmha to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.fuse_fp4_quant to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.multiple_profiles to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.paged_state to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.streamingllm to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.manage_weights to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.use_fused_mlp to True.\n[09/09/2026-15:16:14] [TRT-LLM] [I] Set PluginConfig.pp_reduce_scatter to False.\n[09/09/2026-15:16:14] [TRT-LLM] [I] RPCServer is bound to ipc:///inferlab-tmp/rpc_test_c8012731-092f-4185-90a1-41a0137b1674\n[09/09/2026-15:16:14] [TRT-LLM] [I] RPC Server started and listening on ipc:///inferlab-tmp/rpc_test_c8012731-092f-4185-90a1-41a0137b1674\n[09/09/2026-15:16:14] [TRT-LLM] [I] RPC Server has started.\n[09/09/2026-15:16:14] [TRT-LLM] [I] get signal from executor worker\n[09/09/2026-15:16:15] [TRT-LLM] [I] No log path provided, skipping logging.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Starting benchmarking async task.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Starting benchmark...\n[09/09/2026-15:16:15] [TRT-LLM] [I] Request submission complete. [count=1, time=0.0000s, rate=157778.48 req/s]\n[09/09/2026-15:16:15] [TRT-LLM] [I] Benchmark complete.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Stopping LLM backend.\n[09/09/2026-15:16:15] [TRT-LLM] [I] LLM Backend stopped.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Benchmark done. Reporting results...\n[09/09/2026-15:16:15] [TRT-LLM] [I] Writing report information to path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_report.json...\n[09/09/2026-15:16:15] [TRT-LLM] [I] Report information written to path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_report.json.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Writing report information to path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_output.json...\n[09/09/2026-15:16:15] [TRT-LLM] [I] Report information written to path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_output.json.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Writing report information to path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_request_details.raw...\n[09/09/2026-15:16:15] [TRT-LLM] [I] Report information written to path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_request_details.raw.\n[09/09/2026-15:16:15] [TRT-LLM] [I] \n\n===========================================================\n= ENGINE DETAILS\n===========================================================\nModel:\t\t\tdistilgpt2\nModel Path:\t\tNone\nRevision:\t\tN/A\nEngine Directory:\tpath_537859c734dc0cbc/tmp/inferlab-trtllm.dakte9sa/engine\nTensorRT LLM Version:\t1.2.1\nDtype:\t\t\tfloat16\nKV Cache Dtype:\t\tNone\nQuantization:\t\tNone\nMax Input Length:\t64\nMax Sequence Length:\t96\n\n===========================================================\n= MACHINE DETAILS \n===========================================================\nNVIDIA GeForce RTX 4060 Ti, memory 16.00 GB, 9.00 GHz\n\n===========================================================\n= REQUEST DETAILS \n===========================================================\nNumber of requests:             1\nNumber of concurrent requests:  1.0000\nAverage Input Length (tokens):  9.0000\nAverage Output Length (tokens): 8.0000\n===========================================================\n= WORLD + RUNTIME INFORMATION \n===========================================================\nTP Size:                1\nPP Size:                1\nEP Size:                1\nMax Runtime Batch Size: 1\nMax Runtime Tokens:     64\nScheduling Policy:      GUARANTEED_NO_EVICT\nKV Memory Percentage:   30.00%\nIssue Rate (req/sec):   0.0000E+00\n\n===========================================================\n= PERFORMANCE OVERVIEW \n===========================================================\nRequest Throughput (req/sec):                     4.8703\nTotal Output Throughput (tokens/sec):             38.9625\nTotal Token Throughput (tokens/sec):              82.7954\nTotal Latency (ms):                               205.3255\nAverage request latency (ms):                     205.3255\nPer User Output Throughput [w/ ctx] (tps/user):   38.9625\nPer GPU Output Throughput (tps/gpu):              38.9625\n\n-- Request Latency Breakdown (ms) -----------------------\n\n[Latency] P50    : 205.3255\n[Latency] P90    : 205.3255\n[Latency] P95    : 205.3255\n[Latency] P99    : 205.3255\n[Latency] MINIMUM: 205.3255\n[Latency] MAXIMUM: 205.3255\n[Latency] AVERAGE: 205.3255\n\n===========================================================\n= DATASET DETAILS\n===========================================================\nDataset Path:         path_537859c734dc0cbc/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_dataset.json\nNumber of Sequences:  1\n\n-- Percentiles statistics ---------------------------------\n\n        Input              Output           Seq. Length\n-----------------------------------------------------------\nMIN:     9.0000             8.0000            17.0000\nMAX:     9.0000             8.0000            17.0000\nAVG:     9.0000             8.0000            17.0000\nP50:     9.0000             8.0000            17.0000\nP90:     9.0000             8.0000            17.0000\nP95:     9.0000             8.0000            17.0000\nP99:     9.0000             8.0000            17.0000\n===========================================================\n\n[09/09/2026-15:16:15] [TRT-LLM] [I] Thread proxy_dispatch_result_thread stopped.\n[09/09/2026-15:16:15] [TRT-LLM] [I] Thread await_response_thread stopped.\n[TensorRT-LLM][INFO] Refreshed the MPI local session",
+    "timed_out": false
+  },
+  "schema_version": 1,
+  "status": "ok",
+  "summary": {
+    "avg_latency_ms": 205.325528,
+    "elapsed_ms": 20742.579,
+    "latency_ms": 205.3255,
+    "metric_status": "parsed_metrics",
+    "p50_latency_ms": 205.325528,
+    "request_throughput_per_s": 4.870315,
+    "returncode": 0,
+    "throughput_per_s": 38.9625,
+    "token_throughput_per_s": 38.96252
+  },
+  "timestamp_utc": "2026-09-09T15:16:17Z"
+}

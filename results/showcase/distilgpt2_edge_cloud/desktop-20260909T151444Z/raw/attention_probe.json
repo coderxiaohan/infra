@@ -1,0 +1,64 @@
+{
+  "artifact_type": "native_attention_probe",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU attention reference and static read-profile calculation only; not a fused production kernel, GPU timing result, or product runtime benchmark.",
+  "attention": {
+    "head_dim": 8,
+    "key_length": 6,
+    "num_heads": 2,
+    "output_elements": 64,
+    "output_sum_checksum": 0.042545,
+    "profile": {
+      "causal_square": {
+        "key_length": 4,
+        "query_length": 4,
+        "read_profile": {
+          "causal_mask_sparsity": 0.375000,
+          "key_element_reads_for_scores": 160,
+          "kv_element_reads_dense": 416,
+          "kv_element_reads_mask_aware": 320,
+          "masked_score_elements": 12,
+          "output_write_elements": 64,
+          "probability_intermediate_bytes": 128,
+          "qk_multiply_add_ops": 320,
+          "query_element_reads_for_scores": 160,
+          "score_elements": 32,
+          "score_intermediate_bytes": 128,
+          "total_intermediate_bytes": 256,
+          "unmasked_score_elements": 20,
+          "value_element_reads_dense": 256,
+          "value_element_reads_mask_aware": 160,
+          "value_multiply_add_ops_dense": 512,
+          "value_multiply_add_ops_mask_aware": 320
+        }
+      },
+      "non_causal": {
+        "read_profile": {
+          "causal_mask_sparsity": 0.000000,
+          "key_element_reads_for_scores": 384,
+          "kv_element_reads_dense": 768,
+          "kv_element_reads_mask_aware": 768,
+          "masked_score_elements": 0,
+          "output_write_elements": 64,
+          "probability_intermediate_bytes": 192,
+          "qk_multiply_add_ops": 768,
+          "query_element_reads_for_scores": 384,
+          "score_elements": 48,
+          "score_intermediate_bytes": 192,
+          "total_intermediate_bytes": 384,
+          "unmasked_score_elements": 48,
+          "value_element_reads_dense": 384,
+          "value_element_reads_mask_aware": 384,
+          "value_multiply_add_ops_dense": 768,
+          "value_multiply_add_ops_mask_aware": 768
+        }
+      }
+    },
+    "query_length": 4,
+    "score_elements": 48,
+    "working_set_cap_elements": 33554432,
+    "working_set_elements": 416
+  }
+}

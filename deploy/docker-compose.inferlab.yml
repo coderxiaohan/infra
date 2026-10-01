@@ -17,7 +17,16 @@ services:
         CUDA_BASE_IMAGE: ${CUDA_BASE_IMAGE:-nvidia/cuda:12.4.1-devel-ubuntu22.04}
         VLLM_PACKAGE: ${VLLM_PACKAGE:-vllm}
         EXTRA_PIP_INDEX_URL: ${EXTRA_PIP_INDEX_URL:-}
+        HTTP_PROXY: ${INFERLAB_BUILD_PROXY:-}
+        HTTPS_PROXY: ${INFERLAB_BUILD_PROXY:-}
     image: ${INFERLAB_VLLM_IMAGE:-inferlab-vllm:local}
+    shm_size: "1gb"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 180s
     ports:
       - "${INFERLAB_PORT:-8000}:8000"
     environment:
@@ -26,6 +35,9 @@ services:
       INFERLAB_PORT: 8000
       INFERLAB_DTYPE: ${INFERLAB_DTYPE:-auto}
       INFERLAB_MAX_MODEL_LEN: ${INFERLAB_MAX_MODEL_LEN:-4096}
+      INFERLAB_GPU_MEMORY_UTILIZATION: ${INFERLAB_GPU_MEMORY_UTILIZATION:-0.9}
+      # Model Runner V2 requires UVA, which is unavailable in WSL.
+      VLLM_USE_V2_MODEL_RUNNER: ${VLLM_USE_V2_MODEL_RUNNER:-0}
     volumes:
       - ${INFERLAB_MODEL_ROOT:-./models}:/models:ro
       - ..:/workspace/InferLab:ro

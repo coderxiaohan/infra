@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "status": "ok",
+  "claim_scope": "single_request_smoke_snapshot_not_performance_ranking",
+  "sections": [
+    {
+      "title": "vLLM API single request",
+      "source": "vllm_serving_benchmark.json",
+      "status": "ok",
+      "metrics": [
+        {
+          "name": "avg_latency_ms",
+          "value": 129.90083300246624
+        },
+        {
+          "name": "output_token_throughput_per_s",
+          "value": 61.476875422361374
+        },
+        {
+          "name": "request_count",
+          "value": 1
+        },
+        {
+          "name": "input_tokens",
+          "value": 9
+        },
+        {
+          "name": "output_tokens",
+          "value": 8
+        }
+      ]
+    },
+    {
+      "title": "TensorRT Engine single request",
+      "source": "trtllm_benchmark.json",
+      "status": "ok",
+      "metrics": [
+        {
+          "name": "avg_latency_ms",
+          "value": 205.325528
+        },
+        {
+          "name": "output_token_throughput_per_s",
+          "value": 38.96252004280734
+        },
+        {
+          "name": "request_count",
+          "value": 1
+        },
+        {
+          "name": "input_tokens",
+          "value": 9
+        },
+        {
+          "name": "output_tokens",
+          "value": 8
+        }
+      ]
+    },
+    {
+      "title": "llama.cpp CPU single request",
+      "source": "llama_cpp_benchmark.json",
+      "status": "ok",
+      "metrics": [
+        {
+          "name": "reported_decode_token_throughput_per_s",
+          "value": 282.5
+        },
+        {
+          "name": "process_elapsed_ms",
+          "value": 267.721
+        },
+        {
+          "name": "threads",
+          "value": 4
+        }
+      ]
+    },
+    {
+      "title": "Native mechanisms",
+      "source": "native_probe_run.json",
+      "status": "ok",
+      "metrics": [
+        {
+          "name": "passed_probes",
+          "value": 20
+        },
+        {
+          "name": "failed_probes",
+          "value": 0
+        }
+      ]
+    }
+  ]
+}

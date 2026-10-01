@@ -1,0 +1,143 @@
+{
+  "artifact_type": "native_shape_probe",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic CPU shape/KV reference calculation only; not a product runtime trace, GPU benchmark, latency result, or production capacity guarantee.",
+  "config": {
+    "batch_size": 1,
+    "decode_steps": 16,
+    "dtype": "fp16",
+    "head_dim": 64,
+    "hidden_size": 768,
+    "num_heads": 12,
+    "num_layers": 12,
+    "seq_len": 128
+  },
+  "decode": [
+    {
+      "kv_sequence_length": 129,
+      "kv_total_bytes": 4755456,
+      "kv_total_mib": 4.535156,
+      "query_shape": [1, 1, 768],
+      "step": 1
+    },
+    {
+      "kv_sequence_length": 130,
+      "kv_total_bytes": 4792320,
+      "kv_total_mib": 4.570312,
+      "query_shape": [1, 1, 768],
+      "step": 2
+    },
+    {
+      "kv_sequence_length": 131,
+      "kv_total_bytes": 4829184,
+      "kv_total_mib": 4.605469,
+      "query_shape": [1, 1, 768],
+      "step": 3
+    },
+    {
+      "kv_sequence_length": 132,
+      "kv_total_bytes": 4866048,
+      "kv_total_mib": 4.640625,
+      "query_shape": [1, 1, 768],
+      "step": 4
+    },
+    {
+      "kv_sequence_length": 133,
+      "kv_total_bytes": 4902912,
+      "kv_total_mib": 4.675781,
+      "query_shape": [1, 1, 768],
+      "step": 5
+    },
+    {
+      "kv_sequence_length": 134,
+      "kv_total_bytes": 4939776,
+      "kv_total_mib": 4.710938,
+      "query_shape": [1, 1, 768],
+      "step": 6
+    },
+    {
+      "kv_sequence_length": 135,
+      "kv_total_bytes": 4976640,
+      "kv_total_mib": 4.746094,
+      "query_shape": [1, 1, 768],
+      "step": 7
+    },
+    {
+      "kv_sequence_length": 136,
+      "kv_total_bytes": 5013504,
+      "kv_total_mib": 4.781250,
+      "query_shape": [1, 1, 768],
+      "step": 8
+    },
+    {
+      "kv_sequence_length": 137,
+      "kv_total_bytes": 5050368,
+      "kv_total_mib": 4.816406,
+      "query_shape": [1, 1, 768],
+      "step": 9
+    },
+    {
+      "kv_sequence_length": 138,
+      "kv_total_bytes": 5087232,
+      "kv_total_mib": 4.851562,
+      "query_shape": [1, 1, 768],
+      "step": 10
+    },
+    {
+      "kv_sequence_length": 139,
+      "kv_total_bytes": 5124096,
+      "kv_total_mib": 4.886719,
+      "query_shape": [1, 1, 768],
+      "step": 11
+    },
+    {
+      "kv_sequence_length": 140,
+      "kv_total_bytes": 5160960,
+      "kv_total_mib": 4.921875,
+      "query_shape": [1, 1, 768],
+      "step": 12
+    },
+    {
+      "kv_sequence_length": 141,
+      "kv_total_bytes": 5197824,
+      "kv_total_mib": 4.957031,
+      "query_shape": [1, 1, 768],
+      "step": 13
+    },
+    {
+      "kv_sequence_length": 142,
+      "kv_total_bytes": 5234688,
+      "kv_total_mib": 4.992188,
+      "query_shape": [1, 1, 768],
+      "step": 14
+    },
+    {
+      "kv_sequence_length": 143,
+      "kv_total_bytes": 5271552,
+      "kv_total_mib": 5.027344,
+      "query_shape": [1, 1, 768],
+      "step": 15
+    },
+    {
+      "kv_sequence_length": 144,
+      "kv_total_bytes": 5308416,
+      "kv_total_mib": 5.062500,
+      "query_shape": [1, 1, 768],
+      "step": 16
+    }
+  ],
+  "prefill": {
+    "attention_score_shape": [1, 12, 128, 128],
+    "input_shape": [1, 128, 768],
+    "kv_cache": {
+      "bytes_per_token_per_layer": 3072,
+      "key_shape": [1, 12, 128, 64],
+      "total_bytes": 4718592,
+      "total_mib": 4.500000,
+      "value_shape": [1, 12, 128, 64]
+    },
+    "qkv_projection_shape": [1, 128, 2304]
+  }
+}

@@ -1,19 +1,21 @@
 services:
   node-exporter:
+    restart: unless-stopped
     image: prom/node-exporter:v1.8.2
     command:
       - --path.rootfs=/host
       - --collector.textfile.directory=/textfile
     ports:
-      - "${NODE_EXPORTER_PORT:-9100}:9100"
+      - "${OBSERVABILITY_BIND_ADDRESS:-127.0.0.1}:${NODE_EXPORTER_PORT:-9100}:9100"
     volumes:
-      - /:/host:ro,rslave
+      - /:/host:ro
       - ${INFERLAB_TEXTFILE_DIR:-../results/tables}:/textfile:ro
 
   prometheus:
+    restart: unless-stopped
     image: prom/prometheus:v2.53.1
     ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
+      - "${OBSERVABILITY_BIND_ADDRESS:-127.0.0.1}:${PROMETHEUS_PORT:-9090}:9090"
     volumes:
       - ../monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -21,15 +23,17 @@ services:
       - node-exporter
 
   grafana:
+    restart: unless-stopped
     image: grafana/grafana:11.1.0
     ports:
-      - "${GRAFANA_PORT:-3000}:3000"
+      - "${OBSERVABILITY_BIND_ADDRESS:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in a private env file or shell}
     volumes:
       - grafana-data:/var/lib/grafana
       - ../monitoring/grafana_dashboard.json:/var/lib/grafana/dashboards/inferlab.json:ro
+      - ../monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
 

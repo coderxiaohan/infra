@@ -19,11 +19,23 @@ RUN apt-get update \
         python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-RUN if [ -n "${EXTRA_PIP_INDEX_URL}" ]; then \
-        python3 -m pip install --no-cache-dir --extra-index-url "${EXTRA_PIP_INDEX_URL}" "${VLLM_PACKAGE}"; \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python3 -m pip install --timeout 120 --upgrade pip
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    if [ -n "${EXTRA_PIP_INDEX_URL}" ]; then \
+        python3 -m pip install --timeout 120 --extra-index-url "${EXTRA_PIP_INDEX_URL}" "${VLLM_PACKAGE}"; \
     else \
-        python3 -m pip install --no-cache-dir "${VLLM_PACKAGE}"; \
+        python3 -m pip install --timeout 120 "${VLLM_PACKAGE}"; \
     fi
+
+# Triton compiles Python extension launchers when the server first uses the GPU.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY docker/patch_flashinfer_annotations.py /opt/inferlab/patch_flashinfer_annotations.py
+RUN python3 /opt/inferlab/patch_flashinfer_annotations.py
 
 WORKDIR /workspace/InferLab
 
@@ -34,5 +46,6 @@ ENV INFERLAB_HOST=0.0.0.0
 ENV INFERLAB_PORT=8000
 ENV INFERLAB_DTYPE=auto
 ENV INFERLAB_MAX_MODEL_LEN=4096
+ENV INFERLAB_GPU_MEMORY_UTILIZATION=0.9
 
-CMD ["sh", "-lc", "python3 -m vllm.entrypoints.openai.api_server --model \"$INFERLAB_MODEL\" --host \"$INFERLAB_HOST\" --port \"$INFERLAB_PORT\" --dtype \"$INFERLAB_DTYPE\" --max-model-len \"$INFERLAB_MAX_MODEL_LEN\""]
+CMD ["sh", "-lc", "python3 -m vllm.entrypoints.openai.api_server --model \"$INFERLAB_MODEL\" --host \"$INFERLAB_HOST\" --port \"$INFERLAB_PORT\" --dtype \"$INFERLAB_DTYPE\" --max-model-len \"$INFERLAB_MAX_MODEL_LEN\" --gpu-memory-utilization \"$INFERLAB_GPU_MEMORY_UTILIZATION\""]

@@ -1,0 +1,21 @@
+[
+    {
+        "id": 2,
+        "num_input_tokens": 9,
+        "error_tokens": 0,
+        "start_timestamp": 49442614408542,
+        "first_token_timestamp": -1,
+        "end_timestamp": 49442819734070,
+        "decode_iteration": 8,
+        "num_total_output_tokens": 8,
+        "num_generated_tokens": 7,
+        "generation_time": 205325528.0,
+        "time_to_first_token": 0.0,
+        "intertoken_latency": 7063259962010.143,
+        "end_to_end_latency": 205325528,
+        "output_token_throughput": 3.896252004280734e-08,
+        "generation_token_throughput": 3.4092205037456427e-08,
+        "output": "\n\n\n\n\n\n\n\n",
+        "output_tokens": 8
+    }
+]

@@ -26,7 +26,7 @@ InferLab 不是聊天机器人演示项目，也不尝试替代 llama.cpp、vLLM
 
 ## 最短验证路径
 
-以下命令在仓库根目录构建 CPU 目标、运行 CTest，并将本次基础流程写入独立临时目录：
+以下命令在仓库根目录构建 CPU 目标、运行 CTest，并将本次基础流程写入独立临时目录。本文示例统一在项目的 `tmp/` 下创建临时目录；如果仓库位于 `~/Projects/infra`，则输出保存在 `~/Projects/infra/tmp/`。每次运行会生成带随机后缀的子目录，避免混入历史结果。`tmp/` 已由 `.gitignore` 排除，结果会保留在本地，可在确认不再需要后自行清理：
 
 ```bash
 cmake -S . -B build \
@@ -35,7 +35,8 @@ cmake -S . -B build \
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 
-BASIC_RESULTS="$(mktemp -d /tmp/inferlab-basic.XXXXXX)"
+mkdir -p "$PWD/tmp"
+BASIC_RESULTS="$(mktemp -d "$PWD/tmp/inferlab-basic.XXXXXX")"
 INFERLAB_RESULTS_DIR="$BASIC_RESULTS" bash scripts/run_all_benchmarks.sh
 printf 'results: %s\n' "$BASIC_RESULTS"
 ```
@@ -211,17 +212,19 @@ git submodule update --init --recursive
 bash scripts/download_models.sh --download-only
 ```
 
-`--download-only` 会把固定 revision 的 DistilGPT2 Hugging Face 文件下载到 `models/distilgpt2_clean_hf/`，并逐文件校验 SHA256。若还需要生成端侧 F16 GGUF，请使用独立转换环境，避免与项目主 Python 环境的依赖版本互相影响：
+`--download-only` 会把固定 revision 的 DistilGPT2 Hugging Face 文件下载到 `models/distilgpt2_clean_hf/`，并逐文件校验 SHA256。若还需要生成端侧 F16 GGUF，请使用独立转换环境，避免与项目主 Python 环境的依赖版本互相影响。请先准备 Python 3.12；固定转换依赖中的 NumPy 1.26.4 不支持 Python 3.14。以下命令使用 CPU 版 PyTorch，转换无需 CUDA：
 
 ```bash
-python3 -m venv .venv-llama-convert
+python3.12 -m venv .venv-llama-convert
+.venv-llama-convert/bin/python -m pip install \
+  --index-url https://download.pytorch.org/whl/cpu "torch==2.11.0"
 .venv-llama-convert/bin/python -m pip install \
   -r third_party/llama.cpp/requirements/requirements-convert_hf_to_gguf.txt
 INFERLAB_CONVERT_PYTHON=.venv-llama-convert/bin/python \
   bash scripts/download_models.sh
 ```
 
-脚本固定上游模型 revision、`llama.cpp` Commit 和最终 GGUF SHA256；下载或转换结果不一致时会返回非零退出码。模型目录由 `.gitignore` 排除，不会进入主仓库。
+脚本固定上游模型 revision、`llama.cpp` Commit 和最终 GGUF SHA256。转换时会在临时副本中去掉 6 个 GPT2 可重建的注意力掩码，并校验清理后权重的 SHA256；下载的原始文件和学习参数保持不变。下载或转换结果不一致时会返回非零退出码。模型目录由 `.gitignore` 排除，不会进入主仓库。
 
 ## 构建配置项
 
@@ -252,7 +255,8 @@ INFERLAB_CONVERT_PYTHON=.venv-llama-convert/bin/python \
 ### Python Smoke 流程
 
 ```bash
-SMOKE_RESULTS="$(mktemp -d /tmp/inferlab-smoke.XXXXXX)"
+mkdir -p "$PWD/tmp"
+SMOKE_RESULTS="$(mktemp -d "$PWD/tmp/inferlab-smoke.XXXXXX")"
 
 python3 -m mini_llm.shape_probe \
   --batch-size 1 \
@@ -269,7 +273,8 @@ python3 -m unittest discover -s tests -p "test_*.py"
 ### 原生 CPU 构建
 
 ```bash
-CPU_RESULTS="$(mktemp -d /tmp/inferlab-cpu.XXXXXX)"
+mkdir -p "$PWD/tmp"
+CPU_RESULTS="$(mktemp -d "$PWD/tmp/inferlab-cpu.XXXXXX")"
 
 cmake -S . -B build \
   -DCMAKE_BUILD_TYPE=Release \
@@ -298,7 +303,8 @@ python3 scripts/validate_outputs.py \
 ### 基础完整流程
 
 ```bash
-BASIC_RESULTS="$(mktemp -d /tmp/inferlab-basic.XXXXXX)"
+mkdir -p "$PWD/tmp"
+BASIC_RESULTS="$(mktemp -d "$PWD/tmp/inferlab-basic.XXXXXX")"
 INFERLAB_RESULTS_DIR="$BASIC_RESULTS" bash scripts/run_all_benchmarks.sh
 ```
 
@@ -365,7 +371,8 @@ python3 scripts/run_android_edge_benchmark.py \
 以下示例用于批量收集环境预检诊断，因此显式允许工具在写出非 `ok` 产物后继续：
 
 ```bash
-BACKEND_RESULTS="$(mktemp -d /tmp/inferlab-backends.XXXXXX)"
+mkdir -p "$PWD/tmp"
+BACKEND_RESULTS="$(mktemp -d "$PWD/tmp/inferlab-backends.XXXXXX")"
 
 python3 scripts/run_llama_cpp_benchmark.py \
   --allow-non-ok-status \
@@ -487,7 +494,8 @@ curl --fail http://127.0.0.1:8000/v1/models
 #### 5. 执行真实 Benchmark
 
 ```bash
-VLLM_RESULTS="$(mktemp -d /tmp/inferlab-vllm.XXXXXX)"
+mkdir -p "$PWD/tmp"
+VLLM_RESULTS="$(mktemp -d "$PWD/tmp/inferlab-vllm.XXXXXX")"
 
 python3 scripts/run_vllm_benchmark.py \
   --base-url http://127.0.0.1:8000 \
@@ -577,7 +585,9 @@ docker compose \
   up -d
 ```
 
-默认访问地址为 Prometheus `http://127.0.0.1:9090`、Grafana `http://127.0.0.1:3000`。密码只应通过私有环境变量或未提交的环境文件提供。可观测性服务属于运维辅助能力，不替代 Benchmark JSON 和严格结果校验。
+默认访问地址为 Prometheus `http://127.0.0.1:9090`、Grafana `http://127.0.0.1:3000`。端口默认仅绑定本机回环地址；若 3000 已被占用，可在启动前设置 `export GRAFANA_PORT=3001`。密码只应通过私有环境变量或未提交的环境文件提供。可观测性服务属于运维辅助能力，不替代 Benchmark JSON 和严格结果校验。
+
+Compose 会自动配置 Grafana 的 Prometheus 数据源和 InferLab 看板；Prometheus 通过服务名 `node-exporter:9100` 抓取指标。导出脚本生成的是已完成测试的快照，不会自动重跑 Benchmark。结果位于 `tmp/` 等其他目录时，须用 `--results`、`--source` 显式选择来源；`--source` 会替换默认来源列表，目录不会递归扫描。多次测试可通过 `--summary` 提供含 `sections` 数组的统一摘要，配合 `--no-raw` 展示经核对的指标。纯输出吞吐量与含输入的总吞吐量应分别标注；测试参数不同的结果不能直接作为性能排名。
 
 停止可观测性服务时执行：
 

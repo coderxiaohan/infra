@@ -1,0 +1,731 @@
+{
+  "artifact_type": "native_scheduler_workload_sweep",
+  "mode": "execute",
+  "executed": true,
+  "replayed": false,
+  "claim_scope": "Executed deterministic scalar CPU scheduler workload sweep over synthetic request mixes only; not measured product latency, throughput, capacity, or GPU runtime evidence.",
+  "reference_simulation_only": true,
+  "scheduler_config": {
+    "block_size_tokens": 8,
+    "bytes_per_token": 128,
+    "max_active_requests": 3,
+    "num_blocks": 10
+  },
+  "tradeoff_summary": {
+    "best_tokens_per_step": 3.000000,
+    "best_tokens_per_step_workload": "prefill_heavy",
+    "highest_average_queue_wait_steps": 3.600000,
+    "highest_average_queue_wait_workload": "decode_heavy",
+    "highest_peak_used_blocks": 10,
+    "highest_peak_used_blocks_workload": "cache_stress",
+    "lowest_average_ttft_rejection_filter": "no_rejections",
+    "lowest_average_ttft_steps": 1.400000,
+    "lowest_average_ttft_workload": "prefill_heavy",
+    "max_rejected_request_workload": "cache_stress",
+    "max_rejected_requests": 1,
+    "total_rejected_requests": 1,
+    "workload_count": 5
+  },
+  "workloads": [
+    {
+      "name": "short_chat",
+      "pressure_profile": {
+        "average_active_requests": 1.000000,
+        "average_cache_utilization": 0.604167,
+        "average_decode_steps_per_token": 1.000000,
+        "average_queue_wait_steps": 1.600000,
+        "average_ttft_steps": 1.600000,
+        "average_used_blocks": 1.000000,
+        "finished_request_count": 5,
+        "peak_active_requests": 2,
+        "peak_cache_utilization": 1.000000,
+        "peak_reserved_bytes": 2048,
+        "peak_total_tokens": 13,
+        "peak_used_blocks": 2,
+        "rejected_request_count": 0,
+        "request_count": 5,
+        "steps": 3,
+        "tokens_per_step": 2.666667,
+        "total_admitted": 5,
+        "total_backpressure_deferred": 0,
+        "total_decoded_tokens": 8,
+        "total_finished": 5,
+        "total_rejected": 0
+      },
+      "prompt_to_decode_ratio": 3.125000,
+      "prompt_tokens": 25,
+      "requested_decode_tokens": 8,
+      "request_count": 5,
+      "request_metrics": [
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 2,
+          "max_decode_tokens": 2,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 1,
+          "request_id": 1,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 2
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 2,
+          "max_decode_tokens": 2,
+          "prompt_tokens": 5,
+          "queue_wait_steps": 1,
+          "request_id": 2,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 2
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 1,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 4,
+          "queue_wait_steps": 1,
+          "request_id": 3,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 1
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 3,
+          "first_decode_step": 2,
+          "first_scheduled_step": 2,
+          "generated_tokens": 2,
+          "max_decode_tokens": 2,
+          "prompt_tokens": 7,
+          "queue_wait_steps": 2,
+          "request_id": 4,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 2,
+          "total_latency_steps": 3
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 3,
+          "first_decode_step": 3,
+          "first_scheduled_step": 3,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 3,
+          "queue_wait_steps": 3,
+          "request_id": 5,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 3,
+          "total_latency_steps": 3
+        }
+      ],
+      "requests": [
+        {
+          "max_decode_tokens": 2,
+          "prompt_tokens": 6,
+          "request_id": 1,
+          "total_tokens": 8
+        },
+        {
+          "max_decode_tokens": 2,
+          "prompt_tokens": 5,
+          "request_id": 2,
+          "total_tokens": 7
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 4,
+          "request_id": 3,
+          "total_tokens": 5
+        },
+        {
+          "max_decode_tokens": 2,
+          "prompt_tokens": 7,
+          "request_id": 4,
+          "total_tokens": 9
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 3,
+          "request_id": 5,
+          "total_tokens": 4
+        }
+      ],
+      "simulation_step_budget": 8
+    },
+    {
+      "name": "decode_heavy",
+      "pressure_profile": {
+        "average_active_requests": 2.272727,
+        "average_cache_utilization": 0.692992,
+        "average_decode_steps_per_token": 1.000000,
+        "average_queue_wait_steps": 3.600000,
+        "average_ttft_steps": 3.600000,
+        "average_used_blocks": 3.090909,
+        "finished_request_count": 5,
+        "peak_active_requests": 3,
+        "peak_cache_utilization": 1.000000,
+        "peak_reserved_bytes": 6144,
+        "peak_total_tokens": 30,
+        "peak_used_blocks": 6,
+        "rejected_request_count": 0,
+        "request_count": 5,
+        "steps": 11,
+        "tokens_per_step": 2.727273,
+        "total_admitted": 5,
+        "total_backpressure_deferred": 0,
+        "total_decoded_tokens": 30,
+        "total_finished": 5,
+        "total_rejected": 0
+      },
+      "prompt_to_decode_ratio": 0.800000,
+      "prompt_tokens": 24,
+      "requested_decode_tokens": 30,
+      "request_count": 5,
+      "request_metrics": [
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 8,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 8,
+          "max_decode_tokens": 8,
+          "prompt_tokens": 4,
+          "queue_wait_steps": 1,
+          "request_id": 1,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 8
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 7,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 7,
+          "max_decode_tokens": 7,
+          "prompt_tokens": 5,
+          "queue_wait_steps": 1,
+          "request_id": 2,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 7
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 6,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 6,
+          "max_decode_tokens": 6,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 1,
+          "request_id": 3,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 6
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 11,
+          "first_decode_step": 7,
+          "first_scheduled_step": 7,
+          "generated_tokens": 5,
+          "max_decode_tokens": 5,
+          "prompt_tokens": 4,
+          "queue_wait_steps": 7,
+          "request_id": 4,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 7,
+          "total_latency_steps": 11
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 11,
+          "first_decode_step": 8,
+          "first_scheduled_step": 8,
+          "generated_tokens": 4,
+          "max_decode_tokens": 4,
+          "prompt_tokens": 5,
+          "queue_wait_steps": 8,
+          "request_id": 5,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 8,
+          "total_latency_steps": 11
+        }
+      ],
+      "requests": [
+        {
+          "max_decode_tokens": 8,
+          "prompt_tokens": 4,
+          "request_id": 1,
+          "total_tokens": 12
+        },
+        {
+          "max_decode_tokens": 7,
+          "prompt_tokens": 5,
+          "request_id": 2,
+          "total_tokens": 12
+        },
+        {
+          "max_decode_tokens": 6,
+          "prompt_tokens": 6,
+          "request_id": 3,
+          "total_tokens": 12
+        },
+        {
+          "max_decode_tokens": 5,
+          "prompt_tokens": 4,
+          "request_id": 4,
+          "total_tokens": 9
+        },
+        {
+          "max_decode_tokens": 4,
+          "prompt_tokens": 5,
+          "request_id": 5,
+          "total_tokens": 9
+        }
+      ],
+      "simulation_step_budget": 30
+    },
+    {
+      "name": "prefill_heavy",
+      "pressure_profile": {
+        "average_active_requests": 0.500000,
+        "average_cache_utilization": 0.354167,
+        "average_decode_steps_per_token": 1.000000,
+        "average_queue_wait_steps": 1.400000,
+        "average_ttft_steps": 1.400000,
+        "average_used_blocks": 1.500000,
+        "finished_request_count": 5,
+        "peak_active_requests": 1,
+        "peak_cache_utilization": 0.708333,
+        "peak_reserved_bytes": 3072,
+        "peak_total_tokens": 17,
+        "peak_used_blocks": 3,
+        "rejected_request_count": 0,
+        "request_count": 5,
+        "steps": 2,
+        "tokens_per_step": 3.000000,
+        "total_admitted": 5,
+        "total_backpressure_deferred": 0,
+        "total_decoded_tokens": 6,
+        "total_finished": 5,
+        "total_rejected": 0
+      },
+      "prompt_to_decode_ratio": 13.333333,
+      "prompt_tokens": 80,
+      "requested_decode_tokens": 6,
+      "request_count": 5,
+      "request_metrics": [
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 1,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 18,
+          "queue_wait_steps": 1,
+          "request_id": 1,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 1
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 1,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 20,
+          "queue_wait_steps": 1,
+          "request_id": 2,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 1
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 2,
+          "max_decode_tokens": 2,
+          "prompt_tokens": 16,
+          "queue_wait_steps": 1,
+          "request_id": 3,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 2
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 2,
+          "first_scheduled_step": 2,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 12,
+          "queue_wait_steps": 2,
+          "request_id": 4,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 2,
+          "total_latency_steps": 2
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 2,
+          "first_scheduled_step": 2,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 14,
+          "queue_wait_steps": 2,
+          "request_id": 5,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 2,
+          "total_latency_steps": 2
+        }
+      ],
+      "requests": [
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 18,
+          "request_id": 1,
+          "total_tokens": 19
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 20,
+          "request_id": 2,
+          "total_tokens": 21
+        },
+        {
+          "max_decode_tokens": 2,
+          "prompt_tokens": 16,
+          "request_id": 3,
+          "total_tokens": 18
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 12,
+          "request_id": 4,
+          "total_tokens": 13
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 14,
+          "request_id": 5,
+          "total_tokens": 15
+        }
+      ],
+      "simulation_step_budget": 6
+    },
+    {
+      "name": "long_tail",
+      "pressure_profile": {
+        "average_active_requests": 0.900000,
+        "average_cache_utilization": 0.712500,
+        "average_decode_steps_per_token": 1.000000,
+        "average_queue_wait_steps": 1.400000,
+        "average_ttft_steps": 1.400000,
+        "average_used_blocks": 1.600000,
+        "finished_request_count": 5,
+        "peak_active_requests": 1,
+        "peak_cache_utilization": 1.000000,
+        "peak_reserved_bytes": 2048,
+        "peak_total_tokens": 15,
+        "peak_used_blocks": 2,
+        "rejected_request_count": 0,
+        "request_count": 5,
+        "steps": 10,
+        "tokens_per_step": 1.400000,
+        "total_admitted": 5,
+        "total_backpressure_deferred": 0,
+        "total_decoded_tokens": 14,
+        "total_finished": 5,
+        "total_rejected": 0
+      },
+      "prompt_to_decode_ratio": 2.142857,
+      "prompt_tokens": 30,
+      "requested_decode_tokens": 14,
+      "request_count": 5,
+      "request_metrics": [
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 10,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 10,
+          "max_decode_tokens": 10,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 1,
+          "request_id": 1,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 10
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 1,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 1,
+          "request_id": 2,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 1
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 1,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 1,
+          "request_id": 3,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 1
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 2,
+          "first_scheduled_step": 2,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 2,
+          "request_id": 4,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 2,
+          "total_latency_steps": 2
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 2,
+          "first_decode_step": 2,
+          "first_scheduled_step": 2,
+          "generated_tokens": 1,
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "queue_wait_steps": 2,
+          "request_id": 5,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 2,
+          "total_latency_steps": 2
+        }
+      ],
+      "requests": [
+        {
+          "max_decode_tokens": 10,
+          "prompt_tokens": 6,
+          "request_id": 1,
+          "total_tokens": 16
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "request_id": 2,
+          "total_tokens": 7
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "request_id": 3,
+          "total_tokens": 7
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "request_id": 4,
+          "total_tokens": 7
+        },
+        {
+          "max_decode_tokens": 1,
+          "prompt_tokens": 6,
+          "request_id": 5,
+          "total_tokens": 7
+        }
+      ],
+      "simulation_step_budget": 14
+    },
+    {
+      "name": "cache_stress",
+      "pressure_profile": {
+        "average_active_requests": 1.600000,
+        "average_cache_utilization": 0.590000,
+        "average_decode_steps_per_token": 1.000000,
+        "average_queue_wait_steps": 1.800000,
+        "average_ttft_steps": 2.000000,
+        "average_used_blocks": 5.600000,
+        "finished_request_count": 4,
+        "peak_active_requests": 3,
+        "peak_cache_utilization": 0.843750,
+        "peak_reserved_bytes": 10240,
+        "peak_total_tokens": 61,
+        "peak_used_blocks": 10,
+        "rejected_request_count": 1,
+        "request_count": 5,
+        "steps": 5,
+        "tokens_per_step": 2.400000,
+        "total_admitted": 5,
+        "total_backpressure_deferred": 0,
+        "total_decoded_tokens": 12,
+        "total_finished": 4,
+        "total_rejected": 1
+      },
+      "prompt_to_decode_ratio": 5.500000,
+      "prompt_tokens": 88,
+      "requested_decode_tokens": 16,
+      "request_count": 5,
+      "request_metrics": [
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 4,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 4,
+          "max_decode_tokens": 4,
+          "prompt_tokens": 24,
+          "queue_wait_steps": 1,
+          "request_id": 1,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 4
+        },
+        {
+          "decode_steps_per_token": 0.000000,
+          "finished_step": 1,
+          "first_decode_step": -1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 0,
+          "max_decode_tokens": 4,
+          "prompt_tokens": 24,
+          "queue_wait_steps": 1,
+          "request_id": 2,
+          "state": "rejected",
+          "submitted_step": 0,
+          "time_to_first_token_steps": -1,
+          "total_latency_steps": 1
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 4,
+          "first_decode_step": 1,
+          "first_scheduled_step": 1,
+          "generated_tokens": 4,
+          "max_decode_tokens": 4,
+          "prompt_tokens": 24,
+          "queue_wait_steps": 1,
+          "request_id": 3,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 1,
+          "total_latency_steps": 4
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 3,
+          "first_decode_step": 2,
+          "first_scheduled_step": 2,
+          "generated_tokens": 2,
+          "max_decode_tokens": 2,
+          "prompt_tokens": 8,
+          "queue_wait_steps": 2,
+          "request_id": 4,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 2,
+          "total_latency_steps": 3
+        },
+        {
+          "decode_steps_per_token": 1.000000,
+          "finished_step": 5,
+          "first_decode_step": 4,
+          "first_scheduled_step": 4,
+          "generated_tokens": 2,
+          "max_decode_tokens": 2,
+          "prompt_tokens": 8,
+          "queue_wait_steps": 4,
+          "request_id": 5,
+          "state": "finished",
+          "submitted_step": 0,
+          "time_to_first_token_steps": 4,
+          "total_latency_steps": 5
+        }
+      ],
+      "requests": [
+        {
+          "max_decode_tokens": 4,
+          "prompt_tokens": 24,
+          "request_id": 1,
+          "total_tokens": 28
+        },
+        {
+          "max_decode_tokens": 4,
+          "prompt_tokens": 24,
+          "request_id": 2,
+          "total_tokens": 28
+        },
+        {
+          "max_decode_tokens": 4,
+          "prompt_tokens": 24,
+          "request_id": 3,
+          "total_tokens": 28
+        },
+        {
+          "max_decode_tokens": 2,
+          "prompt_tokens": 8,
+          "request_id": 4,
+          "total_tokens": 10
+        },
+        {
+          "max_decode_tokens": 2,
+          "prompt_tokens": 8,
+          "request_id": 5,
+          "total_tokens": 10
+        }
+      ],
+      "simulation_step_budget": 16
+    }
+  ]
+}

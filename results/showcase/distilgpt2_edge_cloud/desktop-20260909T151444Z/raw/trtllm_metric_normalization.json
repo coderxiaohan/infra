@@ -1,0 +1,8 @@
+{
+  "source": "/home/anonymous/Projects/infra/results/showcase/distilgpt2_edge_cloud/desktop-20260909T151444Z/raw/trtllm_report.json",
+  "source_sha256": "6b19d1df5bb5bfe6f1574d35f0b592bd741639eabf9b90268f800a01790c9569",
+  "metric_semantics": "output tokens only; input tokens excluded",
+  "system_output_throughput_tok_s": 38.96252004280734,
+  "request_throughput_req_s": 4.870315005350918,
+  "avg_request_latency_ms": 205.325528
+}

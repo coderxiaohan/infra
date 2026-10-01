@@ -1,0 +1,21 @@
+{
+  "artifacts": [
+    "raw/showcase_prompt.jsonl",
+    "raw/trtllm_dataset.json"
+  ],
+  "backend_input_contract": {
+    "same_tokenized_prompt": true,
+    "trtllm_prompt_tokens": 9,
+    "vllm_prompt_tokens": 9
+  },
+  "model_family": "distilgpt2",
+  "output_tokens": 8,
+  "prompt_id": "kv_cache_short_explain",
+  "prompt_sha256": "1c03637e4aacdbf4e8a376011d69de074f1d69fa194bafc6f1e68d7807a70a6f",
+  "prompt_tokens": 9,
+  "schema_version": 1,
+  "status": "ok",
+  "tokenizer_class": "GPT2Tokenizer",
+  "tokenizer_vocab_size": 50257,
+  "trtllm_input_tokens": 9
+}

@@ -1,0 +1,87 @@
+# HELP inferlab_export_info Metadata for the latest InferLab metrics export.
+# TYPE inferlab_export_info gauge
+# HELP inferlab_source_present Whether an expected InferLab JSON artifact exists.
+# TYPE inferlab_source_present gauge
+# HELP inferlab_source_status Numeric status value for an InferLab JSON source.
+# TYPE inferlab_source_status gauge
+# HELP inferlab_source_artifact_info Artifact execution semantics and claim-boundary labels for an InferLab JSON source.
+# TYPE inferlab_source_artifact_info gauge
+# HELP inferlab_source_claim_scope_present Whether an InferLab JSON source exposes claim-scope metadata.
+# TYPE inferlab_source_claim_scope_present gauge
+# HELP inferlab_source_blocker_count Canonical blocker count projected from an InferLab JSON source.
+# TYPE inferlab_source_blocker_count gauge
+# HELP inferlab_source_evidence_confidence_info Evidence confidence tier for a raw InferLab JSON source.
+# TYPE inferlab_source_evidence_confidence_info gauge
+# HELP inferlab_summary_metric Numeric benchmark summary metric by source and section.
+# TYPE inferlab_summary_metric gauge
+# HELP inferlab_raw_metric Numeric raw JSON metric by source and dotted path.
+# TYPE inferlab_raw_metric gauge
+# HELP inferlab_catalog_source_count Artifact source counts from catalog resolution.
+# TYPE inferlab_catalog_source_count gauge
+# HELP inferlab_catalog_source_resolution_info Catalog consumption status for Prometheus export.
+# TYPE inferlab_catalog_source_resolution_info gauge
+# HELP inferlab_artifact_catalog_info Artifact catalog drift-review decision labels.
+# TYPE inferlab_artifact_catalog_info gauge
+# HELP inferlab_artifact_catalog_metric Numeric artifact catalog wiring and drift-review metrics.
+# TYPE inferlab_artifact_catalog_metric gauge
+# HELP inferlab_evidence_query_info Non-execute evidence query decision labels.
+# TYPE inferlab_evidence_query_info gauge
+# HELP inferlab_evidence_query_metric Numeric evidence query and repair-path metrics.
+# TYPE inferlab_evidence_query_metric gauge
+# HELP inferlab_native_core_audit_register_info Static native-core audit decision labels.
+# TYPE inferlab_native_core_audit_register_info gauge
+# HELP inferlab_native_core_audit_register_metric Numeric static native-core audit coverage and closure metrics.
+# TYPE inferlab_native_core_audit_register_metric gauge
+inferlab_export_info{generator="export_prometheus_metrics.py",results="path_ae82053be2994f88",timestamp_utc="2026-09-09T15:22:39Z"} 1
+inferlab_catalog_source_resolution_info{catalog_path="path_ba7ebf6eeac7acb7.json",source_policy="cli_override",status="cli_override"} 1
+inferlab_catalog_source_error_present{source_policy="cli_override",status="cli_override"} 0
+inferlab_catalog_source_count{kind="extension",source_policy="cli_override",status="cli_override"} 4
+inferlab_catalog_source_count{kind="catalog",source_policy="cli_override",status="cli_override"} 0
+inferlab_catalog_source_count{kind="resolved",source_policy="cli_override",status="cli_override"} 4
+inferlab_catalog_source_count{kind="extra_catalog",source_policy="cli_override",status="cli_override"} 0
+inferlab_catalog_source_count{kind="extension_only",source_policy="cli_override",status="cli_override"} 4
+inferlab_catalog_source_count{kind="shared",source_policy="cli_override",status="cli_override"} 0
+inferlab_catalog_source_count{kind="fallback_deprecated",source_policy="cli_override",status="cli_override"} 0
+inferlab_catalog_source_count{kind="fallback_only_deprecated",source_policy="cli_override",status="cli_override"} 0
+inferlab_source_present{source="vllm_serving_benchmark.json"} 1
+inferlab_source_status{section="raw",source="vllm_serving_benchmark.json",status="ok"} 1
+inferlab_source_artifact_info{artifact_type="vllm_serving_benchmark",claim_scope_present="false",executed="unknown",mode="external_openai_compatible_endpoint",release_decision="unknown",replayed="unknown",source="vllm_serving_benchmark.json"} 1
+inferlab_source_claim_scope_present{source="vllm_serving_benchmark.json"} 0
+inferlab_source_blocker_count{source="vllm_serving_benchmark.json"} 0
+inferlab_source_evidence_confidence_info{confidence="schema_only",source="vllm_serving_benchmark.json"} 1
+inferlab_source_present{source="trtllm_benchmark.json"} 1
+inferlab_source_status{section="raw",source="trtllm_benchmark.json",status="ok"} 1
+inferlab_source_artifact_info{artifact_type="trtllm_benchmark",claim_scope_present="false",executed="unknown",mode="command",release_decision="unknown",replayed="unknown",source="trtllm_benchmark.json"} 1
+inferlab_source_claim_scope_present{source="trtllm_benchmark.json"} 0
+inferlab_source_blocker_count{source="trtllm_benchmark.json"} 0
+inferlab_source_evidence_confidence_info{confidence="schema_only",source="trtllm_benchmark.json"} 1
+inferlab_source_present{source="llama_cpp_benchmark.json"} 1
+inferlab_source_status{section="raw",source="llama_cpp_benchmark.json",status="ok"} 1
+inferlab_source_artifact_info{artifact_type="llama_cpp_benchmark",claim_scope_present="false",executed="unknown",mode="cli",release_decision="unknown",replayed="unknown",source="llama_cpp_benchmark.json"} 1
+inferlab_source_claim_scope_present{source="llama_cpp_benchmark.json"} 0
+inferlab_source_blocker_count{source="llama_cpp_benchmark.json"} 0
+inferlab_source_evidence_confidence_info{confidence="schema_only",source="llama_cpp_benchmark.json"} 1
+inferlab_source_present{source="native_probe_run.json"} 1
+inferlab_source_artifact_info{artifact_type="native_probe_run",claim_scope_present="false",executed="unknown",mode="unknown",release_decision="unknown",replayed="unknown",source="native_probe_run.json"} 1
+inferlab_source_claim_scope_present{source="native_probe_run.json"} 0
+inferlab_source_blocker_count{source="native_probe_run.json"} 0
+inferlab_source_evidence_confidence_info{confidence="schema_only",source="native_probe_run.json"} 1
+inferlab_source_status{section="vLLM API single request",source="vllm_serving_benchmark.json",status="ok"} 1
+inferlab_summary_metric{metric="avg_latency_ms",section="vLLM API single request",source="vllm_serving_benchmark.json"} 129.900833002
+inferlab_summary_metric{metric="output_token_throughput_per_s",section="vLLM API single request",source="vllm_serving_benchmark.json"} 61.4768754224
+inferlab_summary_metric{metric="request_count",section="vLLM API single request",source="vllm_serving_benchmark.json"} 1
+inferlab_summary_metric{metric="input_tokens",section="vLLM API single request",source="vllm_serving_benchmark.json"} 9
+inferlab_summary_metric{metric="output_tokens",section="vLLM API single request",source="vllm_serving_benchmark.json"} 8
+inferlab_source_status{section="TensorRT Engine single request",source="trtllm_benchmark.json",status="ok"} 1
+inferlab_summary_metric{metric="avg_latency_ms",section="TensorRT Engine single request",source="trtllm_benchmark.json"} 205.325528
+inferlab_summary_metric{metric="output_token_throughput_per_s",section="TensorRT Engine single request",source="trtllm_benchmark.json"} 38.9625200428
+inferlab_summary_metric{metric="request_count",section="TensorRT Engine single request",source="trtllm_benchmark.json"} 1
+inferlab_summary_metric{metric="input_tokens",section="TensorRT Engine single request",source="trtllm_benchmark.json"} 9
+inferlab_summary_metric{metric="output_tokens",section="TensorRT Engine single request",source="trtllm_benchmark.json"} 8
+inferlab_source_status{section="llama.cpp CPU single request",source="llama_cpp_benchmark.json",status="ok"} 1
+inferlab_summary_metric{metric="reported_decode_token_throughput_per_s",section="llama.cpp CPU single request",source="llama_cpp_benchmark.json"} 282.5
+inferlab_summary_metric{metric="process_elapsed_ms",section="llama.cpp CPU single request",source="llama_cpp_benchmark.json"} 267.721
+inferlab_summary_metric{metric="threads",section="llama.cpp CPU single request",source="llama_cpp_benchmark.json"} 4
+inferlab_source_status{section="Native mechanisms",source="native_probe_run.json",status="ok"} 1
+inferlab_summary_metric{metric="passed_probes",section="Native mechanisms",source="native_probe_run.json"} 20
+inferlab_summary_metric{metric="failed_probes",section="Native mechanisms",source="native_probe_run.json"} 0

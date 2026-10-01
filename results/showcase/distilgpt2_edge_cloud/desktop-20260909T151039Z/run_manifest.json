@@ -1,0 +1,249 @@
+{
+  "execution_mode": "execute",
+  "experiment": {
+    "claim_scope": "Representative single-request smoke evidence for an end-to-end InferLab workflow; not a product SLA or cross-format model quality ranking.",
+    "id": "distilgpt2_edge_cloud",
+    "model_family": "distilgpt2",
+    "prompt_id": "kv_cache_short_explain"
+  },
+  "finished_at_utc": "2026-09-09T15:11:38.947339Z",
+  "run_directory": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151039Z",
+  "run_id": "desktop-20260909T151039Z",
+  "schema_version": 1,
+  "stages": [
+    {
+      "artifact": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151039Z/raw/runtime_inputs.json",
+      "artifact_status": "ok",
+      "capture_status": "ok",
+      "command": [
+        "path_074778434986a3b2",
+        "path_7926e8cd2050147d.py",
+        "--repo-root",
+        "path_537859c734dc0cbc",
+        "--config",
+        "path_ee4b7b9eca8496ce.json",
+        "--prepare-inputs-only",
+        "--run-dir",
+        "path_8f30a8a148d9e987"
+      ],
+      "elapsed_ms": 5753.864,
+      "logs": [
+        "logs/input_preparation.stdout.log",
+        "logs/input_preparation.stderr.log"
+      ],
+      "name": "input_preparation",
+      "output_limit_exceeded": false,
+      "returncode": 0,
+      "status": "passed",
+      "stdout_tail": "prepared 9 prompt tokens",
+      "timed_out": false
+    },
+    {
+      "artifact": "model_artifacts.json",
+      "elapsed_ms": 578.826,
+      "name": "model_fingerprints",
+      "status": "passed"
+    },
+    {
+      "artifact": "tmp/inferlab-trtllm.dakte9sa/engine/config.json",
+      "input_tokens": 9,
+      "name": "trtllm_engine_contract",
+      "output_tokens": 8,
+      "status": "passed"
+    },
+    {
+      "artifact": "raw/native_probe_run.json",
+      "capture_status": "ok",
+      "command": [
+        "path_31f2aee4e71d21fb",
+        "path_a5ac58f2bf1e3f03.py",
+        "--repo-root",
+        "path_537859c734dc0cbc",
+        "--build-dir",
+        "path_c271e4694b0772b3",
+        "--results",
+        "path_647a39e910835d69",
+        "--output",
+        "path_31d2475775c62049.json",
+        "--timeout-seconds",
+        "300",
+        "--strict"
+      ],
+      "elapsed_ms": 260.566,
+      "logs": [
+        "logs/native_mechanisms.stdout.log",
+        "logs/native_mechanisms.stderr.log"
+      ],
+      "name": "native_mechanisms",
+      "output_limit_exceeded": false,
+      "returncode": 0,
+      "status": "passed",
+      "stdout_tail": "path_31d2475775c62049.json",
+      "timed_out": false
+    },
+    {
+      "artifact": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151039Z/raw/llama_cpp_benchmark.json",
+      "artifact_status": "ok",
+      "capture_status": "ok",
+      "command": [
+        "path_31f2aee4e71d21fb",
+        "path_5e7143189d4d79b1.py",
+        "--repo-root",
+        "path_537859c734dc0cbc",
+        "--mode",
+        "cli",
+        "--llama-cli",
+        "path_9e11a6e9c2692770",
+        "--llama-bench",
+        "path_b087982abb238f2a",
+        "--model",
+        "path_f52bb49bfb490afb.gguf",
+        "--prompt",
+        "<redacted>",
+        "--threads",
+        "4",
+        "--ctx-size",
+        "512",
+        "--batch-size",
+        "128",
+        "--ubatch-size",
+        "128",
+        "--n-predict",
+        "8",
+        "--ngl",
+        "0",
+        "--timeout-seconds",
+        "120",
+        "--extra-arg=--single-turn",
+        "--output",
+        "path_5eed9e132788e884.json"
+      ],
+      "elapsed_ms": 539.196,
+      "logs": [
+        "logs/llama_cpp_edge.stdout.log",
+        "logs/llama_cpp_edge.stderr.log"
+      ],
+      "name": "llama_cpp_edge",
+      "output_limit_exceeded": false,
+      "returncode": 0,
+      "status": "passed",
+      "stdout_tail": "path_5eed9e132788e884.json",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "path_074778434986a3b2",
+        "-m",
+        "vllm.entrypoints.openai.api_server",
+        "--model",
+        "path_90d502034d8bbb7c",
+        "--served-model-name",
+        "inferlab-distilgpt2",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "18000",
+        "--dtype",
+        "half",
+        "--max-model-len",
+        "512",
+        "--gpu-memory-utilization",
+        "0.35",
+        "--enforce-eager"
+      ],
+      "elapsed_ms": 13812.681,
+      "error": "vLLM exited before health readiness",
+      "log_tail": "(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/v1/engine/async_llm.py\", line 220, in from_vllm_config\n(APIServer pid=7)     return cls(\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/v1/engine/async_llm.py\", line 149, in __init__\n(APIServer pid=7)     self.engine_core = EngineCoreClient.make_async_mp_client(\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/tracing/otel.py\", line 178, in sync_wrapper\n(APIServer pid=7)     return func(*args, **kwargs)\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/v1/engine/core_client.py\", line 139, in make_async_mp_client\n(APIServer pid=7)     return AsyncMPClient(*client_args)\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/tracing/otel.py\", line 178, in sync_wrapper\n(APIServer pid=7)     return func(*args, **kwargs)\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/v1/engine/core_client.py\", line 987, in __init__\n(APIServer pid=7)     super().__init__(\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/v1/engine/core_client.py\", line 589, in __init__\n(APIServer pid=7)     self.input_socket = self.resources.input_socket = make_zmq_socket(\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/vllm/utils/network_utils.py\", line 338, in make_zmq_socket\n(APIServer pid=7)     socket.bind(path)\n(APIServer pid=7)   File \"/usr/local/lib/python3.10/dist-packages/zmq/sugar/socket.py\", line 322, in bind\n(APIServer pid=7)     super().bind(addr)\n(APIServer pid=7)   File \"zmq/backend/cython/_zmq.py\", line 1002, in zmq.backend.cython._zmq.Socket.bind\n(APIServer pid=7) zmq.error.ZMQError: ipc path \"path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/87bf2a46-fb3b-4277-b6cf-ec4f9bf3e681\" is longer than 107 characters (sizeof(sockaddr_un.sun_path)). zmq.IPC_PATH_MAX_LEN constant can be used to check addr length (if it is defined). (addr='ipc://path_537859c734dc0cbc/tmp/inferlab-showcase-setup.2wwq42qb/scratch/87bf2a46-fb3b-4277-b6cf-ec4f9bf3e681')",
+      "logs": [
+        "logs/vllm_server.log"
+      ],
+      "name": "vllm_startup",
+      "returncode": 1,
+      "status": "failed"
+    },
+    {
+      "artifact": "raw/vllm_serving_benchmark.json",
+      "error": "vLLM startup did not become healthy",
+      "name": "vllm_cloud",
+      "status": "blocked"
+    },
+    {
+      "elapsed_ms": 1.077,
+      "name": "vllm_shutdown",
+      "port_released": true,
+      "returncode": 1,
+      "signal": "already_stopped",
+      "status": "passed"
+    },
+    {
+      "artifact": "results/showcase/distilgpt2_edge_cloud/desktop-20260909T151039Z/raw/trtllm_benchmark.json",
+      "artifact_status": "failed",
+      "capture_status": "nonzero_exit",
+      "command": [
+        "path_31f2aee4e71d21fb",
+        "path_fb57e55e034e8889.py",
+        "--repo-root",
+        "path_537859c734dc0cbc",
+        "--mode",
+        "command",
+        "--command",
+        "path_cc1e7552ce386362.json",
+        "--trtllm-bench",
+        "path_dc0de6003c962b51",
+        "--engine-dir",
+        "path_9d0814f980cd5daf",
+        "--model",
+        "path_32a0fa785bfb95c9",
+        "--batch-size",
+        "1",
+        "--input-tokens",
+        "9",
+        "--output-tokens",
+        "8",
+        "--timeout-seconds",
+        "240",
+        "--output",
+        "path_4c33ed16b3b00c00.json"
+      ],
+      "elapsed_ms": 40737.309,
+      "input_tokens": 9,
+      "logs": [
+        "logs/trtllm_cloud.stdout.log",
+        "logs/trtllm_cloud.stderr.log"
+      ],
+      "name": "trtllm_cloud",
+      "output_limit_exceeded": false,
+      "returncode": 1,
+      "status": "failed",
+      "stdout_tail": "wrote path_4c33ed16b3b00c00.json status=failed mode=command",
+      "timed_out": false
+    },
+    {
+      "artifact": "backend_comparison.json",
+      "capture_status": "ok",
+      "command": [
+        "path_31f2aee4e71d21fb",
+        "path_c77906094ffd32f5.py",
+        "--repo-root",
+        "path_537859c734dc0cbc",
+        "--results",
+        "path_647a39e910835d69",
+        "--output",
+        "path_a36996f5fa591b66.json"
+      ],
+      "elapsed_ms": 51.352,
+      "logs": [
+        "logs/backend_comparison.stdout.log",
+        "logs/backend_comparison.stderr.log"
+      ],
+      "name": "backend_comparison",
+      "output_limit_exceeded": false,
+      "returncode": 0,
+      "status": "passed",
+      "stdout_tail": "wrote path_a36996f5fa591b66.json",
+      "timed_out": false
+    }
+  ],
+  "started_at_utc": "2026-09-09T15:10:39.077427Z",
+  "status": "failed"
+}
